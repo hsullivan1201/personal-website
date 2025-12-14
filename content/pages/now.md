@@ -24,7 +24,7 @@ template = "page.html"
 
 ### tv/film
 - Sonarr and Radarr fetch the nzb files i need from [Usenet](https://en.wikipedia.org/wiki/Usenet)
-- this requires an nzb indexer, i use [nzbgeek](https://nzbgeek.info/), and a Usenet service provider,i use [Frugal Usenet](https://frugalusenet.com/)
+- this requires an nzb indexer, i use [nzbgeek](https://nzbgeek.info/), and a Usenet service provider, i use [Frugal Usenet](https://frugalusenet.com/)
 - The downloads are managed by [nzbget](https://nzbget.com/)
 - a [Jellyfin](https://jellyfin.org/) server organizes and serves my content to me, most often via their smart tv app
 
