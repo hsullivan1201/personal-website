@@ -21,7 +21,3 @@ template = "page.html"
 - [Calibre](https://calibre-ebook.com/) to manage my epubs and send them wirelessly to my kindle
 - [libgen](https://libgen.bz/) for epubs if the author is dead/loaded
 - [ebooks.com](https://www.ebooks.com/en-us/) if not. they have a decent DRM-free selection
-
-### tv/film
-- I have a usenet subscription to fetch 
-- Sonarr for TV, Raddarr
