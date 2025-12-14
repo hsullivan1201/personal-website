@@ -1,0 +1,17 @@
+name: build zola
+on:
+  push:
+    branches: [ main ] # or master
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: build and deploy
+        uses: shalzz/zola-deploy-action@v0.19.2
+        env:
+          PAGES_BRANCH: gh-pages
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # if you have a custom domain, zola needs to know to put the CNAME file in public/
+          # but the github pages settings (step 4) usually handles creation of the CNAME file for you.
+          # just make sure your config.toml base_url matches the final domain.
