@@ -57,6 +57,13 @@ body {
     grid-template-columns: 1fr;
 }
 
+img {
+  max-width: 50%;
+  height: auto;
+  display: block;
+  margin: 1rem auto; /* centers it too bc why not */
+}
+
 /* typography */
 h1, h2, h3 { line-height: 1.1; margin-top: 2rem; font-weight: normal; }
 h1 { font-size: 2.5rem; border-bottom: 2px solid var(--text); padding-bottom: 0.5rem; }
