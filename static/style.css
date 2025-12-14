@@ -57,6 +57,34 @@ body {
     grid-template-columns: 1fr;
 }
 
+a[data-wp-title] {
+    padding-right: 22px; /* bit more space for the serif */
+    position: relative;
+    text-decoration-color: #aaa;
+}
+
+a[data-wp-title]::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px; 
+    height: 18px; /* the official svg is square-ish */
+    
+    /* the magic: use the svg as a mask, fill with color */
+    background-color: #000;
+    -webkit-mask: url('/wiki-w.svg') no-repeat center / contain;
+    mask: url('/wiki-w.svg') no-repeat center / contain;
+}
+
+/* dark mode: just flip the paint color */
+@media (prefers-color-scheme: dark) {
+    a[data-wp-title]::after {
+        background-color: #fff;
+    }
+}
+
 img {
   max-width: 50%;
   height: auto;
