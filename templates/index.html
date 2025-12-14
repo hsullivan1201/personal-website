@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="intro">
+    <p>hi. im hazel</p>
+</section>
+
+<section class="posts">
+    <h3>logs</h3>
+    <ul class="post-list">
+        {% for page in section.pages %}
+        <li>
+            <span class="date">{{ page.date }}</span>
+            <a href="{{ page.permalink }}">{{ page.title }}</a>
+        </li>
+        {% else %}
+        <li><em>posts forthcoming, eventually</em></li>
+        {% endfor %}
+    </ul>
+</section>
+{% endblock content %}

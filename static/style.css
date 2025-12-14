@@ -1,0 +1,101 @@
+:root {
+    --bg: #fffcf5;      /* warm cream paper */
+    --text: #2c2c2c;    /* soft charcoal, harsh black sucks */
+    --accent: #b93b3b;
+    --link: #b93b3b;    
+    --link-visited: #7a2626; /* dried blood (lol) */
+    
+    --mono: "courier new", monospace;
+    --body: "charter", "bitstream charter", "georgia", serif;
+    --width: 50rem;     /* narrowed slightly for reading comfort */
+    --sidenote-w: 200px;
+}
+
+h1, h2, h3 { 
+    color: var(--accent);
+    border-color: var(--accent); /* if you kept the border-bottom on h1 */
+}
+
+a:hover {
+    background-color: var(--accent);
+    color: var(--bg);
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        /* the "warm noir" palette */
+        --bg: #1c1b1a;         /* very dark warm grey, almost brown */
+        --text: #e6e1dc;       /* old paper white, not stark white */
+        --link: #e06c6c;       /* lifted the red so it's readable on dark */
+        --link-visited: #8f4f4f;
+        --accent: #e06c6c;
+    }
+
+    /* make code blocks subtle instead of jarring */
+    pre, code { 
+        background: rgba(255, 255, 255, 0.06); 
+        border-color: #3d3a38;
+    }
+    
+    /* dim the border on the h1 so it doesn't slice the screen */
+    h1 { border-bottom-color: #3d3a38; }
+}
+
+html {
+    font-size: 18px;
+    line-height: 1.6;
+    background: var(--bg);
+    color: var(--text);
+    padding: 1rem;
+}
+
+body {
+    font-family: var(--body);
+    max-width: var(--width);
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr;
+}
+
+/* typography */
+h1, h2, h3 { line-height: 1.1; margin-top: 2rem; font-weight: normal; }
+h1 { font-size: 2.5rem; border-bottom: 2px solid var(--text); padding-bottom: 0.5rem; }
+p { margin-bottom: 1.5rem; text-align: justify; hyphens: auto; }
+a { color: var(--link); text-decoration: underline; text-underline-offset: 3px; }
+a:visited { color: var(--link-visited); }
+a:hover { background-color: var(--link); color: var(--bg); text-decoration: none; }
+
+/* code blocks */
+pre, code { font-family: var(--mono); font-size: 0.9em; background: rgba(127,127,127,0.1); }
+pre { padding: 1rem; overflow-x: auto; border: 1px solid var(--text); }
+
+
+/* usage: <p>text <aside>note</aside></p> */
+@media (min-width: 1100px) {
+    body {
+        /* shift main column left to make room for notes */
+        padding-right: var(--sidenote-w); 
+    }
+    aside {
+        float: right;
+        clear: right;
+        margin-right: calc(var(--sidenote-w) * -1.2);
+        width: var(--sidenote-w);
+        font-size: 0.8rem;
+        line-height: 1.3;
+        opacity: 0.8;
+        margin-top: 0.3rem;
+        border-left: 1px solid var(--text);
+        padding-left: 0.5rem;
+    }
+}
+
+@media (max-width: 1099px) {
+    aside {
+        display: block;
+        margin: 1rem 2rem;
+        font-size: 0.9rem;
+        background: rgba(127,127,127,0.1);
+        padding: 0.5rem;
+    }
+}
