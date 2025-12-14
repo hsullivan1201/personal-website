@@ -2,3 +2,5 @@
 public/
 .vscode/
 *.swp
+pages/.obsidian/
+pages/templates/
