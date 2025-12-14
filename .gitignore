@@ -2,5 +2,6 @@
 public/
 .vscode/
 *.swp
-pages/.obsidian/
-pages/templates/
+content/pages/.obsidian/
+obsidian_templates/
+.obsidian/
