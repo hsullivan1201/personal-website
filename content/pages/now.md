@@ -10,7 +10,7 @@ template = "page.html"
 - animal liberation now - Peter Singer
 
 ## what i'm doing
-- making a webapp to make dc metro transfers more seamless, with car positions and real time updates. will probably open source this
+- making a webapp to make dc metro transfers more seamless, with car positions and real time updates. give it a try [transferhero.app](https://transferhero.app)
 ![transferhero demo](/transferhero-demo.gif)
 - playing with [tinker](https://tinker-docs.thinkingmachines.ai/) to see if i can do a bit of hobby llm research, for fun
 
