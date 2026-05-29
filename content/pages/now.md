@@ -4,15 +4,15 @@ template = "page.html"
 +++
 
 ## currently reading
-- invisible Cities - Italo Calvino
-- for whom the bell tolls - Ernest Hemingway
-- cod - Mark Kurlansky
-- animal liberation now - Peter Singer
+- Middlemen: Literary Agents and the Making of US Fiction - Laura McGrath
+- The crying of Lot 49 - Thomas Pynchon
+- Blood Meridian - Cormac McCarthy
 
 ## what i'm doing
 - making a webapp to make dc metro transfers more seamless, with car positions and real time updates. give it a try [transferhero.app](https://transferhero.app)
 ![transferhero demo](/transferhero-demo.gif)
 - playing with [tinker](https://tinker-docs.thinkingmachines.ai/) to see if i can do a bit of hobby llm research, for fun
+- a Subway Builder mod for [transit oriented development](https://subwaybuildermodded.com/railyard/mods/tod/)
 
 ## my stack
 
