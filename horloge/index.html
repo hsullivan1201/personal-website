@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#F4ECDA">
+<title>Horloge Républicaine</title>
+<meta name="description" content="L'heure décimale et le calendrier républicain de la Révolution française. Decimal time and the French Republican calendar.">
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🕰️</text></svg>">
+</head>
+<body>
+<div class="tricolor" aria-hidden="true"><span></span><span></span><span></span></div>
+
+<main>
+  <p class="motto">LIBERTÉ · ÉGALITÉ · FRATERNITÉ</p>
+
+  <div class="langrow">
+    <button id="lang-fr" class="langbtn">FR</button><button id="lang-en" class="langbtn">EN</button>
+  </div>
+
+  <svg id="dial" viewBox="0 0 200 200" role="img" aria-label="horloge décimale"></svg>
+
+  <div class="bigtime"><span id="dectime">–:––:––</span></div>
+  <p class="caption" id="cap-units"></p>
+
+  <div class="banner">
+    <p id="dateline" class="dateline"></p>
+    <p id="rural" class="rural"></p>
+  </div>
+
+  <section class="panel" id="calendar-panel">
+    <div class="panel-head">
+      <button class="chev" id="prev" aria-label="mois précédent">‹</button>
+      <div class="panel-title">
+        <h2 id="monthname"></h2>
+        <p id="monthsub"></p>
+      </div>
+      <button class="chev" id="next" aria-label="mois suivant">›</button>
+    </div>
+    <div id="grid"></div>
+    <button id="backtoday" class="linkbtn" hidden></button>
+  </section>
+
+  <p class="caption" id="oldstyle"></p>
+
+  <section class="panel">
+    <h2 class="section-title" id="conv-title"></h2>
+
+    <div class="conv">
+      <h3 id="conv-g2r"></h3>
+      <div class="pickrow">
+        <select id="g-day"></select>
+        <select id="g-month"></select>
+        <input type="number" id="g-year" min="1" max="3000" inputmode="numeric">
+      </div>
+      <div class="result" id="g2r-res"></div>
+    </div>
+
+    <div class="conv">
+      <h3 id="conv-r2g"></h3>
+      <div class="pickrow">
+        <select id="r-day"></select>
+        <select id="r-month"></select>
+        <input type="number" id="r-year" min="1" max="3000" inputmode="numeric">
+        <span class="roman" id="r-roman"></span>
+      </div>
+      <div class="result" id="r2g-res"></div>
+    </div>
+
+    <div class="conv">
+      <h3 id="conv-t2d"></h3>
+      <div class="pickrow">
+        <select id="t-hour"></select><span class="unit">h</span>
+        <select id="t-min"></select><span class="unit">min</span>
+      </div>
+      <div class="result" id="t2d-res"></div>
+    </div>
+
+    <div class="conv">
+      <h3 id="conv-d2t"></h3>
+      <div class="pickrow">
+        <select id="d-hour"></select><span class="unit">h</span>
+        <select id="d-min"></select><span class="unit">min</span>
+      </div>
+      <div class="result" id="d2t-res"></div>
+    </div>
+  </section>
+
+  <section class="panel almanac">
+    <h2 class="section-title" id="alm-title"></h2>
+
+    <details>
+      <summary id="alm-sys-t"></summary>
+      <div class="prose" id="alm-sys"></div>
+    </details>
+
+    <details>
+      <summary id="alm-dec-t"></summary>
+      <div class="prose" id="alm-dec-intro"></div>
+      <div id="alm-dec"></div>
+    </details>
+
+    <details>
+      <summary id="alm-months-t"></summary>
+      <div class="pickrow"><select id="alm-month"></select></div>
+      <div class="prose" id="alm-month-meta"></div>
+      <div id="alm-days"></div>
+    </details>
+
+    <details>
+      <summary>Sans-culottides</summary>
+      <div class="prose" id="alm-sc-intro"></div>
+      <div id="alm-sc"></div>
+    </details>
+  </section>
+
+  <p class="caption footer">
+    <a href="https://github.com/hsullivan1201/horloge-republicaine" id="src-link"></a>
+  </p>
+</main>
+
+<div class="tricolor" aria-hidden="true"><span></span><span></span><span></span></div>
+
+<div id="backdrop" hidden></div>
+<div id="popover" role="dialog" hidden></div>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
