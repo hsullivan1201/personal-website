@@ -8,9 +8,9 @@ template = "page.html"
 - Blood Meridian - Cormac McCarthy
 
 ## what i'm doing
+- Having fun with my [custom landline system](https://github.com/hsullivan1201/phone-setup), where I can control music(via spotify) and talk with [agents](https://github.com/hsullivan1201/operator), who can interface with the internet and devices on the local network
 - making a webapp to make dc metro transfers more seamless, with car positions and real time updates. give it a try [transferhero.app](https://transferhero.app)
 ![transferhero demo](/transferhero-demo.gif)
-- playing with [tinker](https://tinker-docs.thinkingmachines.ai/) to see if i can do a bit of hobby llm research, for fun
 - a Subway Builder mod for [transit oriented development](https://subwaybuildermodded.com/railyard/mods/tod/)
 
 ## my stack
