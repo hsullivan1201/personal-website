@@ -4,7 +4,6 @@ template = "page.html"
 +++
 
 ## currently reading
-- Middlemen: Literary Agents and the Making of US Fiction - Laura McGrath
 - The crying of Lot 49 - Thomas Pynchon
 - Blood Meridian - Cormac McCarthy
 
