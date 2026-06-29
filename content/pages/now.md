@@ -4,7 +4,7 @@ template = "page.html"
 +++
 
 ## currently reading
-- The crying of Lot 49 - Thomas Pynchon
+- To the Lighthouse - Virginia Woolf
 - Blood Meridian - Cormac McCarthy
 
 ## what i'm doing
