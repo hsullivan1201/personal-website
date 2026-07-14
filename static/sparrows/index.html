@@ -3,14 +3,19 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<meta name="description" content="An expert-oriented interactive trainer for sparrows of Washington, DC and the Mid-Atlantic." />
-<meta name="theme-color" content="#f6f2e7" />
+<meta name="description" content="A working field notebook for learning the sparrows around Washington, DC." />
+<meta name="theme-color" content="#fffcf5" />
 <link rel="canonical" href="https://lostinthehaze.net/sparrows/" />
 <meta property="og:type" content="website" />
-<meta property="og:title" content="Sparrow Lab — DC & Mid-Atlantic Field ID" />
-<meta property="og:description" content="An interactive pattern-recognition lab for identifying sparrows around Washington, DC." />
+<meta property="og:title" content="Sparrows around DC — Sparrow Lab" />
+<meta property="og:description" content="A working field notebook for learning the sparrows around Washington, DC." />
 <meta property="og:url" content="https://lostinthehaze.net/sparrows/" />
-<title>Sparrow Lab — DC & Mid-Atlantic Field ID</title>
+<meta property="og:image" content="https://lostinthehaze.net/sparrows/og.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="Sparrows around DC, a field notebook from lost in the haze" />
+<meta name="twitter:card" content="summary_large_image" />
+<title>Sparrows around DC — lost in the haze</title>
 <style>
   :root {
     --ink: #16211c;
@@ -470,52 +475,530 @@
     .course-stage { padding:20px 16px; }
     .weak-row { grid-template-columns:1fr 80px auto; }
   }
+
+  /* lost in the haze / field-notebook theme */
+  :root {
+    --ink:#2c2c2c;
+    --muted:#706b63;
+    --paper:#fffcf5;
+    --paper-2:#f1eadc;
+    --surface:#fffaf2;
+    --line:#d8d0c2;
+    --moss:#7a2626;
+    --moss-2:#b93b3b;
+    --gold:#9a7028;
+    --rust:#b93b3b;
+    --sky:#e9e2d6;
+    --photo-mat:#292725;
+    --shadow:none;
+    --radius:3px;
+    --body:"charter","bitstream charter",Georgia,serif;
+    --mono:"courier new",ui-monospace,monospace;
+  }
+  html { font-size:18px; color-scheme:light dark; }
+  body {
+    font-family:var(--body);
+    line-height:1.6;
+    background:var(--paper);
+    color:var(--ink);
+  }
+  button, input, select { font-family:var(--mono); }
+  button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible, summary:focus-visible {
+    outline:2px solid var(--moss-2);
+    outline-offset:3px;
+  }
+  .shell { width:min(68rem,calc(100% - 2rem)); }
+
+  .topbar {
+    position:static;
+    background:var(--paper);
+    border:0;
+    backdrop-filter:none;
+  }
+  .parent-header { width:min(50rem,100%); margin:0 auto; padding:1rem 0 1.15rem; }
+  .site-title {
+    display:block;
+    color:var(--moss-2);
+    border-bottom:2px solid var(--ink);
+    padding-bottom:.5rem;
+    font-size:2.5rem;
+    line-height:1.1;
+    font-weight:400;
+    text-decoration:none;
+  }
+  .parent-nav { display:flex; flex-wrap:wrap; gap:.2rem .8rem; margin-top:.65rem; }
+  .parent-nav a {
+    color:var(--moss-2);
+    text-decoration:underline;
+    text-underline-offset:3px;
+  }
+  .parent-nav a:visited { color:#7a2626; }
+  .parent-nav a:hover, .site-title:hover {
+    background:var(--moss-2);
+    color:var(--paper);
+    text-decoration:none;
+  }
+  .parent-nav a[aria-current="page"] { font-style:italic; }
+  .topbar-inner {
+    min-height:0;
+    padding:.55rem 0;
+    border-top:1px solid var(--line);
+    border-bottom:1px solid var(--line);
+    gap:1rem;
+  }
+  .brand {
+    flex:0 0 auto;
+    display:flex;
+    gap:.45rem;
+    color:var(--muted);
+    font-family:var(--mono);
+    font-size:.68rem;
+    font-weight:400;
+    letter-spacing:0;
+    text-transform:lowercase;
+  }
+  .brand span:last-child { display:inline; color:var(--ink); }
+  .topnav { gap:.1rem; margin-left:auto; }
+  .topnav button, .field-launch {
+    border:0;
+    border-radius:0;
+    background:transparent;
+    box-shadow:none;
+    color:var(--ink);
+    padding:.35rem .42rem;
+    font-size:.67rem;
+    font-weight:400;
+    text-transform:lowercase;
+  }
+  .topnav button:hover, .topnav button.active {
+    background:transparent;
+    color:var(--moss-2);
+    box-shadow:none;
+    text-decoration:underline;
+    text-underline-offset:3px;
+    transform:none;
+  }
+  .topnav .field-launch { border:1px solid var(--moss-2); margin-left:.3rem; }
+
+  .hero {
+    grid-template-columns:minmax(0,1.15fr) minmax(18rem,.85fr);
+    gap:3rem;
+    align-items:start;
+    padding:3.25rem 0 3rem;
+  }
+  .eyebrow, .today-date, .signal-label, .lesson-count, .demo-key, .console-kicker,
+  .real-badge, .metric label, .detail-kicker, .edge-card .rarity, .photo-credit,
+  .likelihood-legend, .result-count, .audio-time {
+    color:var(--muted);
+    font-family:var(--mono);
+    font-size:.68rem;
+    font-weight:400;
+    letter-spacing:0;
+    text-transform:lowercase;
+  }
+  h1 {
+    max-width:13ch;
+    margin:.65rem 0 1rem;
+    color:var(--moss-2);
+    font-family:var(--body);
+    font-size:clamp(2.5rem,4.5vw,3.25rem);
+    line-height:1.02;
+    letter-spacing:-.025em;
+    font-weight:400;
+  }
+  .hero p { max-width:40rem; color:var(--ink); font-size:1.05rem; }
+  .hero-copy p, .section-head p, footer p { text-align:justify; hyphens:auto; }
+  .hero-actions { margin-top:1.35rem; gap:1rem; }
+  .hero-actions button {
+    padding:.15rem 0;
+    border:0;
+    border-bottom:1px solid currentColor;
+    border-radius:0;
+    background:transparent !important;
+    color:var(--moss-2) !important;
+    font-family:var(--body);
+    font-weight:400;
+  }
+  .hero-actions button:hover { background:var(--moss-2) !important; color:var(--paper) !important; }
+  .hero-plate { margin:0; padding:.35rem; border:1px solid var(--line); background:var(--surface); }
+  .hero-plate img { display:block; width:100%; aspect-ratio:4/3; object-fit:cover; }
+  .hero-plate figcaption { padding:.45rem .15rem .05rem; color:var(--muted); font-family:var(--mono); font-size:.64rem; line-height:1.45; }
+  .hero-plate figcaption span { color:var(--moss-2); }
+
+  .section { padding:2.8rem 0; border-top:1px solid var(--line); scroll-margin-top:1rem; }
+  .section-head { display:block; max-width:50rem; margin-bottom:1.45rem; }
+  .section-head h2 {
+    margin:0;
+    color:var(--moss-2);
+    font-family:var(--body);
+    font-size:clamp(1.65rem,3vw,2.15rem);
+    line-height:1.12;
+    letter-spacing:0;
+    font-weight:400;
+  }
+  .section-head p { max-width:46rem; margin:.55rem 0 0; color:var(--muted); }
+
+  .quick-grid { grid-template-columns:repeat(2,1fr); gap:0 2rem; }
+  .quick-card {
+    min-height:0;
+    padding:1rem 0 1.15rem;
+    border:0;
+    border-top:1px solid var(--line);
+    border-radius:0;
+    background:transparent;
+    box-shadow:none;
+  }
+  .quick-card .num {
+    display:block;
+    width:auto;
+    height:auto;
+    margin:0 0 .35rem;
+    border-radius:0;
+    background:transparent;
+    color:var(--moss-2);
+    font-family:var(--mono);
+    font-weight:400;
+  }
+  .quick-card h3 { color:var(--ink); font-weight:600; }
+  .quick-card p { color:var(--muted); }
+
+  .now-board, .signal-card, .course-shell, .progress-shell, .glossary-shell,
+  .species-card, .atlas-shell, .atlas-card, .audio-card, .confusion-card,
+  .key-box, .key-results, .candidate, .quiz-card, .stat-box, .compare-sheet,
+  .edge-card, .metric, .fact {
+    border:1px solid var(--line);
+    border-radius:3px;
+    box-shadow:none;
+  }
+  .now-board, .course-shell, .progress-shell, .glossary-shell, .atlas-shell,
+  .key-box, .key-results, .compare-sheet { background:transparent; }
+  .species-card, .atlas-card, .audio-card, .confusion-card, .candidate,
+  .quiz-card, .stat-box, .edge-card, .metric, .fact { background:var(--surface); }
+
+  .now-layout { grid-template-columns:1.35fr .65fr; gap:1rem; }
+  .now-board { padding:1rem; }
+  .now-chip {
+    padding:.35rem .55rem;
+    border:1px solid var(--line);
+    border-radius:2px;
+    background:var(--surface);
+    font-weight:400;
+  }
+  .now-chip img { border-radius:1px; }
+  .now-chip button { color:var(--moss-2); font-family:var(--body); font-weight:400; }
+  .signal-card {
+    padding:1rem;
+    border-left:3px solid var(--moss-2);
+    background:transparent;
+    color:var(--ink);
+  }
+  .signal-card .signal-label { color:var(--moss-2); }
+  .signal-card h3 { color:var(--moss-2); font-size:1.25rem; font-weight:400; }
+  .signal-card p { color:var(--muted); }
+  .signal-card button {
+    border:1px solid var(--moss-2);
+    border-radius:2px;
+    background:transparent;
+    color:var(--moss-2);
+    font-weight:400;
+  }
+
+  .course-shell { grid-template-columns:230px 1fr; }
+  .course-rail { padding:0; border-right:1px solid var(--line); background:transparent; color:var(--ink); }
+  .course-rail button {
+    padding:.8rem .75rem;
+    border:0;
+    border-bottom:1px solid var(--line);
+    background:transparent;
+    color:var(--muted);
+    font-weight:400;
+  }
+  .course-rail button.active {
+    border-left:0;
+    border-bottom-color:var(--moss-2);
+    background:transparent;
+    color:var(--moss-2);
+    text-decoration:underline;
+    text-underline-offset:3px;
+  }
+  .course-stage { padding:1.5rem; }
+  .course-stage h3 { color:var(--ink); font-size:clamp(1.55rem,3vw,2.2rem); font-weight:400; letter-spacing:0; }
+  .course-stage .lesson-lede { color:var(--muted); }
+  .demo-cell { border-radius:2px; background:var(--surface); }
+
+  .audio-layout { grid-template-columns:320px 1fr; gap:1rem; }
+  .audio-console {
+    top:1rem;
+    border:1px solid #48433f;
+    border-radius:3px;
+    background:var(--photo-mat);
+    box-shadow:none;
+  }
+  .audio-console:before { display:none; }
+  .audio-console .console-kicker { color:#d6b879; }
+  .audio-console h3 { font-weight:400; }
+  #spectrumCanvas { border:1px solid #48433f; border-radius:2px; }
+  .audio-grid { grid-template-columns:repeat(2,1fr); gap:.7rem; }
+  .audio-card { border-radius:2px; min-height:160px; }
+  .audio-card h4 { font-weight:600; }
+  .rhythm-code i { border-radius:0; background:var(--moss-2); }
+
+  .atlas-shell { overflow:hidden; }
+  .atlas-rail { padding:.55rem .7rem; border-bottom:1px solid var(--line); background:transparent; }
+  .atlas-rail button {
+    padding:.35rem .25rem;
+    border:0;
+    border-bottom:1px solid transparent;
+    border-radius:0;
+    background:transparent;
+    color:var(--muted);
+    font-weight:400;
+  }
+  .atlas-rail button.active { border-color:var(--moss-2); background:transparent; color:var(--moss-2); }
+  .atlas-stage { padding:1rem; }
+  .atlas-title-row h3 { color:var(--moss-2); font-size:2rem; font-weight:400; letter-spacing:0; }
+  .atlas-card { border-radius:2px; }
+  .atlas-photo-button { background:var(--photo-mat); }
+  .atlas-photo-button:after { border-radius:1px; background:var(--paper); color:var(--ink); font-weight:400; }
+  .atlas-caption p, .id-line, .detail-section p, .course-stage .lesson-lede { color:var(--muted); }
+
+  .controls { gap:.5rem; }
+  .control, input.control, select.control {
+    border:1px solid var(--line);
+    border-radius:2px;
+    background:var(--surface);
+    color:var(--ink);
+  }
+  .toggle { color:var(--moss-2); font-weight:400; }
+  .toggle input { accent-color:var(--moss-2); }
+  .species-grid { grid-template-columns:repeat(3,minmax(0,1fr)); gap:.8rem; }
+  .species-card { border-radius:2px; transition:border-color .15s ease; }
+  .species-card:hover { transform:none; border-color:var(--moss-2); box-shadow:none; }
+  .species-card:hover img { transform:none; }
+  .photo-wrap { background:var(--photo-mat); }
+  .photo-wrap img { transition:none; }
+  .photo-fallback { background:var(--paper-2); color:var(--moss-2); font-weight:400; }
+  .badge-row { position:static; margin:.55rem 0 0; }
+  .badge, .tiny-tag, .selected-pill, .reason {
+    padding:.2rem .35rem;
+    border:1px solid var(--line);
+    border-radius:1px;
+    background:transparent !important;
+    color:var(--muted) !important;
+    font-family:var(--mono);
+    font-size:.62rem;
+    font-weight:400;
+    letter-spacing:0;
+    text-transform:lowercase;
+    backdrop-filter:none;
+  }
+  .badge.strong { color:var(--moss-2); }
+  .species-card h3 { color:var(--moss-2); font-weight:400; letter-spacing:0; }
+  .compare-check, .score {
+    border:1px solid var(--line);
+    border-radius:2px;
+    background:var(--surface);
+    color:var(--moss-2);
+    font-weight:400;
+  }
+  .compare-check.selected, .score { background:var(--moss); color:var(--paper); }
+  .tiny-tag { background:var(--paper-2) !important; }
+  .card-photo-rail { background:var(--photo-mat); }
+  .card-photo-rail img { border-radius:0; }
+  .card-photo-rail img:first-child { box-shadow:inset 0 -2px 0 var(--moss-2); }
+
+  .confusion-head { padding:1rem; border-bottom:1px solid var(--line); background:transparent; color:var(--ink); }
+  .confusion-head h3 { color:var(--moss-2); font-weight:400; }
+  .confusion-head p { color:var(--muted); }
+  .versus { border-radius:2px; background:var(--paper-2); color:var(--moss-2); font-family:var(--mono); font-weight:400; }
+
+  .key-progress, .strength-track { border-radius:0; background:var(--paper-2); }
+  .key-progress span, .strength-track span { background:var(--moss-2); }
+  .key-question { font-weight:400; }
+  .candidate, .candidate img { border-radius:2px; }
+  .candidate img { background:var(--paper-2); }
+  .reason.no { color:var(--rust) !important; }
+
+  .quiz-card, .stat-box { border-radius:2px; }
+  .quiz-media { background:var(--photo-mat); }
+  .quiz-body h3, .stat-box h3 { font-weight:400; }
+  .stat-big { color:var(--moss-2); font-size:2.6rem; }
+  .confidence button { border-radius:1px; font-weight:400; }
+  .confidence button.active { border-color:var(--moss-2); background:var(--moss-2); color:var(--paper); }
+  .quiz-feedback { border-radius:0; }
+
+  .progress-shell { padding:1rem; }
+  .metric { border-radius:2px; }
+  .metric strong { color:var(--moss-2); font-weight:400; }
+  .glossary-shell summary { color:var(--moss-2); font-weight:400; }
+  .edge-card { border-style:dashed; border-color:var(--line); border-radius:2px; }
+
+  .open-btn, .quick-sound, .atlas-actions button, .compare-dock button,
+  .detail-actions button, .key-actions button, .key-option, .quiz-option,
+  .quiz-next, .mode-buttons button, .audio-card button, .lesson-actions button,
+  .weak-row button, .sound-mystery button {
+    border:1px solid var(--line);
+    border-radius:2px;
+    box-shadow:none;
+    font-weight:400;
+  }
+  .open-btn, .quiz-next, .atlas-actions .primary, .lesson-actions .primary,
+  .audio-card button:not(.ghost), .key-reset {
+    border-color:var(--moss);
+    background:var(--moss);
+    color:var(--paper);
+  }
+  .quick-sound, .atlas-actions .secondary, .audio-card button.ghost,
+  .lesson-actions button:not(.primary), .key-back, .weak-row button,
+  .mode-buttons button, .key-option, .quiz-option, .detail-actions button {
+    background:var(--surface);
+    color:var(--ink);
+  }
+  .mode-buttons button.active, .detail-actions button.primary {
+    border-color:var(--moss);
+    background:var(--moss);
+    color:var(--paper);
+  }
+  .key-option:hover { border-color:var(--moss-2); box-shadow:none; }
+
+  .compare-dock {
+    border:1px solid var(--line);
+    border-radius:3px;
+    background:var(--photo-mat);
+    box-shadow:0 8px 24px rgba(0,0,0,.18);
+    backdrop-filter:none;
+  }
+  .selected-pill { border-color:#5a544f; color:#eee8df !important; }
+  .compare-sheet { border-radius:3px; background:var(--paper); }
+  .compare-table { border-spacing:.35rem; }
+  .compare-table th, .compare-table td { border-radius:2px; background:var(--surface); }
+  .compare-table th:first-child, .compare-table td:first-child { background:var(--paper-2); }
+  .compare-table img { border-radius:1px; }
+
+  .detail-panel { background:var(--paper); }
+  .detail-content h2, .detail-section h3 { color:var(--moss-2); font-weight:400; letter-spacing:0; }
+  .detail-actions button, .fact { background:var(--surface); }
+  .fact label { font-family:var(--mono); font-weight:400; letter-spacing:0; text-transform:lowercase; }
+  .detail-thumb, .detail-arrow, .panel-close, .detail-photo-count { border-radius:2px; }
+  .month { border-radius:1px; background:var(--paper-2); color:var(--muted); font-family:var(--mono); font-weight:400; }
+  .month.on { background:var(--moss); color:var(--paper); }
+  .month.peak { background:var(--gold); color:#fffaf2; }
+
+  .field-modal { background:var(--photo-mat); }
+  .field-question { font-size:clamp(1.8rem,6vw,2.8rem); font-weight:400; }
+  .field-close, .field-options button, .field-result, .field-result img,
+  .field-result button, .field-utility button { border-radius:2px; }
+  .field-result { background:var(--surface); color:var(--ink); }
+  .field-result button { background:var(--moss); }
+
+  footer { padding-top:2rem; border-top:1px solid var(--line); }
+  footer .footer-grid { max-width:50rem; }
+  footer h3 { color:var(--moss-2); font-weight:400; }
+  footer a { color:var(--moss-2); font-weight:400; }
+  .toast { border:1px solid var(--line); border-radius:2px; background:var(--photo-mat); box-shadow:none; }
+
+  @media (prefers-color-scheme:dark) {
+    :root {
+      --paper:#1c1b1a;
+      --paper-2:#292623;
+      --surface:#242220;
+      --ink:#e6e1dc;
+      --muted:#aaa29a;
+      --line:#3d3a38;
+      --moss:#8f4f4f;
+      --moss-2:#e06c6c;
+      --gold:#b98a3d;
+      --rust:#e06c6c;
+      --photo-mat:#11100f;
+    }
+    .parent-nav a:visited { color:#8f4f4f; }
+    .hero-plate, .control, input.control, select.control, .now-chip,
+    .demo-cell, .compare-check, .quick-sound, .key-option, .quiz-option,
+    .mode-buttons button, .detail-actions button { background:var(--surface); color:var(--ink); }
+    .photo-fallback { background:var(--paper-2); }
+    .quiz-option.correct { background:#26352a; border-color:#5f8768; }
+    .quiz-option.wrong, .quiz-feedback.wrong { background:#3a2926; border-color:#9a5f55; }
+    .quiz-feedback { background:#26352a; color:var(--ink); }
+  }
+
+  @media (max-width:900px) {
+    .hero, .now-layout, .audio-layout { grid-template-columns:1fr; }
+    .hero { gap:1.8rem; }
+    .hero-copy { max-width:50rem; }
+    .hero-plate { max-width:34rem; }
+    .audio-console { position:relative; top:auto; }
+    .species-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+    .course-shell { grid-template-columns:1fr; }
+    .course-rail { display:flex; overflow:auto; border-right:0; border-bottom:1px solid var(--line); }
+    .course-rail button { width:auto; min-width:max-content; }
+  }
+  @media (max-width:700px) {
+    .shell { width:min(100% - 2rem,68rem); }
+    .site-title { font-size:2rem; }
+    .topbar-inner { display:block; }
+    .brand { margin-bottom:.45rem; }
+    .topnav { width:100%; margin:0; overflow-x:auto; }
+    .topnav button { display:inline-block !important; }
+    .topnav .field-launch { margin-left:.2rem; }
+    .hero { padding:2.4rem 0; }
+    h1 { font-size:2.4rem; }
+    .quick-grid, .species-grid { grid-template-columns:1fr; }
+    .section { padding:2.2rem 0; }
+    .section-head p { text-align:left; }
+    .progress-shell { grid-template-columns:1fr; }
+    .weak-list { grid-column:auto; }
+  }
+  @media (prefers-reduced-motion:reduce) {
+    *, *:before, *:after { scroll-behavior:auto !important; transition:none !important; animation:none !important; }
+  }
 </style>
 </head>
 <body>
 <header class="topbar">
-  <div class="shell topbar-inner">
-    <div class="brand"><span class="brand-mark">S</span><span>Sparrow Lab</span><span class="brand-mode">DC build</span></div>
-    <a class="site-return" href="https://lostinthehaze.net/">← lost in the haze</a>
-    <nav class="topnav" aria-label="Page sections">
-      <button data-scroll="now">Right now</button>
-      <button data-scroll="course">Learn</button>
-      <button data-scroll="audio-lab">Sounds</button>
-      <button data-scroll="atlas">Photo atlas</button>
-      <button data-scroll="field-guide">Field guide</button>
-      <button data-scroll="confusions">Confusion sets</button>
-      <button data-scroll="key">ID key</button>
-      <button data-scroll="quiz">Quiz</button>
-      <button class="field-launch" id="fieldLaunch">Field mode ↗</button>
-    </nav>
+  <div class="shell">
+    <div class="parent-header">
+      <a class="site-title" href="https://lostinthehaze.net/">lost in the haze</a>
+      <nav class="parent-nav" aria-label="Main site">
+        <a href="https://lostinthehaze.net/pages/about/">about</a>
+        <a href="https://lostinthehaze.net/pages/now/">now</a>
+        <a href="https://lostinthehaze.net/horloge/">horloge</a>
+        <a aria-current="page" href="https://lostinthehaze.net/sparrows/">sparrows</a>
+      </nav>
+    </div>
+    <div class="topbar-inner">
+      <div class="brand"><span>field notebook no. 01</span><span aria-hidden="true">/</span><span>sparrow lab</span></div>
+      <nav class="topnav" aria-label="Sparrow Lab sections">
+        <button data-scroll="now">in season</button>
+        <button data-scroll="course">how to look</button>
+        <button data-scroll="audio-lab">sounds</button>
+        <button data-scroll="atlas">photographs</button>
+        <button data-scroll="field-guide">species</button>
+        <button data-scroll="confusions">confusions</button>
+        <button data-scroll="key">id key</button>
+        <button data-scroll="quiz">practice</button>
+        <button class="field-launch" id="fieldLaunch">field mode ↗</button>
+      </nav>
+    </div>
   </div>
 </header>
 
 <main>
   <section class="shell hero">
-    <div>
-      <div class="eyebrow">Washington, DC + Mid-Atlantic • birder mode</div>
-      <h1>Brown bird,<br>resolved.</h1>
-      <p>A pattern-recognition lab for the DC sparrow problem. Learn the decision tree, hear real field recordings, drill your specific confusions, and build an ID from evidence instead of vibes.</p>
-      <div class="hero-actions"><button class="primary" data-scroll="course">Start the mental model</button><button class="secondary" data-scroll="quiz">Give me a bird</button></div>
+    <div class="hero-copy">
+      <div class="eyebrow">a field notebook for washington, dc</div>
+      <h1>sparrows around dc</h1>
+      <p>Fourteen birds I wanted to stop mixing up, compared by structure, season, habitat, voice, and the field mark that actually breaks the tie.</p>
+      <div class="hero-actions"><button class="primary" data-scroll="course">start with how to look</button><button class="secondary" data-scroll="quiz">practice with a bird</button></div>
     </div>
-    <aside class="hero-card">
-      <span class="today-date" id="heroDate">Loading DC season…</span>
-      <h2>The five-second protocol</h2>
-      <ol>
-        <li><b>Freeze the silhouette:</b> tail length, body mass, head shape, bill depth.</li>
-        <li><b>Classify the breast:</b> clean, finely streaked, coarsely streaked, or heavily spotted.</li>
-        <li><b>Read the face:</b> eyering, eyeline, throat boundary, lores, crown geometry.</li>
-        <li><b>Use habitat as evidence:</b> wet feet, open turf, weedy edge, leaf litter, pavement.</li>
-        <li><b>Let season veto bad ideas:</b> especially Chipping vs. American Tree and passage-only Lincoln’s.</li>
-      </ol>
-      <div class="hero-rule"><kbd>F</kbd><span>opens the low-friction field assistant from anywhere.</span></div>
-    </aside>
+    <figure class="hero-plate">
+      <img src="assets/song.jpg?v=20260714" alt="Song Sparrow perched among dried seed heads" />
+      <figcaption><span id="heroDate">loading the dc season…</span><br>plate 01 · song sparrow · photograph by Rhododendrites · CC BY-SA 4.0</figcaption>
+    </figure>
   </section>
 
   <section class="shell section" id="now">
     <div class="section-head">
-      <h2>What is live right now</h2>
+      <h2>in season now</h2>
       <p>Local season is a prior, not a verdict. This list is generated from the current month and keeps improbable birds from occupying working memory.</p>
     </div>
     <div class="now-layout">
@@ -530,20 +1013,21 @@
 
   <section class="shell section" id="method">
     <div class="section-head">
-      <h2>How experts make the pile smaller</h2>
-      <p>Plumage is only one data stream. These four cuts usually eliminate most of the field before you start arguing about subtle buff tones.</p>
+      <h2>five useful cuts</h2>
+      <p>Plumage is only one stream of evidence. These checks usually eliminate most of the field before you start arguing about subtle buff tones.</p>
     </div>
     <div class="quick-grid">
       <article class="quick-card"><span class="num">1</span><h3>Structure outranks color</h3><p>A tiny short-tailed Grasshopper, a long-tailed Song, and a hulking Fox can all look “brown and streaky” in bad light. Their proportions cannot.</p></article>
       <article class="quick-card"><span class="num">2</span><h3>Streak texture matters</h3><p>Song is coarse and brush-painted; Lincoln’s is crisp and pen-drawn over buff; Savannah is fine and linear; Fox is broad, triangular, and blotchy.</p></article>
       <article class="quick-card"><span class="num">3</span><h3>Face geometry is a map</h3><p>Do not just note “striped head.” Locate the supercilium, eyeline, malar, throat border, crown stripe, and any yellow in the lores.</p></article>
       <article class="quick-card"><span class="num">4</span><h3>Habitat is a likelihood ratio</h3><p>Standing water strongly favors Swamp; clipped lawns and open pine edges favor Chipping; broad grassland pushes Grasshopper or Savannah.</p></article>
+      <article class="quick-card"><span class="num">5</span><h3>Season changes the burden of proof</h3><p>A July American Tree Sparrow or January Grasshopper Sparrow is not impossible, but it should have to survive a much harder audit than a bird in season.</p></article>
     </div>
   </section>
 
   <section class="shell section" id="course">
     <div class="section-head">
-      <h2>The sparrow compiler</h2>
+      <h2>a way to look</h2>
       <p>A short tutorial for replacing a pile of independent field marks with a reusable decision system. The order matters more than memorizing every adjective.</p>
     </div>
     <div class="course-shell">
@@ -554,12 +1038,12 @@
 
   <section class="shell section" id="audio-lab">
     <div class="section-head">
-      <h2>Ear lab</h2>
+      <h2>songs and calls</h2>
       <p>Real recordings teach timbre and mess. Synthetic sketches strip a song down to timing and contour. Use both; they solve different learning problems.</p>
     </div>
     <div class="audio-layout">
       <aside class="audio-console" id="audioConsole">
-        <div class="console-kicker">Shared player</div>
+        <div class="console-kicker">current recording</div>
         <h3 id="audioNow">Choose a recording</h3>
         <p id="audioMeta">All 14 field recordings are stored locally; every species also has a rhythm sketch.</p>
         <canvas id="spectrumCanvas" width="600" height="224" aria-label="Rhythm and contour visualization"></canvas>
@@ -573,7 +1057,7 @@
 
   <section class="shell section" id="atlas">
     <div class="section-head">
-      <h2>Variation atlas</h2>
+      <h2>the same bird, three ways</h2>
       <p>One perfect portrait teaches one photograph. These 42 field images teach the species across pose, lighting, distance, sex, age, and plumage variation.</p>
     </div>
     <div class="atlas-shell">
@@ -584,7 +1068,7 @@
 
   <section class="shell section" id="field-guide">
     <div class="section-head">
-      <h2>Interactive field guide</h2>
+      <h2>species notes</h2>
       <p>Select up to three birds for a direct comparison. Every account now includes a three-image carousel, and photo quizzes rotate among all 42 field views.</p>
     </div>
     <div class="controls">
@@ -618,7 +1102,7 @@
 
   <section class="shell section" id="confusions">
     <div class="section-head">
-      <h2>Confusion sets</h2>
+      <h2>birds that look alike</h2>
       <p>The useful question is rarely “what does this species look like?” It is “what single observation breaks the tie between the two or three live candidates?”</p>
     </div>
     <div class="confusion-grid" id="confusionGrid"></div>
@@ -626,7 +1110,7 @@
 
   <section class="shell section" id="key">
     <div class="section-head">
-      <h2>Build an ID from observations</h2>
+      <h2>narrow it down</h2>
       <p>This is a probabilistic teaching key, not a taxonomic dichotomous key. You can skip uncertain characters; the candidate list updates after every answer.</p>
     </div>
     <div class="key-layout">
@@ -647,7 +1131,7 @@
 
   <section class="shell section" id="quiz">
     <div class="section-head">
-      <h2>Field-speed quiz</h2>
+      <h2>practice</h2>
       <p>Switch among photo, mark-only, real-sound, and confusion-pair drills. Confidence and retrieval history tune what the scheduler shows you next.</p>
     </div>
     <div class="quiz-shell">
@@ -670,12 +1154,12 @@
   </section>
 
   <section class="shell section" id="progress">
-    <div class="section-head"><h2>Your model, instrumented</h2><p>Progress stays in this browser. “Strong” means repeated retrieval over time—not that you clicked a learned checkbox once.</p></div>
+    <div class="section-head"><h2>practice notes</h2><p>Progress stays in this browser. “Strong” means repeated retrieval over time—not that you clicked a learned checkbox once.</p></div>
     <div class="progress-shell" id="progressShell"></div>
   </section>
 
   <section class="shell section" id="glossary">
-    <div class="section-head"><h2>Field-mark decoder ring</h2><p>Precise words reduce visual ambiguity. Open these when a guide sounds like it was written by a committee of tiny Victorian anatomists.</p></div>
+    <div class="section-head"><h2>field-mark glossary</h2><p>Precise words reduce visual ambiguity. Open these when a guide sounds like it was written by a committee of tiny Victorian anatomists.</p></div>
     <div class="glossary-shell">
       <details><summary>Supercilium, eyeline, and lores</summary><p>The supercilium is the eyebrow above the eye; the eyeline passes through it; the lores are the small zone between eye and bill. Savannah and White-throated can show yellow specifically in the lores—not vaguely “on the face.”</p></details>
       <details><summary>Malar, moustachial, and throat border</summary><p>These diagonal stripes frame the throat. Song Sparrow often has strong dark malars; White-throated creates a hard dark frame around the white throat patch. Read boundaries, not just colors.</p></details>
@@ -686,7 +1170,7 @@
   </section>
 
   <section class="shell section" id="edge-cases">
-    <div class="section-head"><h2>Regional edge cases</h2><p>These are not in the core quiz, but they are exactly the birds that turn a routine Mid-Atlantic outing into a group-chat event.</p></div>
+    <div class="section-head"><h2>just outside the core set</h2><p>These are not in the core quiz, but they are exactly the birds that turn a routine Mid-Atlantic outing into a group-chat event.</p></div>
     <div class="edge-grid">
       <article class="edge-card"><span class="rarity">Uncommon migrant</span><h3>Vesper Sparrow</h3><p>Large-ish, clean white eyering, white outer tail, rusty lesser coverts, and a more open-faced look than Savannah. Think sparse fields, gravel, and exposed soil.</p></article>
       <article class="edge-card"><span class="rarity">Local breeder</span><h3>Henslow’s Sparrow</h3><p>Flat olive head, huge-looking bill, chestnut scapulars, finely streaked buff breast, and a famously abrupt <i>tsi-lick</i>. Usually found by voice in intact grassland.</p></article>
@@ -876,7 +1360,7 @@ const courseLessons = [
   {title:'Compile the breast',lede:'Convert “streaky” into a texture class. This single operation breaks the core set into manageable buckets.',cells:[['Clean','No organized marks','Field, Chipping, Swamp, Zonotrichia, Junco.'],['Pen','Fine linear streaks','Savannah; Lincoln’s when printed over a buff band.'],['Brush','Coarse / merging','Song; Fox when the marks become broad chevrons.']]},
   {title:'Parse face geometry',lede:'Treat the face like a subway map: lines have exact routes. A yellow pixel is only useful if you know where it lives.',cells:[['Eye','Ring vs. line','Field = complete eyering. Chipping = hard black eyeline.'],['Front','Lores','Savannah and White-throated may show yellow between bill and eye.'],['Below','Throat frame','White-throated has a bounded patch; Song has dark malars.']]},
   {title:'Query the habitat',lede:'Habitat is a likelihood ratio, not decoration. Record what the bird’s feet are touching, not the landscape category on eBird.',cells:[['Wet feet','Mud / sedge / cattail','Strongly promotes Swamp; supports Lincoln’s on passage.'],['Open turf','Short grass / fence','Promotes Savannah or Chipping depending structure.'],['Leaf litter','Double-scratching','Promotes Fox, White-throated, or Towhee depending size.']]},
-  {title:'Run the season veto',lede:'Before you chase a subtle mark, ask whether the calendar makes your idea expensive. Rare things happen; common things happen constantly.',cells:[['Winter','Tree, Fox, Zonotrichia, Junco','Chipping becomes a claim that needs better evidence.'],['Migration','Lincoln’s enters the chat','Damp low cover in May or September deserves attention.'],['Summer','Grasshopper + Chipping sing','White-throated around DC becomes an exceptional record.']]},
+  {title:'Let season change the burden of proof',lede:'Before chasing a subtle mark, ask how well the calendar supports the idea. Rare things happen; common things happen constantly.',cells:[['Winter','Tree, Fox, Zonotrichia, Junco','Chipping becomes a claim that needs better evidence.'],['Migration','Lincoln’s enters the chat','Damp low cover in May or September deserves attention.'],['Summer','Grasshopper + Chipping sing','White-throated around DC becomes an exceptional record.']]},
   {title:'Attach the sound',lede:'Do not memorize prose mnemonics as lyrics. Encode sound as rhythm + contour + texture, then attach the species name.',cells:[['Rhythm','Even vs. accelerating','Chipping even; Field accelerates.'],['Texture','Whistle / trill / buzz','White-throated whistles; Grasshopper buzzes.'],['Grammar','Fixed vs. variable phrase','Song Sparrow varies; Savannah keeps the tick-to-buzz grammar.']]}
 ];
 
@@ -986,7 +1470,7 @@ function renderAtlas(id=atlasSpeciesId) {
   ).join('');
   document.getElementById('atlasStage').innerHTML=
     '<div class="atlas-title-row">'+
-      '<div><div class="eyebrow">3 views · 1 invariant model</div><h3>'+s.name+'</h3></div>'+
+      '<div><div class="eyebrow">three views / one bird</div><h3>'+s.name+'</h3></div>'+
       '<p><b>'+s.mnemonic+'</b><br>'+s.summary+'</p>'+
     '</div>'+
     '<div class="atlas-grid">'+photos.map((p,i)=>
@@ -1020,11 +1504,11 @@ function renderSpecies() {
       <div class="photo-wrap">
         <div class="photo-fallback">${s.name}<br><small>photo unavailable</small></div>
         ${imgTag(s)}
-        <div class="badge-row"><span class="badge ${s.seasonClass}">${s.seasonLabel}</span><span class="badge">3 views</span>${isStrong(s.id)?'<span class="badge">strong ✓</span>':''}</div>
       </div>
       <div class="card-photo-rail">${photoLibrary[s.id].map((p,i)=>photoTag(p,`${s.name} view ${i+1}`)).join('')}</div>
       <div class="card-body">
         <div class="card-title-row"><div><h3>${s.name}</h3><div class="latin">${s.latin}</div></div><button class="compare-check ${selected.includes(s.id)?'selected':''}" data-compare="${s.id}" aria-label="Add ${s.name} to comparison">${selected.includes(s.id)?'✓':'+'}</button></div>
+        <div class="badge-row"><span class="badge ${s.seasonClass}">${s.seasonLabel}</span><span class="badge">3 views</span>${isStrong(s.id)?'<span class="badge strong">strong ✓</span>':''}</div>
         <div class="id-line">${s.summary}</div>
         <div class="tag-row"><span class="tiny-tag">${s.breast}</span>${s.habitats.map(h=>`<span class="tiny-tag">${h}</span>`).join('')}</div>
         <div class="mastery-pips" aria-label="Memory strength ${reviewFor(s.id).level} of 5">${[1,2,3,4,5].map(n=>`<i class="${reviewFor(s.id).level>=n?'on':''}"></i>`).join('')}</div>
@@ -1076,7 +1560,7 @@ function setDetailPhoto(panel,s,index) {
   panel.dataset.photoIndex=index;
   const image=panel.querySelector('.detail-main-image');
   image.style.display='';
-  image.src=p.file;
+  image.src=mediaUrl(p.file);
   image.alt=s.name+' — '+p.label;
   panel.querySelector('#detailPhotoCount').textContent=(index+1)+' / '+photos.length;
   panel.querySelector('#detailPhotoLabel').textContent=p.label;
@@ -1340,7 +1824,7 @@ function renderToday(){
   document.getElementById('nowLegend').textContent=`● strongest window (${strong.length}) · ○ regular, local, or lower likelihood (${possible.length}) · ${unlikely.length} core species need exceptional evidence this month.`;
   document.querySelectorAll('[data-now-open]').forEach(b=>b.addEventListener('click',()=>openDetail(b.dataset.nowOpen)));
   const trap=unlikely.find(s=>s.id==='white-throated')||unlikely[0],anchor=strong[0]||possible[0];
-  document.getElementById('signalCard').innerHTML=`<div class="signal-label">Seasonal type-check</div><h3>${anchor?anchor.name:'Keep the whole set'} is cheap.<br>${trap?trap.name:'A rarity'} is expensive.</h3><p>${trap?`${trap.name} is outside its normal DC window. Do not delete the possibility—raise the evidence threshold.`:'Migration keeps several candidates live; use structure and microhabitat.'}</p><button data-scroll="key">Build an evidence stack →</button>`;
+  document.getElementById('signalCard').innerHTML=`<div class="signal-label">season note</div><h3>${anchor?anchor.name:'Several birds'} ${anchor?'is expected.':'are in play.'}<br>${trap?trap.name:'An out-of-season bird'} needs proof.</h3><p>${trap?`${trap.name} is outside its normal DC window. Keep the possibility, but ask it to survive a harder field-mark check.`:'Migration keeps several candidates live; use structure and microhabitat.'}</p><button data-scroll="key">open the identification key →</button>`;
   document.querySelector('#signalCard [data-scroll]')?.addEventListener('click',e=>document.getElementById(e.currentTarget.dataset.scroll).scrollIntoView({behavior:'smooth'}));
 }
 

@@ -4,25 +4,26 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="description" content="Complete photo and audio attribution register for Sparrow Lab." />
-<meta name="theme-color" content="#f6f2e7" />
+<meta name="theme-color" content="#fffcf5" />
 <link rel="canonical" href="https://lostinthehaze.net/sparrows/attributions.html" />
 <title>Media attributions — Sparrow Lab</title>
 <style>
-:root{--ink:#16211c;--muted:#647168;--paper:#f6f2e7;--card:#fffdf7;--line:rgba(22,33,28,.14);--moss:#214f3b;--gold:#efb83d}
-*{box-sizing:border-box}body{margin:0;color:var(--ink);background:radial-gradient(circle at 90% 0,rgba(45,115,84,.13),transparent 32rem),var(--paper);font:16px/1.5 ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-main,header{width:min(1040px,calc(100% - 32px));margin:auto}header{padding:56px 0 30px}.back{color:var(--moss);font-weight:850;text-decoration:none}.back:hover{text-decoration:underline;text-underline-offset:3px}
-h1{font:700 clamp(2.7rem,8vw,5.5rem)/.95 Georgia,serif;letter-spacing:-.055em;margin:26px 0 18px}.lede{max-width:780px;color:#3e4d45;font-size:1.08rem}.audit{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:28px 0 10px}.audit div{padding:16px;border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.62)}.audit b{display:block;font-size:1.5rem}.audit span{color:var(--muted);font-size:.85rem}
-.notice{border-left:5px solid var(--gold);background:rgba(255,255,255,.55);padding:16px 18px;margin:24px 0 42px;border-radius:0 14px 14px 0}.notice p{margin:.35rem 0}.notice a{color:var(--moss);font-weight:800}
-section{margin:0 0 34px}h2{font:700 1.8rem/1.1 Georgia,serif;margin:0 0 12px}ul{list-style:none;margin:0;padding:0;border:1px solid var(--line);border-radius:18px;overflow:hidden;background:var(--card)}
-li{display:grid;grid-template-columns:70px minmax(170px,1.3fr) minmax(160px,1fr) 130px minmax(170px,.9fr);gap:14px;align-items:center;padding:14px 16px;border-bottom:1px solid var(--line);font-size:.88rem}li:last-child{border-bottom:0}.kind{justify-self:start;padding:4px 8px;border-radius:999px;background:var(--moss);color:white;font-size:.68rem;font-weight:900;text-transform:uppercase;letter-spacing:.08em}small,.label{display:block;color:var(--muted);font-size:.72rem}.source,li a{color:var(--moss);font-weight:800}.note{grid-column:2/-1;margin:0;color:var(--muted);font-size:.76rem}
-footer{margin-top:50px;padding:26px 0 70px;border-top:1px solid var(--line);color:var(--muted);font-size:.85rem}
-@media(max-width:760px){.audit{grid-template-columns:1fr}li{grid-template-columns:64px 1fr}.source,li>div:nth-child(3),li>div:nth-child(4){grid-column:2}.note{grid-column:2}h1{font-size:clamp(2.8rem,15vw,4.8rem)}}
+:root{--ink:#2c2c2c;--muted:#706b63;--paper:#fffcf5;--surface:#fffaf2;--line:#d8d0c2;--red:#b93b3b;--body:"charter","bitstream charter",Georgia,serif;--mono:"courier new",ui-monospace,monospace}
+*{box-sizing:border-box}html{font-size:18px;color-scheme:light dark}body{margin:0;color:var(--ink);background:var(--paper);font:1rem/1.6 var(--body)}
+main,header{width:min(68rem,calc(100% - 2rem));margin:auto}header{padding:2.2rem 0 2rem}.back{color:var(--red);font-weight:400;text-decoration:underline;text-underline-offset:3px}.back:hover,.notice a:hover,.source:hover,li a:hover{background:var(--red);color:var(--paper);text-decoration:none}
+h1{max-width:50rem;margin:1.5rem 0 1rem;color:var(--red);font:400 clamp(2.4rem,6vw,3.6rem)/1.05 var(--body);letter-spacing:-.025em}.lede{max-width:50rem;color:var(--muted);font-size:1.05rem;text-align:justify;hyphens:auto}.audit{display:grid;grid-template-columns:repeat(3,1fr);gap:.55rem;margin:1.6rem 0 .7rem}.audit div{padding:.8rem;border:1px solid var(--line);border-radius:2px;background:var(--surface)}.audit b{display:block;color:var(--red);font-size:1.35rem;font-weight:400}.audit span{color:var(--muted);font: .72rem/1.4 var(--mono)}
+.notice{max-width:50rem;border-left:3px solid var(--red);background:transparent;padding:.35rem 0 .35rem 1rem;margin:1.4rem 0 2.5rem}.notice p{margin:.35rem 0;text-align:justify;hyphens:auto}.notice a{color:var(--red);font-weight:400}
+section{margin:0 0 2.1rem}h2{margin:0 0 .65rem;color:var(--red);font:400 1.55rem/1.15 var(--body)}ul{list-style:none;margin:0;padding:0;border:1px solid var(--line);border-radius:2px;overflow:hidden;background:transparent}
+li{display:grid;grid-template-columns:64px minmax(170px,1.3fr) minmax(150px,1fr) 125px minmax(165px,.9fr);gap:.8rem;align-items:center;padding:.75rem .85rem;border-bottom:1px solid var(--line);background:var(--surface);font-size:.84rem}li:last-child{border-bottom:0}.kind{justify-self:start;padding:.15rem .3rem;border:1px solid var(--red);border-radius:1px;background:transparent;color:var(--red);font:.62rem/1.4 var(--mono);text-transform:lowercase}small,.label{display:block;color:var(--muted);font:.66rem/1.45 var(--mono)}.source,li a{color:var(--red);font-weight:400;text-underline-offset:3px}.note{grid-column:2/-1;margin:0;color:var(--muted);font-size:.76rem}
+footer{margin-top:3rem;padding:1.5rem 0 4rem;border-top:1px solid var(--line);color:var(--muted);font-size:.82rem}
+@media(prefers-color-scheme:dark){:root{--ink:#e6e1dc;--muted:#aaa29a;--paper:#1c1b1a;--surface:#242220;--line:#3d3a38;--red:#e06c6c}}
+@media(max-width:760px){.audit{grid-template-columns:1fr}li{grid-template-columns:58px 1fr}.source,li>div:nth-child(3),li>div:nth-child(4){grid-column:2}.note{grid-column:2}h1{font-size:2.45rem}}
 </style>
 </head>
 <body>
 <header>
-  <a class="back" href="index.html">← Sparrow Lab</a>
-  <h1>Media attributions</h1>
+  <a class="back" href="index.html">← sparrow lab</a>
+  <h1>media attributions</h1>
   <p class="lede">The complete credit and license register for every locally stored photograph and field recording used by Sparrow Lab.</p>
   <div class="audit"><div><b>42</b><span>field photographs</span></div><div><b>14</b><span>field recordings</span></div><div><b>56 / 56</b><span>source records checked</span></div></div>
   <div class="notice">
