@@ -1,0 +1,1446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="description" content="An expert-oriented interactive trainer for sparrows of Washington, DC and the Mid-Atlantic." />
+<meta name="theme-color" content="#f6f2e7" />
+<link rel="canonical" href="https://lostinthehaze.net/sparrows/" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Sparrow Lab — DC & Mid-Atlantic Field ID" />
+<meta property="og:description" content="An interactive pattern-recognition lab for identifying sparrows around Washington, DC." />
+<meta property="og:url" content="https://lostinthehaze.net/sparrows/" />
+<title>Sparrow Lab — DC & Mid-Atlantic Field ID</title>
+<style>
+  :root {
+    --ink: #16211c;
+    --muted: #647168;
+    --paper: #f6f2e7;
+    --paper-2: #ebe5d5;
+    --card: rgba(255,255,255,.74);
+    --line: rgba(22,33,28,.13);
+    --moss: #214f3b;
+    --moss-2: #2d7354;
+    --gold: #efb83d;
+    --rust: #a84d2d;
+    --sky: #d7e7e7;
+    --shadow: 0 18px 50px rgba(33,48,39,.12);
+    --radius: 22px;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    color: var(--ink);
+    background:
+      radial-gradient(circle at 10% 0%, rgba(239,184,61,.16), transparent 28rem),
+      radial-gradient(circle at 90% 10%, rgba(45,115,84,.13), transparent 34rem),
+      var(--paper);
+    font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    line-height: 1.5;
+  }
+  button, input, select { font: inherit; }
+  button { cursor: pointer; }
+  a { color: inherit; }
+  .shell { width: min(1500px, calc(100% - 32px)); margin: 0 auto; }
+  .topbar {
+    position: sticky; top: 0; z-index: 50;
+    backdrop-filter: blur(18px);
+    background: rgba(246,242,231,.84);
+    border-bottom: 1px solid var(--line);
+  }
+  .topbar-inner { min-height: 66px; display: flex; align-items: center; gap: 18px; }
+  .brand { display: flex; align-items: center; gap: 11px; font-weight: 900; letter-spacing: -.03em; }
+  .brand-mark { width: 34px; height: 34px; display:grid; place-items:center; border-radius: 50%; background: var(--moss); color: white; box-shadow: inset 0 0 0 6px rgba(255,255,255,.08); }
+  .site-return { color:var(--moss-2); font-size:.78rem; font-weight:850; text-decoration:none; white-space:nowrap; }
+  .site-return:hover { text-decoration:underline; text-underline-offset:3px; }
+  .topnav { display:flex; gap: 6px; margin-left: auto; overflow-x: auto; scrollbar-width: none; }
+  .topnav button { border:0; background:transparent; padding:10px 12px; border-radius:999px; color:var(--muted); white-space:nowrap; font-weight:750; }
+  .topnav button:hover, .topnav button.active { background:white; color:var(--moss); box-shadow: 0 4px 18px rgba(30,50,39,.08); }
+
+  .hero { padding: 72px 0 34px; display:grid; grid-template-columns: 1.2fr .8fr; gap: 36px; align-items:end; }
+  .eyebrow { display:inline-flex; gap:8px; align-items:center; text-transform:uppercase; font-size:.74rem; font-weight:900; letter-spacing:.14em; color:var(--moss-2); }
+  h1 { margin: 12px 0 18px; max-width: 900px; font-family: Georgia, "Times New Roman", serif; font-size: clamp(3.1rem, 8vw, 7.5rem); line-height:.86; letter-spacing:-.065em; font-weight:700; }
+  .hero p { max-width: 780px; margin:0; font-size:clamp(1.04rem, 1.8vw, 1.3rem); color:#3e4d45; }
+  .hero-card { background:var(--moss); color:white; border-radius:var(--radius); padding:24px; box-shadow:var(--shadow); overflow:hidden; position:relative; }
+  .hero-card:before { content:""; position:absolute; width:220px; height:220px; border-radius:50%; background:rgba(239,184,61,.15); right:-80px; top:-100px; }
+  .hero-card h2 { margin:0 0 12px; font-family:Georgia,serif; font-size:1.5rem; }
+  .hero-card ol { padding-left:1.25rem; margin:0; }
+  .hero-card li { margin:.62rem 0; color:rgba(255,255,255,.82); }
+  .hero-card b { color:white; }
+
+  .section { padding: 38px 0 58px; scroll-margin-top:80px; }
+  .section-head { display:flex; align-items:end; justify-content:space-between; gap:20px; margin-bottom:22px; }
+  .section-head h2 { margin:0; font-family:Georgia,serif; font-size:clamp(2rem,4vw,3.3rem); letter-spacing:-.035em; line-height:1; }
+  .section-head p { max-width:620px; margin:0; color:var(--muted); }
+
+  .quick-grid { display:grid; grid-template-columns:repeat(4, 1fr); gap:12px; }
+  .quick-card { border:1px solid var(--line); background:var(--card); border-radius:18px; padding:18px; min-height:160px; box-shadow:0 8px 25px rgba(33,48,39,.06); }
+  .quick-card .num { display:inline-grid; place-items:center; width:30px; height:30px; border-radius:50%; background:var(--ink); color:white; font-weight:900; margin-bottom:12px; }
+  .quick-card h3 { margin:0 0 7px; font-size:1rem; }
+  .quick-card p { margin:0; color:var(--muted); font-size:.93rem; }
+
+  .controls { display:grid; grid-template-columns: minmax(210px,1.5fr) repeat(3,minmax(145px,.6fr)) auto; gap:10px; margin-bottom:18px; }
+  .control { border:1px solid var(--line); background:rgba(255,255,255,.68); border-radius:14px; padding:11px 13px; min-width:0; }
+  input.control, select.control { width:100%; color:var(--ink); }
+  .toggle { display:flex; align-items:center; justify-content:center; gap:8px; font-weight:800; color:var(--moss); }
+  .toggle input { accent-color:var(--moss); }
+  .result-count { color:var(--muted); font-size:.9rem; margin: 6px 0 14px; }
+  .species-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px; }
+  .species-card { border:1px solid var(--line); background:var(--card); border-radius:20px; overflow:hidden; box-shadow:0 12px 32px rgba(33,48,39,.08); transition:transform .2s ease, box-shadow .2s ease; position:relative; }
+  .species-card:hover { transform:translateY(-4px); box-shadow:0 18px 38px rgba(33,48,39,.14); }
+  .photo-wrap { aspect-ratio:4/3; background:#d8dfd8; position:relative; overflow:hidden; }
+  .photo-wrap img { width:100%; height:100%; object-fit:cover; display:block; transition:transform .35s ease; position:relative; z-index:1; }
+  .species-card:hover img { transform:scale(1.035); }
+  .photo-fallback { position:absolute; inset:0; z-index:0; display:grid; place-items:center; background:linear-gradient(145deg,#c7d7cd,#ebe6d6); color:var(--moss); font-weight:900; text-align:center; padding:20px; }
+  .badge-row { position:absolute; z-index:2; left:10px; right:10px; top:10px; display:flex; gap:7px; flex-wrap:wrap; }
+  .badge { padding:5px 8px; border-radius:999px; background:rgba(20,32,26,.82); color:white; font-size:.7rem; font-weight:900; backdrop-filter:blur(8px); }
+  .badge.winter { background:rgba(45,93,117,.88); }
+  .badge.breeder { background:rgba(45,115,84,.92); }
+  .badge.year { background:rgba(107,68,39,.9); }
+  .card-body { padding:16px; }
+  .card-title-row { display:flex; gap:10px; justify-content:space-between; align-items:start; }
+  .species-card h3 { margin:0; font-size:1.16rem; letter-spacing:-.02em; }
+  .latin { color:var(--muted); font-size:.78rem; font-style:italic; margin-top:2px; }
+  .compare-check { display:grid; place-items:center; width:32px; height:32px; border-radius:10px; border:1px solid var(--line); background:white; font-weight:900; color:var(--moss); flex:0 0 auto; }
+  .compare-check.selected { background:var(--moss); color:white; }
+  .id-line { margin:12px 0 14px; color:#425048; font-size:.9rem; min-height:2.7em; }
+  .tag-row { display:flex; gap:6px; flex-wrap:wrap; }
+  .tiny-tag { padding:5px 8px; background:var(--paper-2); border-radius:999px; color:#526158; font-size:.72rem; font-weight:800; }
+  .open-btn { margin-top:14px; width:100%; border:0; background:var(--ink); color:white; border-radius:12px; padding:10px 12px; font-weight:850; }
+  .open-btn:hover { background:var(--moss); }
+
+  .card-photo-rail { display:grid; grid-template-columns:repeat(3,1fr); gap:3px; height:52px; padding:3px; background:#18251e; }
+  .card-photo-rail img { width:100%; height:46px; object-fit:cover; display:block; border-radius:5px; opacity:.82; }
+  .card-photo-rail img:first-child { opacity:1; box-shadow:inset 0 0 0 2px var(--gold); }
+
+  .atlas-shell { border:1px solid var(--line); border-radius:26px; background:rgba(255,255,255,.62); overflow:hidden; box-shadow:var(--shadow); }
+  .atlas-rail { display:flex; gap:7px; overflow-x:auto; padding:13px; border-bottom:1px solid var(--line); background:rgba(235,229,213,.62); scrollbar-width:thin; }
+  .atlas-rail button { border:1px solid var(--line); background:white; color:var(--muted); border-radius:999px; padding:8px 11px; font-size:.78rem; font-weight:850; white-space:nowrap; }
+  .atlas-rail button.active { background:var(--moss); border-color:var(--moss); color:white; }
+  .atlas-stage { padding:22px; }
+  .atlas-title-row { display:flex; align-items:end; justify-content:space-between; gap:16px; margin-bottom:17px; }
+  .atlas-title-row h3 { margin:3px 0 0; font-family:Georgia,serif; font-size:clamp(1.8rem,3.3vw,2.7rem); letter-spacing:-.035em; line-height:1; }
+  .atlas-title-row p { max-width:620px; margin:0; color:var(--muted); }
+  .atlas-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:11px; }
+  .atlas-card { margin:0; border:1px solid var(--line); border-radius:18px; background:white; overflow:hidden; min-width:0; }
+  .atlas-photo-button { display:block; width:100%; padding:0; border:0; background:#1d2922; text-align:left; position:relative; }
+  .atlas-photo-button img { width:100%; height:320px; object-fit:contain; display:block; position:relative; z-index:1; }
+  .atlas-photo-button:after { content:"open account ↗"; position:absolute; z-index:2; right:9px; bottom:9px; padding:5px 8px; border-radius:999px; background:rgba(15,25,19,.82); color:white; font-size:.63rem; font-weight:900; opacity:0; transition:opacity .18s ease; }
+  .atlas-photo-button:hover:after, .atlas-photo-button:focus-visible:after { opacity:1; }
+  .atlas-caption { padding:13px 14px 15px; }
+  .atlas-caption strong { display:block; font-size:.92rem; }
+  .atlas-caption p { margin:5px 0 9px; color:#526158; font-size:.8rem; min-height:2.4em; }
+  .photo-credit { color:var(--muted); font-size:.69rem; line-height:1.35; }
+  .photo-credit a { color:var(--moss); font-weight:850; }
+  .atlas-actions { display:flex; gap:9px; flex-wrap:wrap; margin-top:16px; }
+  .atlas-actions button { border:0; border-radius:12px; padding:10px 13px; font-weight:900; }
+  .atlas-actions .primary { background:var(--ink); color:white; }
+  .atlas-actions .secondary { background:var(--paper-2); color:var(--ink); }
+
+  .compare-dock { position:fixed; z-index:60; left:50%; bottom:18px; transform:translateX(-50%) translateY(150%); width:min(760px,calc(100% - 24px)); background:rgba(22,33,28,.96); color:white; border-radius:20px; padding:12px; box-shadow:0 20px 60px rgba(0,0,0,.3); transition:transform .25s ease; display:flex; align-items:center; gap:12px; backdrop-filter:blur(18px); }
+  .compare-dock.show { transform:translateX(-50%) translateY(0); }
+  .compare-dock .selected-list { display:flex; gap:6px; flex:1; min-width:0; overflow:auto; }
+  .selected-pill { background:rgba(255,255,255,.12); padding:7px 10px; border-radius:999px; white-space:nowrap; font-size:.8rem; }
+  .compare-dock button { border:0; border-radius:12px; padding:10px 14px; font-weight:900; }
+  .compare-go { background:var(--gold); color:#2a210f; }
+  .compare-clear { background:rgba(255,255,255,.11); color:white; }
+
+  .panel-overlay { position:fixed; inset:0; z-index:80; background:rgba(10,18,14,.58); opacity:0; pointer-events:none; transition:opacity .2s ease; }
+  .panel-overlay.show { opacity:1; pointer-events:auto; }
+  .detail-panel { position:fixed; z-index:81; top:0; right:0; width:min(720px,100%); height:100dvh; background:var(--paper); transform:translateX(105%); transition:transform .28s ease; overflow:auto; box-shadow:-24px 0 80px rgba(0,0,0,.24); }
+  .detail-panel.show { transform:translateX(0); }
+  .panel-close { position:sticky; top:12px; float:right; z-index:4; margin:12px; width:42px; height:42px; border:0; border-radius:50%; background:rgba(22,33,28,.88); color:white; font-size:1.2rem; }
+  .detail-photo { min-height:390px; background:#1d2922; position:relative; display:grid; place-items:center; overflow:hidden; }
+  .detail-photo img { max-width:100%; width:100%; height:460px; object-fit:contain; display:block; position:relative; z-index:1; }
+  .detail-arrow { position:absolute; z-index:3; top:50%; transform:translateY(-50%); width:42px; height:42px; border:0; border-radius:50%; background:rgba(12,22,16,.78); color:white; font-size:1.25rem; backdrop-filter:blur(8px); }
+  .detail-arrow:hover { background:var(--gold); color:#241c0b; }
+  .detail-arrow.prev { left:12px; }
+  .detail-arrow.next { right:12px; }
+  .detail-photo-count { position:absolute; z-index:3; left:14px; top:14px; padding:6px 9px; border-radius:999px; background:rgba(12,22,16,.78); color:white; font-size:.7rem; font-weight:900; }
+  .detail-gallery-meta { background:#111d17; color:white; padding:11px 14px 14px; }
+  .detail-gallery-copy { display:flex; justify-content:space-between; gap:14px; align-items:start; margin-bottom:10px; }
+  .detail-gallery-copy strong { display:block; font-size:.88rem; }
+  .detail-gallery-copy span { color:rgba(255,255,255,.62); font-size:.74rem; }
+  .detail-gallery-copy a { color:var(--gold); font-size:.7rem; font-weight:850; white-space:nowrap; }
+  .detail-thumbs { display:grid; grid-template-columns:repeat(3,1fr); gap:7px; }
+  .detail-thumb { padding:0; border:2px solid transparent; border-radius:10px; overflow:hidden; background:#29372f; opacity:.65; }
+  .detail-thumb.active { border-color:var(--gold); opacity:1; }
+  .detail-thumb img { display:block; width:100%; height:62px; object-fit:cover; }
+  .hotspot { position:absolute; transform:translate(-50%,-50%); display:none; }
+  .detail-panel.show-marks .hotspot { display:block; }
+  .detail-panel.marks-disabled .hotspot { display:none; }
+  .hotspot-dot { width:19px; height:19px; background:var(--gold); border:3px solid white; border-radius:50%; box-shadow:0 0 0 6px rgba(239,184,61,.28); }
+  .hotspot-label { position:absolute; left:14px; top:14px; min-width:150px; max-width:220px; padding:8px 10px; background:rgba(16,28,21,.92); color:white; border-radius:9px; font-size:.75rem; line-height:1.25; box-shadow:0 10px 25px rgba(0,0,0,.25); }
+  .detail-content { padding:28px 30px 44px; }
+  .detail-kicker { text-transform:uppercase; color:var(--moss-2); font-weight:900; letter-spacing:.12em; font-size:.7rem; }
+  .detail-content h2 { font-family:Georgia,serif; font-size:2.6rem; letter-spacing:-.04em; line-height:1; margin:8px 0 5px; }
+  .detail-actions { display:flex; gap:9px; flex-wrap:wrap; margin:18px 0; }
+  .detail-actions button { border:1px solid var(--line); background:white; border-radius:11px; padding:9px 12px; font-weight:850; }
+  .detail-actions button.primary { background:var(--moss); color:white; border-color:var(--moss); }
+  .detail-actions button:disabled { opacity:.5; cursor:not-allowed; }
+  .fact-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin:20px 0; }
+  .fact { background:rgba(255,255,255,.7); border:1px solid var(--line); border-radius:15px; padding:13px; }
+  .fact label { display:block; text-transform:uppercase; font-size:.66rem; font-weight:900; color:var(--muted); letter-spacing:.1em; margin-bottom:4px; }
+  .detail-section { border-top:1px solid var(--line); padding-top:20px; margin-top:20px; }
+  .detail-section h3 { margin:0 0 8px; font-family:Georgia,serif; font-size:1.35rem; }
+  .detail-section p { margin:0; color:#435047; }
+  .monthbar { display:grid; grid-template-columns:repeat(12,1fr); gap:3px; margin-top:10px; }
+  .month { height:28px; border-radius:5px; background:#ddd9cd; display:grid; place-items:center; font-size:.58rem; font-weight:900; color:#7c827e; }
+  .month.on { background:var(--moss); color:white; }
+  .month.peak { background:var(--gold); color:#2a210f; }
+
+  .confusion-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:14px; }
+  .confusion-card { border:1px solid var(--line); background:rgba(255,255,255,.66); border-radius:20px; overflow:hidden; }
+  .confusion-head { padding:18px 18px 13px; background:var(--ink); color:white; }
+  .confusion-head h3 { margin:0 0 4px; font-size:1.12rem; }
+  .confusion-head p { margin:0; color:rgba(255,255,255,.68); font-size:.84rem; }
+  .confusion-body { padding:16px 18px 18px; }
+  .contrast-row { display:grid; grid-template-columns:1fr 28px 1fr; gap:10px; align-items:start; border-bottom:1px solid var(--line); padding:10px 0; }
+  .contrast-row:last-child { border-bottom:0; }
+  .contrast-side b { display:block; margin-bottom:2px; }
+  .contrast-side span { color:var(--muted); font-size:.86rem; }
+  .versus { display:grid; place-items:center; width:28px; height:28px; background:var(--gold); border-radius:50%; font-size:.65rem; font-weight:1000; }
+
+  .key-layout { display:grid; grid-template-columns:.68fr 1.32fr; gap:18px; }
+  .key-box, .key-results { border:1px solid var(--line); border-radius:22px; background:rgba(255,255,255,.68); padding:20px; }
+  .key-progress { height:8px; background:var(--paper-2); border-radius:999px; overflow:hidden; margin-bottom:20px; }
+  .key-progress span { display:block; height:100%; width:0; background:var(--moss); transition:width .25s ease; }
+  .key-question { font-family:Georgia,serif; font-size:1.45rem; line-height:1.15; margin:0 0 14px; }
+  .key-options { display:grid; gap:8px; }
+  .key-option { border:1px solid var(--line); background:white; border-radius:13px; padding:12px 14px; text-align:left; font-weight:800; color:var(--ink); }
+  .key-option:hover { border-color:var(--moss); box-shadow:0 5px 18px rgba(33,79,59,.1); }
+  .key-actions { display:flex; gap:8px; margin-top:14px; }
+  .key-actions button { border:0; border-radius:11px; padding:9px 12px; font-weight:850; }
+  .key-back { background:var(--paper-2); }
+  .key-reset { background:var(--ink); color:white; }
+  .candidate-list { display:grid; gap:9px; }
+  .candidate { display:grid; grid-template-columns:72px 1fr auto; gap:12px; align-items:center; padding:10px; border:1px solid var(--line); border-radius:15px; background:white; }
+  .candidate img { width:72px; height:58px; object-fit:cover; border-radius:10px; background:#d9e0d9; }
+  .candidate h4 { margin:0; font-size:.96rem; }
+  .candidate p { margin:2px 0 0; color:var(--muted); font-size:.78rem; }
+  .score { width:42px; height:42px; border-radius:50%; background:var(--moss); color:white; display:grid; place-items:center; font-weight:900; font-size:.75rem; }
+
+  .quiz-shell { display:grid; grid-template-columns:1.1fr .9fr; gap:16px; }
+  .quiz-card { border:1px solid var(--line); background:rgba(255,255,255,.72); border-radius:22px; overflow:hidden; min-height:520px; }
+  .quiz-media { height:330px; background:#26362d; position:relative; overflow:hidden; }
+  .quiz-media img { width:100%; height:100%; object-fit:contain; position:relative; z-index:1; }
+  .quiz-obscure-name { position:absolute; inset:auto 0 0; background:linear-gradient(transparent,rgba(0,0,0,.68)); color:white; padding:55px 20px 18px; }
+  .quiz-body { padding:20px; }
+  .quiz-body h3 { margin:0 0 12px; font-family:Georgia,serif; font-size:1.45rem; }
+  .quiz-options { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; }
+  .quiz-option { border:1px solid var(--line); background:white; border-radius:12px; padding:11px; text-align:left; font-weight:800; }
+  .quiz-option.correct { background:#dcefe2; border-color:#43845c; }
+  .quiz-option.wrong { background:#f3deda; border-color:#af6557; }
+  .quiz-next { margin-top:12px; border:0; background:var(--ink); color:white; border-radius:12px; padding:10px 15px; font-weight:900; display:none; }
+  .quiz-side { display:grid; gap:12px; align-content:start; }
+  .stat-box { border:1px solid var(--line); background:rgba(255,255,255,.68); border-radius:20px; padding:18px; }
+  .stat-big { font-family:Georgia,serif; font-size:3.2rem; line-height:1; }
+  .stat-box h3 { margin:0 0 8px; }
+  .stat-box p { margin:0; color:var(--muted); }
+  .mode-buttons { display:grid; gap:8px; }
+  .mode-buttons button { border:1px solid var(--line); background:white; border-radius:12px; padding:11px 13px; text-align:left; font-weight:850; }
+  .mode-buttons button.active { background:var(--moss); color:white; }
+
+  .compare-modal { position:fixed; inset:0; z-index:90; display:none; background:rgba(10,18,14,.7); padding:22px; overflow:auto; }
+  .compare-modal.show { display:block; }
+  .compare-sheet { width:min(1300px,100%); margin:0 auto; background:var(--paper); border-radius:24px; padding:22px; box-shadow:0 24px 90px rgba(0,0,0,.32); }
+  .compare-sheet-head { display:flex; justify-content:space-between; gap:16px; align-items:center; margin-bottom:16px; }
+  .compare-sheet-head h2 { margin:0; font-family:Georgia,serif; font-size:2rem; }
+  .compare-sheet-head button { width:42px; height:42px; border:0; border-radius:50%; background:var(--ink); color:white; }
+  .compare-table-wrap { overflow:auto; }
+  .compare-table { width:100%; border-collapse:separate; border-spacing:8px; min-width:820px; }
+  .compare-table th, .compare-table td { background:white; border:1px solid var(--line); border-radius:13px; padding:12px; text-align:left; vertical-align:top; }
+  .compare-table th:first-child, .compare-table td:first-child { position:sticky; left:0; z-index:2; background:var(--paper-2); width:145px; font-weight:900; }
+  .compare-table img { width:100%; aspect-ratio:4/3; object-fit:cover; border-radius:10px; background:#d9e0d9; }
+
+  .edge-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+  .edge-card { border:1px dashed rgba(22,33,28,.25); border-radius:18px; padding:17px; background:rgba(255,255,255,.42); }
+  .edge-card h3 { margin:0 0 6px; font-size:1rem; }
+  .edge-card p { margin:0; color:var(--muted); font-size:.88rem; }
+  .edge-card .rarity { display:inline-block; margin-bottom:8px; font-size:.65rem; font-weight:900; letter-spacing:.1em; text-transform:uppercase; color:var(--rust); }
+
+  footer { padding:36px 0 80px; color:var(--muted); border-top:1px solid var(--line); font-size:.84rem; }
+  footer .footer-grid { display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+  footer h3 { color:var(--ink); margin:0 0 8px; }
+  footer p { margin:0 0 8px; }
+  footer a { color:var(--moss); font-weight:800; }
+
+  .toast { position:fixed; right:18px; bottom:18px; z-index:110; background:var(--ink); color:white; padding:12px 15px; border-radius:12px; box-shadow:0 15px 40px rgba(0,0,0,.25); opacity:0; transform:translateY(10px); pointer-events:none; transition:.2s ease; }
+  .toast.show { opacity:1; transform:translateY(0); }
+  .hidden { display:none !important; }
+
+  @media (max-width:1100px) {
+    .hero { grid-template-columns:1fr; }
+    .quick-grid { grid-template-columns:repeat(2,1fr); }
+    .species-grid { grid-template-columns:repeat(3,1fr); }
+    .controls { grid-template-columns:1fr 1fr 1fr; }
+    .controls .search { grid-column:span 2; }
+    .toggle { grid-column:span 1; }
+  }
+  @media (max-width:800px) {
+    .shell { width:min(100% - 20px,1500px); }
+    .topbar-inner { min-height:58px; }
+    .brand span:last-child { display:none; }
+    .site-return { display:none; }
+    .hero { padding-top:45px; }
+    h1 { font-size:clamp(3.4rem,18vw,6.2rem); }
+    .species-grid { grid-template-columns:repeat(2,1fr); }
+    .controls { grid-template-columns:1fr 1fr; }
+    .controls .search { grid-column:span 2; }
+    .confusion-grid, .key-layout, .quiz-shell { grid-template-columns:1fr; }
+    .edge-grid { grid-template-columns:repeat(2,1fr); }
+    .detail-photo img { height:390px; }
+    .compare-dock { flex-wrap:wrap; }
+    .selected-list { width:100%; flex-basis:100%; }
+    .atlas-grid { grid-template-columns:1fr; }
+    .atlas-photo-button img { height:min(64vw,430px); }
+  }
+  @media (max-width:540px) {
+    .quick-grid, .species-grid, .edge-grid { grid-template-columns:1fr; }
+    .controls { grid-template-columns:1fr; }
+    .controls .search { grid-column:auto; }
+    .quiz-options { grid-template-columns:1fr; }
+    .fact-grid { grid-template-columns:1fr; }
+    .detail-content { padding:24px 18px 40px; }
+    .section { padding:30px 0 44px; }
+    .section-head { display:block; }
+    .section-head p { margin-top:10px; }
+    footer .footer-grid { grid-template-columns:1fr; }
+    .atlas-stage { padding:14px; }
+    .atlas-title-row, .detail-gallery-copy { display:block; }
+    .atlas-title-row p { margin-top:9px; }
+    .detail-gallery-copy a { display:inline-block; margin-top:7px; }
+  }
+
+  /* Learning system */
+  .brand-mode { padding:4px 7px; border:1px solid var(--line); border-radius:999px; color:var(--moss-2); font-size:.62rem; letter-spacing:.08em; text-transform:uppercase; }
+  .field-launch { border:0; background:var(--gold); color:#271f0d; padding:9px 13px; border-radius:999px; font-weight:950; white-space:nowrap; box-shadow:0 7px 20px rgba(168,111,16,.18); }
+  .field-launch:hover { transform:translateY(-1px); }
+  .hero-actions { display:flex; flex-wrap:wrap; gap:9px; margin-top:24px; }
+  .hero-actions button { border:0; border-radius:13px; padding:11px 15px; font-weight:900; }
+  .hero-actions .primary { background:var(--ink); color:white; }
+  .hero-actions .secondary { background:rgba(255,255,255,.62); color:var(--moss); border:1px solid var(--line); }
+  .hero-card .today-date { display:inline-block; margin-bottom:10px; color:var(--gold); text-transform:uppercase; letter-spacing:.13em; font-size:.68rem; font-weight:950; }
+  .hero-card .hero-rule { display:flex; align-items:center; gap:10px; margin-top:16px; padding-top:14px; border-top:1px solid rgba(255,255,255,.16); color:rgba(255,255,255,.78); font-size:.84rem; }
+  .hero-rule kbd { color:#241c0b; background:var(--gold); padding:3px 7px; border-radius:6px; font-weight:950; }
+
+  .now-layout { display:grid; grid-template-columns:1.3fr .7fr; gap:15px; }
+  .now-board, .signal-card, .course-shell, .progress-shell, .glossary-shell { border:1px solid var(--line); background:rgba(255,255,255,.64); border-radius:24px; box-shadow:0 12px 34px rgba(33,48,39,.07); }
+  .now-board { padding:20px; }
+  .now-chips { display:flex; flex-wrap:wrap; gap:8px; margin:12px 0 5px; }
+  .now-chip { border:1px solid var(--line); background:white; border-radius:14px; padding:8px 10px; display:flex; align-items:center; gap:8px; font-weight:850; }
+  .now-chip img { width:34px; height:34px; object-fit:cover; border-radius:9px; }
+  .now-chip button { border:0; background:transparent; color:var(--moss); font-weight:950; padding:0; }
+  .likelihood-legend { color:var(--muted); font-size:.8rem; margin-top:12px; }
+  .signal-card { padding:20px; background:var(--ink); color:white; }
+  .signal-card .signal-label { color:var(--gold); text-transform:uppercase; letter-spacing:.12em; font-size:.68rem; font-weight:950; }
+  .signal-card h3 { font-family:Georgia,serif; font-size:1.55rem; line-height:1.05; margin:8px 0; }
+  .signal-card p { margin:0; color:rgba(255,255,255,.7); }
+  .signal-card button { margin-top:15px; width:100%; border:0; background:white; color:var(--ink); border-radius:11px; padding:9px; font-weight:900; }
+
+  .course-shell { display:grid; grid-template-columns:260px 1fr; overflow:hidden; }
+  .course-rail { background:var(--ink); color:white; padding:18px; }
+  .course-rail button { width:100%; border:0; border-left:3px solid transparent; background:transparent; color:rgba(255,255,255,.58); padding:11px 10px; text-align:left; font-weight:850; }
+  .course-rail button.active { border-left-color:var(--gold); background:rgba(255,255,255,.08); color:white; }
+  .course-stage { min-height:390px; padding:28px; display:grid; align-content:start; }
+  .lesson-count { color:var(--moss-2); text-transform:uppercase; letter-spacing:.12em; font-weight:950; font-size:.68rem; }
+  .course-stage h3 { margin:8px 0 9px; font-family:Georgia,serif; font-size:clamp(1.8rem,4vw,3rem); letter-spacing:-.035em; line-height:1; }
+  .course-stage .lesson-lede { font-size:1.05rem; color:#435047; max-width:760px; }
+  .lesson-demo { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:20px; }
+  .demo-cell { border:1px solid var(--line); background:white; border-radius:15px; padding:14px; }
+  .demo-cell .demo-key { color:var(--rust); text-transform:uppercase; letter-spacing:.1em; font-weight:950; font-size:.64rem; }
+  .demo-cell b { display:block; margin:5px 0 3px; }
+  .demo-cell span { color:var(--muted); font-size:.84rem; }
+  .lesson-actions { display:flex; gap:8px; margin-top:22px; }
+  .lesson-actions button { border:0; border-radius:11px; padding:10px 13px; font-weight:900; background:var(--paper-2); color:var(--ink); }
+  .lesson-actions .primary { background:var(--moss); color:white; }
+
+  .audio-layout { display:grid; grid-template-columns:340px 1fr; gap:15px; align-items:start; }
+  .audio-console { position:sticky; top:82px; border-radius:22px; background:#101b16; color:white; padding:20px; box-shadow:var(--shadow); overflow:hidden; }
+  .audio-console:before { content:""; position:absolute; inset:0; background:radial-gradient(circle at 80% 0%,rgba(239,184,61,.18),transparent 45%); pointer-events:none; }
+  .audio-console > * { position:relative; }
+  .audio-console .console-kicker { color:var(--gold); font-size:.66rem; font-weight:950; letter-spacing:.13em; text-transform:uppercase; }
+  .audio-console h3 { margin:7px 0 2px; font-family:Georgia,serif; font-size:1.55rem; }
+  .audio-console p { color:rgba(255,255,255,.63); font-size:.82rem; margin:4px 0 12px; }
+  #spectrumCanvas { width:100%; height:112px; display:block; border-radius:12px; background:#07100c; margin:14px 0; }
+  .audio-transport { display:none; grid-template-columns:auto 1fr auto; align-items:center; gap:9px; }
+  .audio-transport button { width:42px; height:42px; border:0; border-radius:50%; background:var(--gold); color:#271f0d; font-weight:950; }
+  .audio-transport input { width:100%; accent-color:var(--gold); }
+  .audio-time { font-variant-numeric:tabular-nums; color:rgba(255,255,255,.68); font-size:.75rem; }
+  .audio-console audio { width:100%; height:36px; margin:0 0 8px; accent-color:var(--gold); }
+  .audio-hint { border-top:1px solid rgba(255,255,255,.12); padding-top:12px; margin-top:14px; }
+  .audio-hint b { color:var(--gold); }
+  .audio-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+  .audio-card { border:1px solid var(--line); background:rgba(255,255,255,.7); border-radius:17px; padding:14px; min-height:170px; display:flex; flex-direction:column; }
+  .audio-card .audio-top { display:flex; justify-content:space-between; gap:8px; align-items:start; }
+  .audio-card .real-badge { color:var(--moss-2); font-size:.62rem; text-transform:uppercase; letter-spacing:.08em; font-weight:950; }
+  .audio-card h4 { margin:3px 0 7px; }
+  .audio-card p { color:var(--muted); font-size:.8rem; margin:0 0 10px; }
+  .rhythm-code { display:flex; gap:3px; height:25px; align-items:center; margin:auto 0 10px; }
+  .rhythm-code i { display:block; width:5px; border-radius:3px; background:var(--moss); opacity:.75; }
+  .audio-card-actions { display:flex; gap:6px; }
+  .audio-card button { flex:1; border:0; border-radius:9px; padding:8px; background:var(--ink); color:white; font-weight:850; font-size:.78rem; }
+  .audio-card button.ghost { background:var(--paper-2); color:var(--moss); }
+  .audio-card button:disabled { opacity:.42; cursor:not-allowed; }
+
+  .confidence { display:flex; gap:6px; align-items:center; margin:0 0 12px; flex-wrap:wrap; }
+  .confidence > span { color:var(--muted); font-size:.78rem; font-weight:850; margin-right:3px; }
+  .confidence button { border:1px solid var(--line); border-radius:999px; background:white; padding:6px 9px; color:var(--muted); font-size:.75rem; font-weight:850; }
+  .confidence button.active { background:var(--gold); color:#2b210d; border-color:var(--gold); }
+  .quiz-feedback { display:none; margin-top:12px; border-left:4px solid var(--moss); background:#eef4ed; border-radius:0 12px 12px 0; padding:12px 13px; color:#35443b; }
+  .quiz-feedback.show { display:block; }
+  .quiz-feedback.wrong { border-left-color:var(--rust); background:#f5e9e5; }
+  .quiz-feedback b { display:block; margin-bottom:3px; }
+  .sound-mystery { height:100%; display:grid; place-items:center; color:white; text-align:center; padding:22px; }
+  .sound-mystery .sound-icon { width:76px; height:76px; display:grid; place-items:center; border:2px solid rgba(255,255,255,.4); border-radius:50%; font-size:2rem; margin:0 auto 12px; }
+  .sound-mystery button { border:0; background:var(--gold); border-radius:12px; padding:10px 15px; font-weight:950; }
+
+  .progress-shell { padding:22px; display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+  .metric { background:white; border:1px solid var(--line); border-radius:16px; padding:15px; }
+  .metric label { color:var(--muted); font-weight:900; text-transform:uppercase; letter-spacing:.1em; font-size:.63rem; }
+  .metric strong { display:block; font-family:Georgia,serif; font-size:2.25rem; line-height:1; margin-top:6px; }
+  .weak-list { grid-column:span 2; }
+  .weak-row { display:grid; grid-template-columns:1fr 110px auto; gap:9px; align-items:center; margin-top:9px; font-size:.82rem; }
+  .strength-track { height:7px; background:var(--paper-2); border-radius:99px; overflow:hidden; }
+  .strength-track span { display:block; height:100%; background:var(--moss); }
+  .weak-row button { border:0; background:var(--paper-2); border-radius:8px; padding:6px 8px; font-weight:850; }
+  .reset-progress { align-self:end; justify-self:end; border:0; background:transparent; color:var(--rust); text-decoration:underline; font-size:.78rem; }
+
+  .species-card .card-tools { display:grid; grid-template-columns:1fr auto; gap:7px; margin-top:14px; }
+  .species-card .card-tools .open-btn { margin:0; }
+  .quick-sound { width:42px; border:0; border-radius:12px; background:var(--paper-2); color:var(--moss); font-weight:950; }
+  .mastery-pips { display:flex; gap:3px; margin-top:10px; }
+  .mastery-pips i { width:14px; height:4px; border-radius:4px; background:#d7d3c7; }
+  .mastery-pips i.on { background:var(--moss-2); }
+
+  .candidate { cursor:pointer; }
+  .candidate-reasons { grid-column:2 / -1; display:flex; gap:5px; flex-wrap:wrap; }
+  .reason { font-size:.68rem; background:#e7f0e8; color:var(--moss); border-radius:999px; padding:4px 6px; }
+  .reason.no { background:#f1e5e0; color:var(--rust); }
+
+  .glossary-shell { padding:8px 20px; }
+  .glossary-shell details { border-bottom:1px solid var(--line); padding:13px 0; }
+  .glossary-shell details:last-child { border-bottom:0; }
+  .glossary-shell summary { cursor:pointer; font-weight:900; }
+  .glossary-shell p { color:var(--muted); margin:8px 0 3px; }
+
+  .field-modal { position:fixed; inset:0; z-index:130; display:none; background:#101b16; color:white; overflow:auto; }
+  .field-modal.show { display:block; }
+  .field-inner { width:min(760px,calc(100% - 26px)); margin:0 auto; padding:20px 0 60px; }
+  .field-head { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:25px; }
+  .field-head h2 { margin:0; font-family:Georgia,serif; }
+  .field-close { width:42px; height:42px; border:1px solid rgba(255,255,255,.18); background:transparent; color:white; border-radius:50%; font-size:1.2rem; }
+  .field-progress { display:flex; gap:4px; margin-bottom:18px; }
+  .field-progress i { flex:1; height:5px; border-radius:5px; background:rgba(255,255,255,.15); }
+  .field-progress i.on { background:var(--gold); }
+  .field-question { font-family:Georgia,serif; font-size:clamp(2rem,7vw,3.5rem); line-height:1; margin:0 0 20px; }
+  .field-options { display:grid; grid-template-columns:repeat(2,1fr); gap:9px; }
+  .field-options button { min-height:70px; border:1px solid rgba(255,255,255,.16); background:rgba(255,255,255,.07); color:white; border-radius:15px; padding:12px; text-align:left; font-weight:900; }
+  .field-options button:hover { background:rgba(255,255,255,.13); border-color:var(--gold); }
+  .field-results { display:grid; gap:8px; margin-top:18px; }
+  .field-result { display:grid; grid-template-columns:58px 1fr auto; gap:11px; align-items:center; padding:9px; background:white; color:var(--ink); border-radius:14px; }
+  .field-result img { width:58px; height:54px; object-fit:cover; border-radius:9px; }
+  .field-result h4 { margin:0; }
+  .field-result p { margin:2px 0 0; color:var(--muted); font-size:.75rem; }
+  .field-result button { border:0; background:var(--moss); color:white; border-radius:9px; padding:8px; font-weight:900; }
+  .field-utility { display:flex; gap:8px; margin-top:16px; }
+  .field-utility button { border:1px solid rgba(255,255,255,.16); background:transparent; color:white; border-radius:10px; padding:8px 11px; font-weight:850; }
+
+  @media (max-width:1100px) {
+    .audio-grid { grid-template-columns:repeat(2,1fr); }
+    .progress-shell { grid-template-columns:repeat(2,1fr); }
+  }
+  @media (max-width:800px) {
+    .brand-mode { display:none; }
+    .now-layout, .audio-layout { grid-template-columns:1fr; }
+    .audio-console { position:relative; top:auto; }
+    .course-shell { grid-template-columns:1fr; }
+    .course-rail { display:flex; overflow:auto; padding:8px; }
+    .course-rail button { width:auto; min-width:max-content; border-left:0; border-bottom:3px solid transparent; }
+    .course-rail button.active { border-left-color:transparent; border-bottom-color:var(--gold); }
+    .lesson-demo { grid-template-columns:1fr; }
+  }
+  @media (max-width:540px) {
+    .topnav button:not(.field-launch) { display:none; }
+    .field-launch { padding:8px 11px; }
+    .audio-grid, .field-options { grid-template-columns:1fr; }
+    .progress-shell { grid-template-columns:1fr; }
+    .weak-list { grid-column:auto; }
+    .course-stage { padding:20px 16px; }
+    .weak-row { grid-template-columns:1fr 80px auto; }
+  }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="shell topbar-inner">
+    <div class="brand"><span class="brand-mark">S</span><span>Sparrow Lab</span><span class="brand-mode">DC build</span></div>
+    <a class="site-return" href="https://lostinthehaze.net/">← lost in the haze</a>
+    <nav class="topnav" aria-label="Page sections">
+      <button data-scroll="now">Right now</button>
+      <button data-scroll="course">Learn</button>
+      <button data-scroll="audio-lab">Sounds</button>
+      <button data-scroll="atlas">Photo atlas</button>
+      <button data-scroll="field-guide">Field guide</button>
+      <button data-scroll="confusions">Confusion sets</button>
+      <button data-scroll="key">ID key</button>
+      <button data-scroll="quiz">Quiz</button>
+      <button class="field-launch" id="fieldLaunch">Field mode ↗</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="shell hero">
+    <div>
+      <div class="eyebrow">Washington, DC + Mid-Atlantic • birder mode</div>
+      <h1>Brown bird,<br>resolved.</h1>
+      <p>A pattern-recognition lab for the DC sparrow problem. Learn the decision tree, hear real field recordings, drill your specific confusions, and build an ID from evidence instead of vibes.</p>
+      <div class="hero-actions"><button class="primary" data-scroll="course">Start the mental model</button><button class="secondary" data-scroll="quiz">Give me a bird</button></div>
+    </div>
+    <aside class="hero-card">
+      <span class="today-date" id="heroDate">Loading DC season…</span>
+      <h2>The five-second protocol</h2>
+      <ol>
+        <li><b>Freeze the silhouette:</b> tail length, body mass, head shape, bill depth.</li>
+        <li><b>Classify the breast:</b> clean, finely streaked, coarsely streaked, or heavily spotted.</li>
+        <li><b>Read the face:</b> eyering, eyeline, throat boundary, lores, crown geometry.</li>
+        <li><b>Use habitat as evidence:</b> wet feet, open turf, weedy edge, leaf litter, pavement.</li>
+        <li><b>Let season veto bad ideas:</b> especially Chipping vs. American Tree and passage-only Lincoln’s.</li>
+      </ol>
+      <div class="hero-rule"><kbd>F</kbd><span>opens the low-friction field assistant from anywhere.</span></div>
+    </aside>
+  </section>
+
+  <section class="shell section" id="now">
+    <div class="section-head">
+      <h2>What is live right now</h2>
+      <p>Local season is a prior, not a verdict. This list is generated from the current month and keeps improbable birds from occupying working memory.</p>
+    </div>
+    <div class="now-layout">
+      <div class="now-board">
+        <div class="eyebrow" id="nowMonth"></div>
+        <div class="now-chips" id="nowChips"></div>
+        <div class="likelihood-legend" id="nowLegend"></div>
+      </div>
+      <aside class="signal-card" id="signalCard"></aside>
+    </div>
+  </section>
+
+  <section class="shell section" id="method">
+    <div class="section-head">
+      <h2>How experts make the pile smaller</h2>
+      <p>Plumage is only one data stream. These four cuts usually eliminate most of the field before you start arguing about subtle buff tones.</p>
+    </div>
+    <div class="quick-grid">
+      <article class="quick-card"><span class="num">1</span><h3>Structure outranks color</h3><p>A tiny short-tailed Grasshopper, a long-tailed Song, and a hulking Fox can all look “brown and streaky” in bad light. Their proportions cannot.</p></article>
+      <article class="quick-card"><span class="num">2</span><h3>Streak texture matters</h3><p>Song is coarse and brush-painted; Lincoln’s is crisp and pen-drawn over buff; Savannah is fine and linear; Fox is broad, triangular, and blotchy.</p></article>
+      <article class="quick-card"><span class="num">3</span><h3>Face geometry is a map</h3><p>Do not just note “striped head.” Locate the supercilium, eyeline, malar, throat border, crown stripe, and any yellow in the lores.</p></article>
+      <article class="quick-card"><span class="num">4</span><h3>Habitat is a likelihood ratio</h3><p>Standing water strongly favors Swamp; clipped lawns and open pine edges favor Chipping; broad grassland pushes Grasshopper or Savannah.</p></article>
+    </div>
+  </section>
+
+  <section class="shell section" id="course">
+    <div class="section-head">
+      <h2>The sparrow compiler</h2>
+      <p>A short tutorial for replacing a pile of independent field marks with a reusable decision system. The order matters more than memorizing every adjective.</p>
+    </div>
+    <div class="course-shell">
+      <nav class="course-rail" id="courseRail" aria-label="Tutorial lessons"></nav>
+      <div class="course-stage" id="courseStage"></div>
+    </div>
+  </section>
+
+  <section class="shell section" id="audio-lab">
+    <div class="section-head">
+      <h2>Ear lab</h2>
+      <p>Real recordings teach timbre and mess. Synthetic sketches strip a song down to timing and contour. Use both; they solve different learning problems.</p>
+    </div>
+    <div class="audio-layout">
+      <aside class="audio-console" id="audioConsole">
+        <div class="console-kicker">Shared player</div>
+        <h3 id="audioNow">Choose a recording</h3>
+        <p id="audioMeta">All 14 field recordings are stored locally; every species also has a rhythm sketch.</p>
+        <canvas id="spectrumCanvas" width="600" height="224" aria-label="Rhythm and contour visualization"></canvas>
+        <audio id="realAudioElement" preload="metadata" controls aria-label="Selected field recording"></audio>
+        <div class="audio-transport"><button id="audioToggle" aria-label="Play or pause">▶</button><input id="audioSeek" type="range" min="0" max="1000" value="0" aria-label="Audio position"><span class="audio-time" id="audioTime">0:00</span></div>
+        <div class="audio-hint" id="audioHint"><b>Listening protocol:</b> Name the rhythm before the pitch. Then ask: trill, buzz, whistles, or messy phrase?</div>
+      </aside>
+      <div class="audio-grid" id="audioGrid"></div>
+    </div>
+  </section>
+
+  <section class="shell section" id="atlas">
+    <div class="section-head">
+      <h2>Variation atlas</h2>
+      <p>One perfect portrait teaches one photograph. These 42 field images teach the species across pose, lighting, distance, sex, age, and plumage variation.</p>
+    </div>
+    <div class="atlas-shell">
+      <nav class="atlas-rail" id="atlasRail" aria-label="Choose a species for the photo atlas"></nav>
+      <div class="atlas-stage" id="atlasStage"></div>
+    </div>
+  </section>
+
+  <section class="shell section" id="field-guide">
+    <div class="section-head">
+      <h2>Interactive field guide</h2>
+      <p>Select up to three birds for a direct comparison. Every account now includes a three-image carousel, and photo quizzes rotate among all 42 field views.</p>
+    </div>
+    <div class="controls">
+      <input id="searchInput" class="control search" type="search" placeholder="Search name, mark, habitat, voice…" aria-label="Search species" />
+      <select id="seasonFilter" class="control" aria-label="Filter by season">
+        <option value="all">All seasons</option>
+        <option value="winter">Winter</option>
+        <option value="spring">Spring migration</option>
+        <option value="summer">Breeding season</option>
+        <option value="fall">Fall migration</option>
+      </select>
+      <select id="habitatFilter" class="control" aria-label="Filter by habitat">
+        <option value="all">All habitats</option>
+        <option value="wetland">Wetland / water edge</option>
+        <option value="grassland">Grassland / open field</option>
+        <option value="brush">Brush / woodland edge</option>
+        <option value="urban">Urban / feeder</option>
+      </select>
+      <select id="breastFilter" class="control" aria-label="Filter by breast pattern">
+        <option value="all">Any breast pattern</option>
+        <option value="clean">Mostly clean</option>
+        <option value="fine">Fine streaking</option>
+        <option value="coarse">Coarse streaking</option>
+        <option value="heavy">Heavy spots / blotches</option>
+      </select>
+      <label class="control toggle"><input id="masteredOnly" type="checkbox" /> strong only</label>
+    </div>
+    <div class="result-count" id="resultCount"></div>
+    <div class="species-grid" id="speciesGrid"></div>
+  </section>
+
+  <section class="shell section" id="confusions">
+    <div class="section-head">
+      <h2>Confusion sets</h2>
+      <p>The useful question is rarely “what does this species look like?” It is “what single observation breaks the tie between the two or three live candidates?”</p>
+    </div>
+    <div class="confusion-grid" id="confusionGrid"></div>
+  </section>
+
+  <section class="shell section" id="key">
+    <div class="section-head">
+      <h2>Build an ID from observations</h2>
+      <p>This is a probabilistic teaching key, not a taxonomic dichotomous key. You can skip uncertain characters; the candidate list updates after every answer.</p>
+    </div>
+    <div class="key-layout">
+      <div class="key-box">
+        <div class="key-progress"><span id="keyProgress"></span></div>
+        <div id="keyQuestionArea"></div>
+        <div class="key-actions">
+          <button class="key-back" id="keyBack">Back</button>
+          <button class="key-reset" id="keyReset">Reset</button>
+        </div>
+      </div>
+      <div class="key-results">
+        <h3 style="margin-top:0">Current candidates</h3>
+        <div class="candidate-list" id="candidateList"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="shell section" id="quiz">
+    <div class="section-head">
+      <h2>Field-speed quiz</h2>
+      <p>Switch among photo, mark-only, real-sound, and confusion-pair drills. Confidence and retrieval history tune what the scheduler shows you next.</p>
+    </div>
+    <div class="quiz-shell">
+      <div class="quiz-card">
+        <div class="quiz-media" id="quizMedia"></div>
+        <div class="quiz-body">
+          <h3 id="quizPrompt">Loading…</h3>
+          <div class="confidence" id="confidence"><span>Before answering:</span><button data-confidence="1">guessing</button><button class="active" data-confidence="2">leaning</button><button data-confidence="3">certain</button></div>
+          <div class="quiz-options" id="quizOptions"></div>
+          <div class="quiz-feedback" id="quizFeedback"></div>
+          <button class="quiz-next" id="quizNext">Next bird →</button>
+        </div>
+      </div>
+      <aside class="quiz-side">
+        <div class="stat-box"><h3>Score</h3><div class="stat-big"><span id="scoreCorrect">0</span>/<span id="scoreTotal">0</span></div><p id="scoreNote">Start with a mode below.</p></div>
+        <div class="stat-box"><h3>Quiz mode</h3><div class="mode-buttons"><button class="active" data-mode="photo">Photo ID</button><button data-mode="clue">Mark-only clues</button><button data-mode="sound">Sound only</button><button data-mode="pair">Confusion pairs</button></div></div>
+        <div class="stat-box"><h3>Learning rule</h3><p>Correct answers space a bird farther into the future; misses bring it back soon. Confident misses are weighted as the most useful signal.</p></div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="shell section" id="progress">
+    <div class="section-head"><h2>Your model, instrumented</h2><p>Progress stays in this browser. “Strong” means repeated retrieval over time—not that you clicked a learned checkbox once.</p></div>
+    <div class="progress-shell" id="progressShell"></div>
+  </section>
+
+  <section class="shell section" id="glossary">
+    <div class="section-head"><h2>Field-mark decoder ring</h2><p>Precise words reduce visual ambiguity. Open these when a guide sounds like it was written by a committee of tiny Victorian anatomists.</p></div>
+    <div class="glossary-shell">
+      <details><summary>Supercilium, eyeline, and lores</summary><p>The supercilium is the eyebrow above the eye; the eyeline passes through it; the lores are the small zone between eye and bill. Savannah and White-throated can show yellow specifically in the lores—not vaguely “on the face.”</p></details>
+      <details><summary>Malar, moustachial, and throat border</summary><p>These diagonal stripes frame the throat. Song Sparrow often has strong dark malars; White-throated creates a hard dark frame around the white throat patch. Read boundaries, not just colors.</p></details>
+      <details><summary>Notched, rounded, and white-flashing tails</summary><p>A notch is a small V at the tail tip; a rounded tail has longer central feathers. More useful in the field: relative tail length and whether white outer feathers flash, as on a junco.</p></details>
+      <details><summary>Streaks, spots, chevrons, and a breast blotch</summary><p>Savannah is fine and linear; Lincoln’s is equally fine but printed over buff; Song is coarser and often converges centrally; eastern Fox has broad arrowhead-like chevrons and blotches.</p></details>
+      <details><summary>Jizz</summary><p>The integrated impression of structure, posture, movement, and proportions. It is real evidence, but make it auditable: translate “felt like a Savannah” into “small head, short tail, low horizontal posture.”</p></details>
+    </div>
+  </section>
+
+  <section class="shell section" id="edge-cases">
+    <div class="section-head"><h2>Regional edge cases</h2><p>These are not in the core quiz, but they are exactly the birds that turn a routine Mid-Atlantic outing into a group-chat event.</p></div>
+    <div class="edge-grid">
+      <article class="edge-card"><span class="rarity">Uncommon migrant</span><h3>Vesper Sparrow</h3><p>Large-ish, clean white eyering, white outer tail, rusty lesser coverts, and a more open-faced look than Savannah. Think sparse fields, gravel, and exposed soil.</p></article>
+      <article class="edge-card"><span class="rarity">Local breeder</span><h3>Henslow’s Sparrow</h3><p>Flat olive head, huge-looking bill, chestnut scapulars, finely streaked buff breast, and a famously abrupt <i>tsi-lick</i>. Usually found by voice in intact grassland.</p></article>
+      <article class="edge-card"><span class="rarity">Rare migrant</span><h3>Clay-colored Sparrow</h3><p>Small Spizella with a crisp pale central crown stripe, dark moustachial, pale lores, gray nape, and buffy unstreaked breast. Often first noticed among Chipping Sparrows.</p></article>
+      <article class="edge-card"><span class="rarity">Rare but loud-looking</span><h3>Lark Sparrow</h3><p>Bold chestnut-and-white face, central breast spot, white tail corners, and a rounded, long-tailed silhouette. One of the few sparrows that looks as distinctive as the field guide promises.</p></article>
+      <article class="edge-card"><span class="rarity">Coastal specialist</span><h3>Nelson’s / Saltmarsh Sparrow</h3><p>Orange-faced Ammospiza in tidal marsh. Nelson’s tends to look softer and blurrier; Saltmarsh more sharply streaked. Hybrids and worn birds demand caution.</p></article>
+      <article class="edge-card"><span class="rarity">Coastal specialist</span><h3>Seaside Sparrow</h3><p>Large, long-billed, dark gray-brown saltmarsh sparrow with yellow lores and a surprisingly clean gray breast. Structure and marsh context do most of the work.</p></article>
+    </div>
+  </section>
+</main>
+
+<div class="compare-dock" id="compareDock">
+  <div class="selected-list" id="selectedList"></div>
+  <button class="compare-clear" id="compareClear">Clear</button>
+  <button class="compare-go" id="compareGo">Compare</button>
+</div>
+
+<div class="panel-overlay" id="panelOverlay"></div>
+<aside class="detail-panel" id="detailPanel" aria-label="Species details"></aside>
+
+<div class="compare-modal" id="compareModal">
+  <div class="compare-sheet">
+    <div class="compare-sheet-head"><h2>Side-by-side comparison</h2><button id="compareClose" aria-label="Close comparison">×</button></div>
+    <div class="compare-table-wrap" id="compareTableWrap"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<section class="field-modal" id="fieldModal" aria-label="Field identification mode">
+  <div class="field-inner">
+    <div class="field-head"><div><div class="eyebrow" style="color:var(--gold)">Fast evidence capture</div><h2>Field mode</h2></div><button class="field-close" id="fieldClose" aria-label="Close field mode">×</button></div>
+    <div class="field-progress" id="fieldProgress"></div>
+    <div id="fieldBody"></div>
+    <div class="field-utility"><button id="fieldBack">← Back</button><button id="fieldReset">Reset</button></div>
+  </div>
+</section>
+
+<footer>
+  <div class="shell footer-grid">
+    <div><h3>Scope and caveats</h3><p>Occurrence labels are tuned to the DC / central Mid-Atlantic experience and intentionally simplified. Local abundance changes with habitat, weather, and exact location. Juveniles, molt, subspecies, and odd lighting can defeat any single mark.</p><p>Song Sparrow is especially variable geographically; this trainer centers the eastern form. White-throated Sparrows occur in both white-striped and tan-striped morphs.</p></div>
+    <div><h3>Photos, audio, and references</h3><p>All 42 field photographs and all 14 field recordings are stored locally and credited individually with creator, source, and license details. They come from Wikimedia Commons under the displayed Creative Commons or public-domain terms. Rhythm sketches are explicitly labeled synthetic. See the <a href="attributions.html">complete media attribution register</a>.</p><p>ID concepts were cross-checked against Cornell Lab’s All About Birds comparison and species-identification pages. Always verify unusual records with multiple views, voice, and local status.</p></div>
+  </div>
+</footer>
+
+<script>
+const PH = 'https://upload.wikimedia.org/wikipedia/commons/thumb/';
+const species = [
+  {
+    id:'song', name:'Song Sparrow', latin:'Melospiza melodia', seasonLabel:'Year-round', seasonClass:'year', seasons:['winter','spring','summer','fall'], months:[1,1,1,1,1,1,1,1,1,1,1,1], peak:[3,4,9,10], habitats:['brush','wetland','urban'], breast:'coarse', size:'Medium; long, rounded tail', structure:'Substantial but not chunky; rounded head, medium-heavy bill, long rounded tail', face:'Gray-brown face with strong malar stripes and a pale supercilium', breastText:'Coarse dark streaks, usually converging into a central breast blotch', bill:'Grayish horn; moderately deep', tail:'Long and rounded; often expressive', behavior:'Low in brush, weedy edges, stream margins, gardens; frequently pumps or flicks the tail and gives a sharp alarm chip', voice:'Variable introductory notes followed by buzzes or trills; call is a hard “chimp”', mnemonic:'Paintbrush streaks + central blotch + long tail', habitatText:'Brushy edges, riparian tangles, marsh margins, gardens', status:'Common resident', danger:'Lincoln’s Sparrow. Song is coarser, less buff across the breast, larger-billed, and usually bolder in open edge habitat.', summary:'Coarse brush-painted streaks, central blotch, strong malars, and a long rounded tail.', photo:'assets/song.jpg', source:'https://commons.wikimedia.org/wiki/File:Song_sparrow_on_amaranth_in_BBG_(54965).jpg', hotspots:[{x:51,y:46,t:'Coarse streaks often merge into a central blotch.'},{x:47,y:35,t:'Strong dark malar frames a pale throat.'},{x:66,y:48,t:'Long, rounded tail supports the overall jizz.'}], audio:'song'
+  },
+  {
+    id:'lincolns', name:'Lincoln’s Sparrow', latin:'Melospiza lincolnii', seasonLabel:'Passage migrant', seasonClass:'breeder', seasons:['spring','fall'], months:[0,0,0,1,2,0,0,0,2,1,0,0], peak:[4,8], habitats:['wetland','brush'], breast:'fine', size:'Small-medium; fine-billed', structure:'Neat, compact Melospiza with a relatively small bill and rounded tail', face:'Gray face, buffy malar, narrow pale eyering, rich crown stripes', breastText:'Very fine crisp streaks laid over a buffy breast band; belly abruptly white', bill:'Fine and grayish', tail:'Moderate, rounded', behavior:'Skulks in damp tangles and low vegetation; often pops up briefly, then disappears', voice:'Call is a sharp dry “tup”; song is rich and wrenlike with bell notes, gurgles, and trills', mnemonic:'Technical-pen streaks on a buff wash', habitatText:'Damp thickets, wet meadow edges, low migration cover', status:'Uncommon but regular migrant', danger:'Song Sparrow or nonbreeding Swamp. Look for the buff breast band, crisp fine streaks, pale eyering, and small bill.', summary:'Fine pen-stroke streaking across a warm buff breast band, pale eyering, small bill.', photo:'assets/lincolns.jpg', source:'https://commons.wikimedia.org/wiki/File:Lincoln%27s_sparrow_(90350).jpg', hotspots:[{x:36,y:31,t:'A narrow pale eyering gives a refined facial expression.'},{x:42,y:48,t:'Fine crisp streaks sit on a buffy breast band.'},{x:49,y:65,t:'The lower belly turns clean white.'}], audio:'lincoln'
+  },
+  {
+    id:'swamp', name:'Swamp Sparrow', latin:'Melospiza georgiana', seasonLabel:'Winter + migration', seasonClass:'winter', seasons:['winter','spring','fall'], months:[1,1,1,2,1,0,0,0,1,2,2,1], peak:[3,9,10], habitats:['wetland'], breast:'clean', size:'Medium; round-tailed', structure:'Compact, rounded Melospiza; bill finer than Song; tail rounded', face:'Gray face and nape, dark eyeline, rusty cap in breeding plumage', breastText:'Usually plain grayish breast with a neat white throat; immatures/nonbreeding birds may show blurry streaks', bill:'Dark with yellowish base, especially lower mandible', tail:'Rounded, often held slightly cocked', behavior:'Low and secretive in sedges, cattails, and wet mud; “wet feet” is often the decisive clue', voice:'Sharp metallic chip; song is a slow, measured trill', mnemonic:'Rusty wings + neat white throat + wet feet', habitatText:'Freshwater marsh, sedge, cattail, muddy water edge', status:'Common migrant and winter bird in suitable habitat', danger:'Lincoln’s in fall. Swamp usually has more rufous in the wings, a cleaner white throat, blurrier breast marks, and no neat eyering.', summary:'Rufous wings, gray face, neat white throat, compact shape—and usually standing near water.', photo:'assets/swamp.jpg', source:'https://commons.wikimedia.org/wiki/File:Swamp_sparrow_(26814).jpg', hotspots:[{x:45,y:31,t:'Gray face with a strong eyeline; breeding birds show a rusty cap.'},{x:49,y:47,t:'Neat pale throat and mostly plain gray breast.'},{x:64,y:43,t:'Extensive warm rufous in wings and tail.'}], audio:'swamp'
+  },
+  {
+    id:'savannah', name:'Savannah Sparrow', latin:'Passerculus sandwichensis', seasonLabel:'Migration + winter', seasonClass:'winter', seasons:['winter','spring','fall'], months:[1,1,2,2,1,0,0,0,2,2,1,1], peak:[2,3,8,9], habitats:['grassland','wetland'], breast:'fine', size:'Small; short-tailed', structure:'Small, low-slung, compact, and short-tailed with a relatively small head', face:'Crisp face pattern; yellow supraloral patch often visible but sometimes faint', breastText:'Fine, narrow streaks on white to buff underparts; no heavy central blotch', bill:'Small, conical, pinkish to horn', tail:'Short and slightly notched', behavior:'Walks or runs through short grass; flushes low and drops quickly; often perches on fences', voice:'Thin chips; song is insectlike, with ticks leading into a buzzy trill', mnemonic:'Short tail + fine streaks + hint of yellow', habitatText:'Open turf, farm fields, dunes, saltmarsh edges', status:'Common migrant; local winter bird', danger:'Song Sparrow. Savannah is smaller and shorter-tailed, more finely streaked, and often shows yellow in front of the eye.', summary:'Small, short-tailed, finely streaked field sparrow with yellow often tucked into the lores.', photo:'assets/savannah.jpg', source:'https://commons.wikimedia.org/wiki/File:Savannah_sparrow_(61373).jpg', hotspots:[{x:54,y:27,t:'Yellow supraloral can be bright, faint, or nearly invisible.'},{x:49,y:46,t:'Fine narrow streaks stay more linear than Song’s.'},{x:35,y:49,t:'Compact body and short tail are major clues.'}], audio:'savannah'
+  },
+  {
+    id:'grasshopper', name:'Grasshopper Sparrow', latin:'Ammodramus savannarum', seasonLabel:'Breeding season', seasonClass:'breeder', seasons:['spring','summer','fall'], months:[0,0,0,1,2,2,2,2,1,0,0,0], peak:[4,5,6,7], habitats:['grassland'], breast:'clean', size:'Very small; short-tailed', structure:'Tiny, flat-headed, thick-billed, and strikingly short-tailed', face:'Buff face with pale eyering; yellow-orange at the lores in breeding adults', breastText:'Buff, largely unstreaked breast; fine necklace may be present', bill:'Large and deep for body size', tail:'Very short', behavior:'Runs mouse-like through dense grass; singing males use low exposed stems or fence posts', voice:'Two introductory ticks followed by a thin insectlike buzz: “tik-tuk-zeeeee”', mnemonic:'Big bill, flat head, tiny tail, clean buff breast', habitatText:'Large open grasslands, old fields, airports, reclaimed sites', status:'Local and declining breeder', danger:'Savannah Sparrow. Grasshopper is shorter-tailed, thicker-billed, flatter-headed, and much cleaner below.', summary:'Tiny grassland specialist: flat head, oversized bill, short tail, clean buff chest.', photo:'assets/grasshopper.jpg', source:'https://commons.wikimedia.org/wiki/File:Grasshopper_sparrow_(46106).jpg', hotspots:[{x:56,y:28,t:'Large deep bill and flat crown create a distinctive profile.'},{x:53,y:41,t:'Buff breast is mostly clean, unlike Savannah.'},{x:38,y:58,t:'Tail is extremely short relative to the body.'}], audio:'grasshopper'
+  },
+  {
+    id:'chipping', name:'Chipping Sparrow', latin:'Spizella passerina', seasonLabel:'Breeding season', seasonClass:'breeder', seasons:['spring','summer','fall'], months:[0,0,1,2,2,2,2,2,2,1,0,0], peak:[3,4,5,6,7], habitats:['brush','urban'], breast:'clean', size:'Small; slender', structure:'Small, slim Spizella with a relatively long notched tail', face:'Breeding adult has rusty cap, crisp black eyeline, and pale gray-white eyebrow', breastText:'Clean, cool gray underparts with essentially no streaking', bill:'Small and dark in breeding plumage; paler outside breeding', tail:'Longish and notched', behavior:'Forages on lawns and open ground near scattered trees; upright posture; often in loose flocks after breeding', voice:'Fast, dry, mechanical trill on one pitch', mnemonic:'Rust cap + black eyeline + spotless gray chest', habitatText:'Open woods, pines, lawns, cemeteries, campuses', status:'Common breeder', danger:'American Tree Sparrow in late fall/winter. Chipping usually has a cleaner breast, a darker bill, and—when adult—a strong black eyeline.', summary:'Slim and clean below, with a crisp black eyeline and rusty crown in breeding plumage.', photo:'assets/chipping.jpg', source:'https://commons.wikimedia.org/wiki/File:Chipping_sparrow_in_GWC_(71122).jpg', hotspots:[{x:42,y:30,t:'Breeding adults show a rusty crown.'},{x:48,y:34,t:'Crisp black eyeline runs straight through the eye.'},{x:48,y:48,t:'Underparts are notably clean and cool gray.'}], audio:'chipping'
+  },
+  {
+    id:'field', name:'Field Sparrow', latin:'Spizella pusilla', seasonLabel:'Mostly year-round', seasonClass:'year', seasons:['winter','spring','summer','fall'], months:[1,1,1,2,2,2,2,2,2,2,1,1], peak:[3,4,5,6], habitats:['grassland','brush'], breast:'clean', size:'Small; long-tailed', structure:'Small and round-headed with a long tail and gentle, open-faced look', face:'Complete pale eyering, rufous crown and auriculars, relatively plain face', breastText:'Warm buff-gray and unstreaked', bill:'Distinctly pink', tail:'Long and narrow', behavior:'Low in brushy old fields; often perches on shrub tops to sing', voice:'Clear whistles accelerate into a bouncing ball or dropped ping-pong pattern', mnemonic:'Pink bill + white eyering + gentle blank face', habitatText:'Brushy fields, regenerating clearings, hedgerows', status:'Fairly common in suitable habitat', danger:'Chipping Sparrow. Field has a complete eyering, pink bill, warmer blanker face, and lacks a hard black eyeline.', summary:'Soft-faced Spizella with a complete eyering, pink bill, and clean warm underparts.', photo:'assets/field.jpg', source:'https://commons.wikimedia.org/wiki/File:Field_sparrow_in_CP_(41484)_(cropped).jpg', hotspots:[{x:42,y:30,t:'Complete pale eyering is a primary mark.'},{x:37,y:34,t:'Small pink bill reinforces the soft facial expression.'},{x:49,y:49,t:'Breast is clean and warm buff-gray.'}], audio:'field'
+  },
+  {
+    id:'tree', name:'American Tree Sparrow', latin:'Spizelloides arborea', seasonLabel:'Winter', seasonClass:'winter', seasons:['winter','spring','fall'], months:[2,2,1,1,0,0,0,0,0,1,2,2], peak:[0,1,10,11], habitats:['grassland','brush','urban'], breast:'clean', size:'Medium-small; long-tailed', structure:'Plump Spizella-like sparrow with a fairly long tail', face:'Rufous cap and eyeline on a gray face', breastText:'Mostly clean gray breast, often with a single central dark spot', bill:'Diagnostic two-tone bill: dark upper, yellow lower', tail:'Longish and notched', behavior:'Winter flocks in weedy fields and feeders; often feeds on seed heads or ground', voice:'Musical chips and sweet, descending phrases; less mechanical than Chipping', mnemonic:'Winter “Chipping” with bicolored bill and breast dot', habitatText:'Weedy fields, brushy edges, feeders in cold weather', status:'Uncommon and local winter visitor around DC; more regular northward', danger:'Chipping Sparrow. Season helps, but confirm the bicolored bill, reddish rather than black eyeline, and central breast spot.', summary:'Rufous cap and eyeline, bicolored bill, and a single breast spot in winter weeds.', photo:'assets/american-tree.jpg', source:'https://commons.wikimedia.org/wiki/File:American_tree_sparrow_in_CP_(41285)_(cropped).jpg', hotspots:[{x:48,y:29,t:'Rufous cap and reddish eyeline, not the hard black eyeline of breeding Chipping.'},{x:43,y:34,t:'Bill is two-toned: dark upper mandible, yellow lower.'},{x:51,y:50,t:'A small central breast spot is often visible.'}], audio:'tree'
+  },
+  {
+    id:'fox', name:'Fox Sparrow', latin:'Passerella iliaca', seasonLabel:'Winter + migration', seasonClass:'winter', seasons:['winter','spring','fall'], months:[2,2,1,1,0,0,0,0,0,1,2,2], peak:[0,1,10,11], habitats:['brush','urban'], breast:'heavy', size:'Large and chunky', structure:'Big, deep-bodied, round-headed sparrow with a thick bill and strong legs', face:'Rufous-gray face, usually less crisply striped than Song', breastText:'Heavy triangular or chevron-shaped spots that merge into broad blotches', bill:'Large; often yellowish at base', tail:'Long and strongly rufous in the eastern red form', behavior:'Powerful double-scratch in leaf litter, often under feeders or dense shrubs', voice:'Rich, clear, musical whistles; call is a sharp smack', mnemonic:'Thrush-sized sparrow with fox-red tail and chevrons', habitatText:'Dense thickets, woodland floor, leaf litter, feeder edges', status:'Uncommon to fairly common migrant and winter visitor', danger:'Song Sparrow. Fox is much larger and chunkier, with more rufous, a yellower bill, and broad chevron spots rather than linear streaks.', summary:'Large, fox-red, heavily chevron-spotted sparrow that attacks leaf litter with both feet.', photo:'assets/fox.jpg', source:'https://commons.wikimedia.org/wiki/File:Fox_sparrow_in_Central_Park_(11050).jpg', hotspots:[{x:53,y:48,t:'Broad triangular spots coalesce into heavy blotches.'},{x:65,y:42,t:'Tail and wings are bright fox-red in the eastern form.'},{x:46,y:31,t:'Overall head and bill look large and powerful.'}], audio:'fox'
+  },
+  {
+    id:'white-throated', name:'White-throated Sparrow', latin:'Zonotrichia albicollis', seasonLabel:'Winter', seasonClass:'winter', seasons:['winter','spring','fall'], months:[2,2,2,2,1,0,0,0,1,2,2,2], peak:[0,1,10,11], habitats:['brush','urban'], breast:'clean', size:'Large; full-bodied', structure:'Large, full-bodied Zonotrichia with a rounded head and substantial bill', face:'Bright yellow lores, bold crown stripes, and sharply bounded white throat; tan-striped morph is duller above', breastText:'Plain gray breast; occasional faint streaking in immatures', bill:'Gray to pinkish horn', tail:'Moderately long and rounded', behavior:'Ground-foraging flocks in brush and leaf litter; characteristic double-scratch', voice:'Sharp “pink” call; clear whistled song often rendered “Old Sam Peabody”', mnemonic:'Yellow headlights + white throat', habitatText:'Woodland understory, brush piles, gardens, feeder edges', status:'Abundant winter bird', danger:'White-crowned Sparrow. White-throated has yellow lores and a discrete white throat; White-crowned lacks both.', summary:'Yellow lores and a sharply white throat beneath bold crown stripes.', photo:'assets/white-throated.jpg', source:'https://commons.wikimedia.org/wiki/File:White-throated_sparrow_in_CP_close_up_(02081).jpg', hotspots:[{x:56,y:33,t:'Yellow lores sit between the eye and bill.'},{x:55,y:45,t:'The white throat patch has a crisp dark border.'},{x:42,y:28,t:'White-striped and tan-striped morphs both show bold crown architecture.'}], audio:'white-throated'
+  },
+  {
+    id:'white-crowned', name:'White-crowned Sparrow', latin:'Zonotrichia leucophrys', seasonLabel:'Migration + winter', seasonClass:'winter', seasons:['winter','spring','fall'], months:[1,1,1,2,1,0,0,0,1,2,1,1], peak:[3,9], habitats:['brush','grassland','urban'], breast:'clean', size:'Large; long-tailed', structure:'Large, long-tailed sparrow with a relatively small bill and often peaked crown', face:'Adults have broad black-and-white crown stripes; immatures show brown-and-tan stripes', breastText:'Plain pale gray breast without a white throat patch', bill:'Pink, orange-pink, or yellowish depending on form and age', tail:'Long', behavior:'Often walks on open ground near brush; frequently in small migrant or winter flocks', voice:'Sharp lower “pink” call; song begins with clear whistles and descends into buzzes or trills', mnemonic:'Zebra crown, pink bill, no yellow, no white throat', habitatText:'Open brush, field margins, gardens, weedy lots', status:'Uncommon but regular migrant; local winter visitor', danger:'White-throated Sparrow. White-crowned has a plain throat and no yellow lores; its crown stripes dominate the entire face.', summary:'Bold zebra-striped crown, pinkish bill, plain gray breast, and no yellow lores.', photo:'assets/white-crowned.jpg', source:'https://commons.wikimedia.org/wiki/File:White-crowned_sparrow_(63356).jpg', hotspots:[{x:48,y:25,t:'Broad crown stripes are the dominant mark; immatures are brown and tan.'},{x:54,y:33,t:'No yellow in front of the eye.'},{x:50,y:44,t:'Throat and breast are plain—no white throat patch.'}], audio:'white-crowned'
+  },
+  {
+    id:'junco', name:'Dark-eyed Junco', latin:'Junco hyemalis', seasonLabel:'Winter', seasonClass:'winter', seasons:['winter','spring','fall'], months:[2,2,2,1,0,0,0,0,0,1,2,2], peak:[0,1,10,11], habitats:['brush','urban'], breast:'clean', size:'Medium; compact', structure:'Compact, round-headed, upright sparrow with a medium tail', face:'Slate-colored form has a dark gray hood and upperparts with a sharp or soft boundary at the white belly', breastText:'Plain; dark upper breast contrasting with clean white belly', bill:'Small and distinctly pink', tail:'Dark with flashing white outer feathers', behavior:'Ground-feeding winter flocks; flushes with conspicuous white tail flashes', voice:'Sharp ticking chips; song is a loose musical trill', mnemonic:'Gray hood + white belly + pink bill + white tail flash', habitatText:'Woodland edges, gardens, feeders, brushy slopes', status:'Abundant winter visitor', danger:'Female House Sparrow at a glance. Junco is cleaner, colder gray, pink-billed, and flashes white outer tail feathers.', summary:'A clean gray-and-white winter sparrow with a pink bill and white tail flash.', photo:'assets/junco.jpg', source:'https://commons.wikimedia.org/wiki/File:Dark-eyed_junco_(70646).jpg', hotspots:[{x:40,y:31,t:'Small pink bill is conspicuous on the dark hood.'},{x:47,y:50,t:'Slate upper breast contrasts with clean white belly.'},{x:74,y:53,t:'White outer tail feathers flash in flight.'}], audio:'junco'
+  },
+  {
+    id:'towhee', name:'Eastern Towhee', latin:'Pipilo erythrophthalmus', seasonLabel:'Year-round / breeder', seasonClass:'year', seasons:['winter','spring','summer','fall'], months:[1,1,1,2,2,2,2,2,2,2,1,1], peak:[3,4,5,6], habitats:['brush'], breast:'clean', size:'Very large; long-tailed', structure:'A giant sparrow: deep-bodied, long-tailed, and heavy-billed', face:'Male black above with red eye; female warm brown above; both have rufous sides', breastText:'White central underparts bordered by bright rufous flanks', bill:'Thick and black', tail:'Very long, with white corners visible in flight', behavior:'Loud double-scratching in dry leaf litter; often hidden until it jumps onto a low perch', voice:'Call is a rising “tow-hee!”; song “drink-your-teeeeea”', mnemonic:'Huge sparrow with rufous sides and leaf-litter violence', habitatText:'Dense shrub layer, woodland edge, overgrown clearings', status:'Common resident and breeder', danger:'Almost none once size and rufous sides are seen. Females can briefly suggest an oversized Fox Sparrow from behind.', summary:'Huge, long-tailed leaf-litter sparrow with rufous sides and a white belly.', photo:'assets/towhee.jpg', source:'https://commons.wikimedia.org/wiki/File:Eastern_towhee_female_in_CP_(43234).jpg', hotspots:[{x:50,y:33,t:'Females are rich brown above; males are black.'},{x:52,y:54,t:'Rufous sides border a white belly.'},{x:62,y:54,t:'Very long tail and large body separate it from typical sparrows.'}], audio:'towhee'
+  },
+  {
+    id:'house', name:'House Sparrow', latin:'Passer domesticus', seasonLabel:'Year-round', seasonClass:'year', seasons:['winter','spring','summer','fall'], months:[2,2,2,2,2,2,2,2,2,2,2,2], peak:[], habitats:['urban'], breast:'clean', size:'Medium; chunky', structure:'Chunky, broad-chested Old World sparrow with a deep seed-cracking bill', face:'Female has pale supercilium and plain buff-brown face; male has gray crown, chestnut nape, and black bib', breastText:'Female plain gray-buff; male gray with variable black bib', bill:'Deep and conical; male black in breeding season', tail:'Moderately short and square', behavior:'Highly social around buildings, transit stations, outdoor dining, parking lots, and feeders', voice:'Repetitive metallic chirps; noisy social chatter', mnemonic:'Chunky city sparrow; deep bill; no delicate facial geometry', habitatText:'Buildings, sidewalks, lots, stations, farms', status:'Abundant introduced resident', danger:'Female House Sparrow vs. female Purple Finch or winter sparrows. Note the deep bill, square shape, plain underparts, and intensely urban context.', summary:'Chunky urban Passer with a deep bill, plain female plumage, and loud social chirps.', photo:'assets/house.jpg', source:'https://commons.wikimedia.org/wiki/File:House_sparrows_in_CP_(60060).jpg', hotspots:[{x:28,y:37,t:'Deep conical bill looks powerful rather than delicate.'},{x:34,y:47,t:'Female breast is plain gray-buff.'},{x:62,y:39,t:'Female face has a pale supercilium but lacks crisp New World sparrow patterning.'}], audio:'house'
+  }
+];
+
+const photoExtras = {
+  song:[
+    {file:'assets/gallery/song-2.jpg',label:'Prospect Park male',author:'Rhododendrites',license:'CC BY-SA 4.0',source:'https://commons.wikimedia.org/wiki/File:Song_sparrow_in_Prospect_Park_(93031).jpg',note:'A clean side view: audit the coarse breast streaks, strong malars, and long rounded tail.'},
+    {file:'assets/gallery/song-3.jpg',label:'Fence-line profile',author:'Cephas',license:'CC BY-SA 3.0',source:'https://commons.wikimedia.org/wiki/File:Song_Sparrow.jpg',note:'Different light and posture; the substantial structure and brushy streak texture survive.'}
+  ],
+  lincolns:[
+    {file:'assets/gallery/lincolns-2.jpg',label:'Open side view',author:'Andy Morffew',license:'CC BY 2.0',source:'https://commons.wikimedia.org/wiki/File:Lincoln_Sparrow_(34945695136).jpg',note:'Look through the overall brownness for a pale eyering, fine bill, and fine streaks printed over buff.'},
+    {file:'assets/gallery/lincolns-3.jpg',label:'Close portrait',author:'Channel City Camera Club',license:'CC BY 2.0',source:'https://commons.wikimedia.org/wiki/File:Backyard_Birds_-_Lincoln_Sparrow_(50638952808).jpg',note:'At close range the neat gray-and-buff face architecture becomes much easier to parse.'}
+  ],
+  swamp:[
+    {file:'assets/gallery/swamp-2.jpg',label:'Reed-side view',author:'Paul Danese',license:'CC BY-SA 4.0',source:'https://commons.wikimedia.org/wiki/File:20241009_swamp_sparrow_point_meadows_PD208131.jpg',note:'Compact proportions, rufous wing, and wet-edge context are more useful than chasing faint breast marks.'},
+    {file:'assets/gallery/swamp-3.jpg',label:'Urban migrant',author:'Rhododendrites',license:'CC BY-SA 4.0',source:'https://commons.wikimedia.org/wiki/File:Swamp_sparrow_in_Bryant_Park_(20915).jpg',note:'A migrant away from an obvious marsh: confirm the neat throat, gray face, and warm wing.'}
+  ],
+  savannah:[
+    {file:'assets/gallery/savannah-2.jpg',label:'Square field portrait',author:'Paul Danese',license:'CC BY-SA 4.0',source:'https://commons.wikimedia.org/wiki/File:20240519_savannah_sparrow_PD205675.jpg',note:'The small head, short tail, and fine linear streaking are stable even when yellow is subtle.'},
+    {file:'assets/gallery/savannah-3.jpg',label:'Low grass posture',author:'Melissa McMasters',license:'CC BY 2.0',source:'https://commons.wikimedia.org/wiki/File:Savannah_sparrow_(50310095226).jpg',note:'Practice reading the low-slung field-bird shape before zooming in on the lores.'}
+  ],
+  grasshopper:[
+    {file:'assets/gallery/grasshopper-2.jpg',label:'Maryland breeding bird',author:'Lwolfartist',license:'CC BY 2.0',source:'https://commons.wikimedia.org/wiki/File:Grasshopper_sparrow_Lani%27s_Patch_Harford_County_5.26.21_DSC_2568.jpg',note:'A regionally relevant adult: huge bill, flat head, tiny tail, and clean buff underparts.'},
+    {file:'assets/gallery/grasshopper-3.jpg',label:'Young bird',author:'USFWS Midwest Region',license:'CC BY 2.0',source:'https://commons.wikimedia.org/wiki/File:Young_Grasshopper_Sparrow_(41488344870).jpg',note:'Age changes plumage. Keep the compact, big-billed, very short-tailed structure in working memory.'}
+  ],
+  chipping:[
+    {file:'assets/gallery/chipping-2.jpg',label:'Breeding adult',author:'Rhododendrites',license:'CC BY-SA 4.0',source:'https://commons.wikimedia.org/wiki/File:Chipping_sparrow_(05555).jpg',note:'Crisp black eyeline, rusty cap, and cool clean breast: the canonical breeding combination.'},
+    {file:'assets/gallery/chipping-3.jpg',label:'Fence profile',author:'Rhododendrites',license:'CC BY-SA 4.0',source:'https://commons.wikimedia.org/wiki/File:Chipping_sparrow_on_a_fence_(02105).jpg',note:'Use the slim body and relatively long notched tail when facial marks are small in the frame.'}
+  ],
+  field:[
+    {file:'assets/gallery/field-2.jpg',label:'Foraging adult',author:'Paul Danese',license:'CC BY-SA 4.0',source:'https://commons.wikimedia.org/wiki/File:20250620_field_sparrow_suffield_wma_PD204939.jpg',note:'Pink bill, complete eyering, and gentle blank face remain legible during normal behavior.'},
+    {file:'assets/gallery/field-3.jpg',label:'Old-field context',author:'Paul Danese',license:'CC BY-SA 4.0',source:'https://commons.wikimedia.org/wiki/File:20240828_field_sparrow_suffield_wma_PD202174.jpg',note:'A habitat-scale view for learning the warm, long-tailed Spizella gestalt at realistic distance.'}
+  ],
+  tree:[
+    {file:'assets/gallery/tree-2.jpg',label:'Winter close view',author:'Rhododendrites',license:'CC BY-SA 4.0',source:'https://commons.wikimedia.org/wiki/File:American_tree_sparrow_in_CP_(41290).jpg',note:'Find the rufous eyeline, bicolored bill, and isolated breast spot without relying on snow.'},
+    {file:'assets/gallery/tree-3.jpg',label:'Weedy-edge posture',author:'Paul Danese',license:'CC BY-SA 4.0',source:'https://commons.wikimedia.org/wiki/File:American_Tree_Sparrow,_Housatonic_Valley_WMA,_New_Lenox,_MA_USA.jpg',note:'A plumper, longer-tailed winter bird than Chipping; season is evidence, not the whole ID.'}
+  ],
+  fox:[
+    {file:'assets/gallery/fox-2.jpg',label:'Eastern red form',author:'Rhododendrites',license:'CC BY-SA 4.0',source:'https://commons.wikimedia.org/wiki/File:Fox_sparrow_(90041).jpg',note:'The DC-relevant red form: large body, fox-red wings and tail, broad triangular breast marks.'},
+    {file:'assets/gallery/fox-3.jpg',label:'Maryland migrant',author:'Lwolfartist',license:'CC BY 2.0',source:'https://commons.wikimedia.org/wiki/File:Fox_sparrow_fox_sparrow_cromwell_valley_10.29.22_DSC_6584.jpg',note:'A regional field view. Compare its deep body and heavy chevrons directly against Song Sparrow.'}
+  ],
+  'white-throated':[
+    {file:'assets/gallery/white-throated-2.jpg',label:'Tan-striped morph',author:'Mykola Swarnyk',license:'CC BY-SA 3.0',source:'https://commons.wikimedia.org/wiki/File:Zonotrichia_albicollis_James_Gardens_tan-striped.jpg',note:'Crucial variation: the crown is tan, not white, but yellow lores and the bounded pale throat persist.'},
+    {file:'assets/gallery/white-throated-3.jpg',label:'White-striped ground bird',author:'Christian David',license:'CC BY-SA 4.0',source:'https://commons.wikimedia.org/wiki/File:White-throated_sparrow,_Central_Park,_Manhattan,_New_York.jpg',note:'A realistic leaf-litter view of the brighter morph and its high-contrast throat frame.'}
+  ],
+  'white-crowned':[
+    {file:'assets/gallery/white-crowned-2.jpg',label:'Adult profile',author:'Frank Schulenburg',license:'CC BY-SA 4.0',source:'https://commons.wikimedia.org/wiki/File:White-crowned_sparrow_perched_at_Llano_Seco.jpg',note:'The black-and-white crown dominates; the throat stays plain and the lores lack yellow.'},
+    {file:'assets/gallery/white-crowned-3.jpg',label:'Immature in Pennsylvania',author:'Andrew Weitzel',license:'CC BY-SA 2.0',source:'https://commons.wikimedia.org/wiki/File:Immature_white-crowned_sparrow_(30256379852).jpg',note:'Immatures replace zebra stripes with brown and tan. Keep the crown geometry and plain throat.'}
+  ],
+  junco:[
+    {file:'assets/gallery/junco-2.jpg',label:'Slate-colored profile',author:'Rhododendrites',license:'CC BY-SA 4.0',source:'https://commons.wikimedia.org/wiki/File:Dark-eyed_junco_(21840).jpg',note:'The eastern slate-colored form: compact shape, pink bill, dark hood, and clean belly.'},
+    {file:'assets/gallery/junco-3.jpg',label:'Soft-boundary individual',author:'Paul Danese',license:'CC BY-SA 4.0',source:'https://commons.wikimedia.org/wiki/File:20231108_dark_eyed_junco_south_meadows_PND08960.jpg',note:'Hood contrast varies. Structure, pink bill, clean underparts, and white tail flash carry the ID.'}
+  ],
+  towhee:[
+    {file:'assets/gallery/towhee-2.jpg',label:'Adult male',author:'Andy Reago & Chrissy McClarren',license:'CC BY 2.0',source:'https://commons.wikimedia.org/wiki/File:Eastern_Towhee_(male)_(23890197798).jpg',note:'Compare with the female reference: black replaces brown, while rufous sides and giant structure stay.'},
+    {file:'assets/gallery/towhee-3.jpg',label:'Leaf-litter context',author:'Paul Danese',license:'CC BY-SA 4.0',source:'https://commons.wikimedia.org/wiki/File:20241004_eastern_towhee_pleasant_valley_PD207789.jpg',note:'A normal habitat view: long tail, heavy bill, rufous flanks, and powerful ground-foraging build.'}
+  ],
+  house:[
+    {file:'assets/gallery/house-2.jpg',label:'Adult male',author:'Rhododendrites',license:'CC BY-SA 4.0',source:'https://commons.wikimedia.org/wiki/File:House_sparrow_male_in_Prospect_Park_(53532).jpg',note:'Male pattern: gray crown, chestnut nape, black bib, and the same deep seed-cracking bill.'},
+    {file:'assets/gallery/house-3.jpg',label:'Juvenile portrait',author:'Rhododendrites',license:'CC BY-SA 4.0',source:'https://commons.wikimedia.org/wiki/File:House_sparrow_juvenile_(30617).jpg',note:'Juveniles are plain. Use the deep bill, chunky body, short square tail, and human-built context.'}
+  ]
+};
+
+const photoLibrary = Object.fromEntries(species.map(s=>[
+  s.id,
+  [
+    {file:s.photo,label:'Annotated reference',author:'Rhododendrites',license:'CC BY-SA 4.0',source:s.source,note:'The reference view used for the clickable field-mark overlay in the species account.'},
+    ...photoExtras[s.id]
+  ]
+]));
+
+const audioLibrary = {
+  song:{file:'audio/song.ogg',kind:'song',author:'Jonathon Jongsma',license:'CC BY-SA 3.0',source:'https://commons.wikimedia.org/wiki/File:Melospiza_melodia_-_Song_Sparrow_-_XC75500.ogg',cue:'Listen for an opening declaration, then a changing stack of buzzes and trills. Song Sparrows do not owe you one fixed melody.',shape:[5,9,4,2,12,6,16,11,8,15,6,10]},
+  lincolns:{file:'audio/lincolns.mp3',kind:'song',author:'Doug Hynes',license:'CC BY-SA 4.0',source:'https://commons.wikimedia.org/wiki/File:Melospiza_lincolnii_-_Lincoln%27s_Sparrow_XC613394.mp3',cue:'Rich, hurried, and wrenlike: bell-like notes collide with gurgles and trills. More elaborate than the plumage suggests.',shape:[4,8,13,5,16,8,15,10,17,6,12,14]},
+  swamp:{file:'audio/swamp.mp3',kind:'song',author:'Jonathon Jongsma',license:'CC BY-SA 3.0',source:'https://commons.wikimedia.org/wiki/File:Melospiza_georgiana_-_Swamp_Sparrow_XC81951.mp3',cue:'A measured, evenly spaced trill. Compare Chipping: usually faster, drier, and more mechanical.',shape:[10,10,10,10,10,10,10,10,10,10,10,10]},
+  savannah:{file:'audio/savannah.ogg',kind:'song',author:'Jonathon Jongsma',license:'CC BY-SA 3.0',source:'https://commons.wikimedia.org/wiki/File:Passerculus_sandwichensis_-_Savannah_Sparrow_-_XC82760.ogg',cue:'A few thin introductory ticks accelerate into a high insectlike buzz.',shape:[3,2,4,6,9,13,16,16,15,15,14,12]},
+  grasshopper:{file:'audio/grasshopper.mp3',kind:'song',author:'Jonathon Jongsma',license:'CC BY-SA 3.0',source:'https://commons.wikimedia.org/wiki/File:Ammodramus_savannarum_-_Grasshopper_Sparrow_XC81294.mp3',cue:'Two separated ticks, then an extremely thin sustained buzz: tik—tuk—zeeeee.',shape:[5,1,1,7,1,1,15,15,15,15,15,15]},
+  chipping:{file:'audio/chipping.ogg',kind:'song',author:'Mdf',license:'CC BY-SA 3.0',source:'https://commons.wikimedia.org/wiki/File:Spizella-passerina-002.ogg',cue:'Fast, dry, one-pitch mechanical trill. The uniformity is the feature.',shape:[12,12,12,12,12,12,12,12,12,12,12,12]},
+  field:{file:'audio/field.ogg',kind:'song',author:'Jonathon Jongsma',license:'CC BY-SA 3.0',source:'https://commons.wikimedia.org/wiki/File:Spizella_pusilla_-_Field_Sparrow_XC142631.ogg',cue:'Clear whistles accelerate like a bouncing ping-pong ball.',shape:[3,4,5,6,7,8,10,12,14,16,18,20]},
+  tree:{file:'audio/tree.mp3',kind:'song',author:'Doug Hynes',license:'CC BY-SA 4.0',source:'https://commons.wikimedia.org/wiki/File:Spizelloides_arborea_-_American_Tree_Sparrow_XC568655.mp3',cue:'Sweet, musical phrases and chips; less dry and mechanical than Chipping.',shape:[14,11,9,7,4,10,8,6,12,9,6,4]},
+  fox:{file:'audio/fox.ogg',kind:'call',author:'Jonathon Jongsma',license:'CC BY-SA 3.0',source:'https://commons.wikimedia.org/wiki/File:Passerella_iliaca_iliaca_-_Fox_Sparrow_-_XC62943.ogg',cue:'This clip is the sharp contact call of a migrating eastern Fox Sparrow—not its rich, whistled breeding song.',shape:[2,13,2,2,12,2,1,14,2,1,10,2]},
+  'white-throated':{file:'audio/white-throated.ogg',kind:'song',author:'G. McGrane',license:'Public domain',source:'https://commons.wikimedia.org/wiki/File:White-throated_Sparrow.ogg',cue:'Pure whistles: one long note, a pitch change, then repeated triplets. The DC winter soundtrack.',shape:[16,16,8,8,6,6,6,5,5,5,4,4]},
+  'white-crowned':{file:'audio/white-crowned.ogg',kind:'song',author:'Jonathon Jongsma',license:'CC BY-SA 3.0',source:'https://commons.wikimedia.org/wiki/File:Zonotrichia_leucophrys_-_White-crowned_Sparrow_-_XC99572.ogg',cue:'Clear introductory whistles descend into buzzes and trills; dialect varies geographically.',shape:[16,13,10,7,5,12,10,8,11,9,7,6]},
+  junco:{file:'audio/junco.ogg',kind:'song',author:'Jonathon Jongsma',license:'CC BY-SA 3.0',source:'https://commons.wikimedia.org/wiki/File:Junco_hyemalis_-_Dark-eyed_Junco_XC142589.ogg',cue:'A loose, musical trill—usually less machine-perfect than Chipping.',shape:[9,11,8,12,9,13,8,11,10,12,8,10]},
+  towhee:{file:'audio/towhee.ogg',kind:'song',author:'Jonathon Jongsma',license:'CC BY-SA 3.0',source:'https://commons.wikimedia.org/wiki/File:Pipilo_erythrophthalmus_-_Eastern_Towhee_-_XC81298.ogg',cue:'Two emphatic setup notes followed by a sustained trill: drink-your-teeeeea.',shape:[4,12,2,13,2,16,15,14,13,12,11,10]},
+  house:{file:'audio/house.mp3',kind:'call',author:'Jonathon Jongsma',license:'CC BY-SA 3.0',source:'https://commons.wikimedia.org/wiki/File:Passer_domesticus_-_House_Sparrow_XC86749.mp3',cue:'Repeated metallic chirps with social chatter rather than a delicate, organized New World sparrow song.',shape:[8,2,9,3,8,2,10,3,9,2,8,3]}
+};
+
+const soundShapes = {
+  field:{cue:'Clear whistles accelerate like a bouncing ping-pong ball.',shape:[3,4,5,6,7,8,10,12,14,16,18,20]},
+  tree:{cue:'Sweet, musical phrases and chips; less dry and mechanical than Chipping.',shape:[14,11,9,7,4,10,8,6,12,9,6,4]},
+  'white-throated':{cue:'Pure whistles: one long note, a pitch change, then repeated triplets. The DC winter soundtrack.',shape:[16,16,8,8,6,6,6,5,5,5,4,4]},
+  'white-crowned':{cue:'Clear introductory whistles descend into buzzes and trills; dialect varies geographically.',shape:[16,13,10,7,5,12,10,8,11,9,7,6]},
+  junco:{cue:'A loose, musical trill—usually less machine-perfect than Chipping.',shape:[9,11,8,12,9,13,8,11,10,12,8,10]}
+};
+
+const courseLessons = [
+  {title:'Stop seeing brown',lede:'Color is noisy under canopy, cloud, backlight, wear, and camera processing. Proportions are the stable API.',cells:[['Extract','Tail / body ratio','Savannah is compact and short-tailed; Song looks longer behind.'],['Extract','Bill depth','Grasshopper has a comically heavy bill for its tiny body.'],['Extract','Center of mass','Fox feels deep and powerful; Chipping feels light and upright.']]},
+  {title:'Compile the breast',lede:'Convert “streaky” into a texture class. This single operation breaks the core set into manageable buckets.',cells:[['Clean','No organized marks','Field, Chipping, Swamp, Zonotrichia, Junco.'],['Pen','Fine linear streaks','Savannah; Lincoln’s when printed over a buff band.'],['Brush','Coarse / merging','Song; Fox when the marks become broad chevrons.']]},
+  {title:'Parse face geometry',lede:'Treat the face like a subway map: lines have exact routes. A yellow pixel is only useful if you know where it lives.',cells:[['Eye','Ring vs. line','Field = complete eyering. Chipping = hard black eyeline.'],['Front','Lores','Savannah and White-throated may show yellow between bill and eye.'],['Below','Throat frame','White-throated has a bounded patch; Song has dark malars.']]},
+  {title:'Query the habitat',lede:'Habitat is a likelihood ratio, not decoration. Record what the bird’s feet are touching, not the landscape category on eBird.',cells:[['Wet feet','Mud / sedge / cattail','Strongly promotes Swamp; supports Lincoln’s on passage.'],['Open turf','Short grass / fence','Promotes Savannah or Chipping depending structure.'],['Leaf litter','Double-scratching','Promotes Fox, White-throated, or Towhee depending size.']]},
+  {title:'Run the season veto',lede:'Before you chase a subtle mark, ask whether the calendar makes your idea expensive. Rare things happen; common things happen constantly.',cells:[['Winter','Tree, Fox, Zonotrichia, Junco','Chipping becomes a claim that needs better evidence.'],['Migration','Lincoln’s enters the chat','Damp low cover in May or September deserves attention.'],['Summer','Grasshopper + Chipping sing','White-throated around DC becomes an exceptional record.']]},
+  {title:'Attach the sound',lede:'Do not memorize prose mnemonics as lyrics. Encode sound as rhythm + contour + texture, then attach the species name.',cells:[['Rhythm','Even vs. accelerating','Chipping even; Field accelerates.'],['Texture','Whistle / trill / buzz','White-throated whistles; Grasshopper buzzes.'],['Grammar','Fixed vs. variable phrase','Song Sparrow varies; Savannah keeps the tick-to-buzz grammar.']]}
+];
+
+const confusionSets = [
+  {title:'Song vs. Lincoln’s vs. Swamp', subtitle:'The wet-thicket Melospiza problem', rows:[
+    ['Song','Coarse brush-painted streaks; central blotch; biggish bill','Lincoln’s','Fine crisp streaks over buff; pale eyering; small bill'],
+    ['Lincoln’s','Buff breast band ending at clean white belly','Swamp','Neat white throat; rufous wing; blurrier or absent streaks'],
+    ['Song','Often edge-visible and long-tailed','Swamp','Usually lower, wetter, rounder, and more secretive']
+  ]},
+  {title:'Chipping vs. Field vs. Tree', subtitle:'The small clean-breasted Spizella cluster', rows:[
+    ['Chipping','Black eyeline, cool gray breast, dark bill','Field','Complete eyering, pink bill, warm blank face'],
+    ['Chipping','Common breeder; mechanical trill','American Tree','Winter bird; bicolored bill; breast dot'],
+    ['Field','Long tail, soft rufous face, accelerating song','American Tree','Gray face, rufous eyeline, winter weedy-field flock']
+  ]},
+  {title:'Savannah vs. Grasshopper', subtitle:'Open-country, small, and often inconveniently distant', rows:[
+    ['Savannah','Fine streaks, short tail, often yellow supraloral','Grasshopper','Clean buff breast, huge bill, flatter head'],
+    ['Savannah','More linear, upright, sometimes fence-perched','Grasshopper','Mouse-like runner in dense grass; very short tail'],
+    ['Savannah','Ticks into a buzzy song','Grasshopper','Two ticks then a thin sustained insect buzz']
+  ]},
+  {title:'White-throated vs. White-crowned', subtitle:'Bold winter Zonotrichia', rows:[
+    ['White-throated','Yellow lores and crisp white throat','White-crowned','No yellow; no white throat patch'],
+    ['White-throated','Crown stripes may be tan or white','White-crowned','Adults zebra-striped; immatures brown-and-tan'],
+    ['White-throated','Fuller gray face with throat contrast','White-crowned','Plainer face dominated by crown and pink bill']
+  ]},
+  {title:'Song vs. Fox', subtitle:'When the bird is large, reddish, and heavily marked', rows:[
+    ['Song','Medium, grayish bill, linear streaks','Fox','Large, yellowish bill, broad chevrons and blotches'],
+    ['Song','Strong malars and striped face','Fox','More uniformly rufous-gray face'],
+    ['Song','Forages in edges and low brush','Fox','Powerful two-footed excavation in leaf litter']
+  ]},
+  {title:'Junco vs. female House Sparrow', subtitle:'The common winter ground-bird glance', rows:[
+    ['Junco','Cold gray hood, clean white belly, pink bill','House Sparrow','Warm buff-brown, deep bill, pale supercilium'],
+    ['Junco','White outer tail flashes on departure','House Sparrow','Tail plain and square'],
+    ['Junco','Woodland edge and feeder ground','House Sparrow','Tightly tied to human structures and social flocks']
+  ]}
+];
+
+const keyQuestions = [
+  {key:'breast', q:'What is the breast pattern?', options:[['clean','Mostly clean or plain'],['fine','Finely streaked'],['coarse','Coarsely streaked'],['heavy','Heavy spots or blotches']]},
+  {key:'habitat', q:'What habitat is the bird actually using?', options:[['wetland','Standing water, cattails, mud, sedge'],['grassland','Open field, turf, dune, or grassland'],['brush','Shrub edge, woodland floor, dense tangle'],['urban','Building, pavement, station, feeder']]},
+  {key:'sizeClass', q:'How does the structure feel?', options:[['tiny','Tiny / short-tailed'],['small','Small and neat'],['medium','Typical medium sparrow'],['large','Large or chunky'],['giant','Towhee-sized']]},
+  {key:'faceMark', q:'Which facial mark is strongest?', options:[['yellow','Yellow in front of the eye'],['eyering','Complete or obvious pale eyering'],['eyeline','Hard dark eyeline'],['throat','Discrete white throat patch'],['crown','Bold crown stripes'],['plain','No single dominant face mark']]},
+  {key:'tailClass', q:'What did the tail look like?', options:[['short','Short'],['medium','Moderate'],['long','Long'],['white','White outer-tail flash']]}
+];
+
+const sizeMap = {
+  'grasshopper':'tiny','savannah':'tiny','chipping':'small','field':'small','tree':'small','lincolns':'small',
+  'swamp':'medium','song':'medium','junco':'medium','house':'medium','white-throated':'large','white-crowned':'large','fox':'large','towhee':'giant'
+};
+const faceMap = {
+  'savannah':['yellow'],'grasshopper':['yellow','eyering'],'chipping':['eyeline'],'field':['eyering'],'tree':['eyeline'],
+  'song':['eyeline'],'lincolns':['eyering'],'swamp':['eyeline'],'fox':['plain'],'white-throated':['yellow','throat','crown'],
+  'white-crowned':['crown'],'junco':['plain'],'towhee':['plain'],'house':['plain']
+};
+const tailMap = {
+  'grasshopper':'short','savannah':'short','house':'medium','swamp':'medium','lincolns':'medium','white-throated':'medium',
+  'chipping':'long','field':'long','tree':'long','song':'long','fox':'long','white-crowned':'long','towhee':'long','junco':'white'
+};
+
+function loadStore(key,fallback){try{return JSON.parse(localStorage.getItem(key)) ?? fallback}catch{return fallback}}
+let selected = [];
+let learned = new Set(loadStore('sparrowLearned',[]));
+let quizStats = loadStore('sparrowQuizStats',{});
+let reviewState = loadStore('sparrowReviewState',{});
+let quizMode = 'photo';
+let quizCurrent = null;
+let quizLocked = false;
+let scoreCorrect = 0;
+let scoreTotal = 0;
+let keyAnswers = [];
+let quizConfidence = 2;
+let quizCluster = null;
+let courseIndex = 0;
+let atlasSpeciesId = 'song';
+let fieldAnswers = [];
+let activeAudio = null;
+let activeAudioId = null;
+let activeAudioBlind = false;
+let audioCtx = null;
+let audioAnalyser = null;
+let audioFrame = null;
+const currentMonth = new Date().getMonth();
+const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const reviewIntervals = [0,1,3,7,21,60];
+
+function reviewFor(id){
+  return reviewState[id] || {level:0,attempts:0,correct:0,due:0,streak:0,confidentMisses:0};
+}
+function isStrong(id){return learned.has(id) || reviewFor(id).level>=4;}
+function saveReview(){localStorage.setItem('sparrowReviewState',JSON.stringify(reviewState));}
+
+function photoTag(photo,alt,className='') {
+  return '<img class="'+className+'" src="'+photo.file+'" alt="'+alt+'" loading="lazy" onerror="this.style.display=\'none\';this.parentElement.classList.add(\'image-failed\')">';
+}
+
+function imgTag(s, className='') {
+  return photoTag(photoLibrary[s.id][0],s.name,className);
+}
+
+function renderAtlas(id=atlasSpeciesId) {
+  atlasSpeciesId=id;
+  const s=species.find(x=>x.id===id);
+  const photos=photoLibrary[id];
+  document.getElementById('atlasRail').innerHTML=species.map(b=>
+    '<button class="'+(b.id===id?'active':'')+'" data-atlas-species="'+b.id+'">'+b.name.replace(' Sparrow','')+'</button>'
+  ).join('');
+  document.getElementById('atlasStage').innerHTML=
+    '<div class="atlas-title-row">'+
+      '<div><div class="eyebrow">3 views · 1 invariant model</div><h3>'+s.name+'</h3></div>'+
+      '<p><b>'+s.mnemonic+'</b><br>'+s.summary+'</p>'+
+    '</div>'+
+    '<div class="atlas-grid">'+photos.map((p,i)=>
+      '<figure class="atlas-card">'+
+        '<button class="atlas-photo-button" data-atlas-open="'+s.id+'" data-atlas-index="'+i+'" aria-label="Open '+s.name+' account at '+p.label+'">'+
+          '<div class="photo-fallback">'+s.name+'<br><small>photo unavailable</small></div>'+photoTag(p,s.name+' — '+p.label)+
+        '</button>'+
+        '<figcaption class="atlas-caption"><strong>'+(i+1)+'. '+p.label+'</strong><p>'+p.note+'</p><div class="photo-credit">'+p.author+' · '+p.license+' · <a href="'+p.source+'" target="_blank" rel="noreferrer">source + license ↗</a></div></figcaption>'+
+      '</figure>'
+    ).join('')+'</div>'+
+    '<div class="atlas-actions"><button class="primary" data-atlas-account="'+s.id+'">Open full '+s.name+' account</button><button class="secondary" id="atlasQuiz">Randomized photo drill →</button></div>';
+  document.querySelectorAll('[data-atlas-species]').forEach(b=>b.addEventListener('click',()=>renderAtlas(b.dataset.atlasSpecies)));
+  document.querySelectorAll('[data-atlas-open]').forEach(b=>b.addEventListener('click',()=>openDetail(b.dataset.atlasOpen,Number(b.dataset.atlasIndex))));
+  document.querySelector('[data-atlas-account]').addEventListener('click',e=>openDetail(e.currentTarget.dataset.atlasAccount));
+  document.getElementById('atlasQuiz').addEventListener('click',()=>{quizCluster=null;setQuizMode('photo');document.getElementById('quiz').scrollIntoView({behavior:'smooth'});});
+}
+
+function renderSpecies() {
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  const season = document.getElementById('seasonFilter').value;
+  const habitat = document.getElementById('habitatFilter').value;
+  const breast = document.getElementById('breastFilter').value;
+  const learnedOnly = document.getElementById('masteredOnly').checked;
+  const filtered = species.filter(s => {
+    const hay = [s.name,s.latin,s.summary,s.face,s.breastText,s.behavior,s.voice,s.habitatText,s.mnemonic].join(' ').toLowerCase();
+    return (!q || hay.includes(q)) && (season==='all'||s.seasons.includes(season)) && (habitat==='all'||s.habitats.includes(habitat)) && (breast==='all'||s.breast===breast) && (!learnedOnly||isStrong(s.id));
+  });
+  document.getElementById('resultCount').textContent = `${filtered.length} of ${species.length} core species shown`;
+  document.getElementById('speciesGrid').innerHTML = filtered.map(s => `
+    <article class="species-card">
+      <div class="photo-wrap">
+        <div class="photo-fallback">${s.name}<br><small>photo unavailable</small></div>
+        ${imgTag(s)}
+        <div class="badge-row"><span class="badge ${s.seasonClass}">${s.seasonLabel}</span><span class="badge">3 views</span>${isStrong(s.id)?'<span class="badge">strong ✓</span>':''}</div>
+      </div>
+      <div class="card-photo-rail">${photoLibrary[s.id].map((p,i)=>photoTag(p,`${s.name} view ${i+1}`)).join('')}</div>
+      <div class="card-body">
+        <div class="card-title-row"><div><h3>${s.name}</h3><div class="latin">${s.latin}</div></div><button class="compare-check ${selected.includes(s.id)?'selected':''}" data-compare="${s.id}" aria-label="Add ${s.name} to comparison">${selected.includes(s.id)?'✓':'+'}</button></div>
+        <div class="id-line">${s.summary}</div>
+        <div class="tag-row"><span class="tiny-tag">${s.breast}</span>${s.habitats.map(h=>`<span class="tiny-tag">${h}</span>`).join('')}</div>
+        <div class="mastery-pips" aria-label="Memory strength ${reviewFor(s.id).level} of 5">${[1,2,3,4,5].map(n=>`<i class="${reviewFor(s.id).level>=n?'on':''}"></i>`).join('')}</div>
+        <div class="card-tools"><button class="open-btn" data-open="${s.id}">Open field account</button><button class="quick-sound" data-quick-sound="${s.id}" aria-label="Play ${s.name} sound">♪</button></div>
+      </div>
+    </article>`).join('');
+  document.querySelectorAll('[data-open]').forEach(b=>b.addEventListener('click',()=>openDetail(b.dataset.open)));
+  document.querySelectorAll('[data-compare]').forEach(b=>b.addEventListener('click',()=>toggleCompare(b.dataset.compare)));
+  document.querySelectorAll('[data-quick-sound]').forEach(b=>b.addEventListener('click',()=>playBestSound(b.dataset.quickSound)));
+}
+
+function toggleCompare(id) {
+  if (selected.includes(id)) selected = selected.filter(x=>x!==id);
+  else if (selected.length < 3) selected.push(id);
+  else return toast('Comparison is limited to three species.');
+  renderSpecies(); renderCompareDock();
+}
+function renderCompareDock() {
+  const dock = document.getElementById('compareDock');
+  dock.classList.toggle('show',selected.length>0);
+  document.getElementById('selectedList').innerHTML = selected.map(id=>`<span class="selected-pill">${species.find(s=>s.id===id).name}</span>`).join('');
+}
+function showCompare() {
+  if (selected.length < 2) return toast('Choose at least two species.');
+  const birds = selected.map(id=>species.find(s=>s.id===id));
+  const rows = [
+    ['Photo',...birds.map(s=>imgTag(s))],
+    ['Fast read',...birds.map(s=>s.mnemonic)],
+    ['Structure',...birds.map(s=>s.structure)],
+    ['Face',...birds.map(s=>s.face)],
+    ['Breast',...birds.map(s=>s.breastText)],
+    ['Bill',...birds.map(s=>s.bill)],
+    ['Tail',...birds.map(s=>s.tail)],
+    ['Habitat',...birds.map(s=>s.habitatText)],
+    ['Behavior',...birds.map(s=>s.behavior)],
+    ['Voice',...birds.map(s=>s.voice)],
+    ['DC status',...birds.map(s=>s.status)],
+    ['Most dangerous confusion',...birds.map(s=>s.danger)]
+  ];
+  document.getElementById('compareTableWrap').innerHTML = `<table class="compare-table"><thead><tr><th>Character</th>${birds.map(s=>`<th>${s.name}<div class="latin">${s.latin}</div></th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map((c,i)=>`<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+  document.getElementById('compareModal').classList.add('show');
+  document.body.style.overflow='hidden';
+}
+
+function setDetailPhoto(panel,s,index) {
+  const photos=photoLibrary[s.id];
+  index=((index%photos.length)+photos.length)%photos.length;
+  const p=photos[index];
+  panel.dataset.photoIndex=index;
+  const image=panel.querySelector('.detail-main-image');
+  image.style.display='';
+  image.src=p.file;
+  image.alt=s.name+' — '+p.label;
+  panel.querySelector('#detailPhotoCount').textContent=(index+1)+' / '+photos.length;
+  panel.querySelector('#detailPhotoLabel').textContent=p.label;
+  panel.querySelector('#detailPhotoSub').textContent=p.note;
+  panel.querySelector('#detailPhotoNote').textContent=p.note;
+  const credit=panel.querySelector('#detailPhotoCredit');
+  credit.href=p.source;
+  credit.textContent=p.author+' · '+p.license+' ↗';
+  panel.querySelectorAll('[data-detail-thumb]').forEach(b=>b.classList.toggle('active',Number(b.dataset.detailThumb)===index));
+  panel.classList.remove('show-marks');
+  panel.classList.toggle('marks-disabled',index!==0);
+  const markButton=panel.querySelector('#markToggle');
+  markButton.disabled=index!==0;
+  markButton.textContent=index===0?'Show field marks':'Marks live on view 1';
+}
+
+function openDetail(id,photoIndex=0) {
+  const s = species.find(x=>x.id===id);
+  const photos = photoLibrary[id];
+  const initialPhoto = photos[((photoIndex%photos.length)+photos.length)%photos.length];
+  const months = ['J','F','M','A','M','J','J','A','S','O','N','D'];
+  const panel = document.getElementById('detailPanel');
+  panel.innerHTML = `
+    <button class="panel-close" aria-label="Close details">×</button>
+    <div class="detail-photo"><div class="photo-fallback">${s.name}<br><small>photo unavailable</small></div>${photoTag(initialPhoto,`${s.name} — ${initialPhoto.label}`,'detail-main-image')}<span class="detail-photo-count" id="detailPhotoCount">${photoIndex+1} / ${photos.length}</span><button class="detail-arrow prev" data-photo-step="-1" aria-label="Previous photo">←</button><button class="detail-arrow next" data-photo-step="1" aria-label="Next photo">→</button>${s.hotspots.map(h=>`<div class="hotspot" style="left:${h.x}%;top:${h.y}%"><div class="hotspot-dot"></div><div class="hotspot-label">${h.t}</div></div>`).join('')}</div>
+    <div class="detail-gallery-meta"><div class="detail-gallery-copy"><div><strong id="detailPhotoLabel">${initialPhoto.label}</strong><span id="detailPhotoSub">${initialPhoto.note}</span></div><a id="detailPhotoCredit" href="${initialPhoto.source}" target="_blank" rel="noreferrer">${initialPhoto.author} · ${initialPhoto.license} ↗</a></div><div class="detail-thumbs">${photos.map((p,i)=>`<button class="detail-thumb ${i===photoIndex?'active':''}" data-detail-thumb="${i}" aria-label="Show ${p.label}">${photoTag(p,`${s.name} thumbnail ${i+1}`)}</button>`).join('')}</div></div>
+    <div class="detail-content">
+      <div class="detail-kicker">${s.seasonLabel} • ${s.status}</div>
+      <h2>${s.name}</h2><div class="latin">${s.latin}</div>
+      <p style="font-size:1.1rem;color:#3d4b43">${s.summary}</p>
+      <div class="detail-actions"><button class="primary" id="markToggle">Show field marks</button>${audioLibrary[s.id]?'<button id="realSound">▶ Real recording</button>':''}<button id="soundButton">◇ Decompose rhythm</button><button id="learnButton">${learned.has(s.id)?'Unpin strong':'Pin as strong'}</button></div>
+      <div class="fact-grid"><div class="fact"><label>Fast read</label>${s.mnemonic}</div><div class="fact"><label>Size / shape</label>${s.size}</div><div class="fact"><label>Habitat</label>${s.habitatText}</div><div class="fact"><label>Regional status</label>${s.status}</div></div>
+      <div class="detail-section"><h3>Structure first</h3><p>${s.structure}</p></div>
+      <div class="detail-section"><h3>Face and underparts</h3><p><b>Face:</b> ${s.face}<br><b>Breast:</b> ${s.breastText}<br><b>Bill:</b> ${s.bill}<br><b>Tail:</b> ${s.tail}</p></div>
+      <div class="detail-section"><h3>Behavior and microhabitat</h3><p>${s.behavior}</p></div>
+      <div class="detail-section"><h3>Voice</h3><p>${s.voice}</p>${audioLibrary[s.id]?`<p style="margin-top:8px;font-size:.78rem">Field recording: ${audioLibrary[s.id].author}, ${audioLibrary[s.id].license}. <a href="${audioLibrary[s.id].source}" target="_blank" rel="noreferrer">Source + license ↗</a></p>`:'<p style="margin-top:8px;font-size:.78rem">No locally stored field recording yet; the rhythm sketch is an analytical teaching aid, not an imitation.</p>'}</div>
+      <div class="detail-section"><h3>Occurrence around DC</h3><div class="monthbar">${months.map((m,i)=>`<div class="month ${s.months[i]===2?'peak':s.months[i]===1?'on':''}" title="${['January','February','March','April','May','June','July','August','September','October','November','December'][i]}">${m}</div>`).join('')}</div><p style="margin-top:9px;font-size:.84rem">Gold = strongest window; green = regular but lower or more local occurrence.</p></div>
+      <div class="detail-section"><h3>The dangerous confusion</h3><p>${s.danger}</p></div>
+      <div class="detail-section"><h3>How to use these photos</h3><p id="detailPhotoNote">${initialPhoto.note}</p><p style="margin-top:8px;font-size:.78rem">The field-mark overlay is calibrated only to the first reference image. The other views are for learning what survives changes in pose, plumage, light, and distance.</p></div>
+    </div>`;
+  panel.classList.add('show');
+  document.getElementById('panelOverlay').classList.add('show');
+  document.body.style.overflow='hidden';
+  panel.querySelector('.panel-close').addEventListener('click',closeDetail);
+  panel.querySelectorAll('[data-detail-thumb]').forEach(b=>b.addEventListener('click',()=>setDetailPhoto(panel,s,Number(b.dataset.detailThumb))));
+  panel.querySelectorAll('[data-photo-step]').forEach(b=>b.addEventListener('click',()=>setDetailPhoto(panel,s,Number(panel.dataset.photoIndex||0)+Number(b.dataset.photoStep))));
+  panel.querySelector('#markToggle').addEventListener('click',e=>{panel.classList.toggle('show-marks');e.target.textContent=panel.classList.contains('show-marks')?'Hide field marks':'Show field marks';});
+  panel.querySelector('#realSound')?.addEventListener('click',()=>playReal(s.id));
+  panel.querySelector('#soundButton').addEventListener('click',()=>playPattern(s.audio));
+  panel.querySelector('#learnButton').addEventListener('click',()=>{const index=Number(panel.dataset.photoIndex||0);toggleLearned(s.id);openDetail(s.id,index);});
+  setDetailPhoto(panel,s,photoIndex);
+}
+function closeDetail(){document.getElementById('detailPanel').classList.remove('show','show-marks','marks-disabled');document.getElementById('panelOverlay').classList.remove('show');document.body.style.overflow='';}
+function toggleLearned(id){ learned.has(id)?learned.delete(id):learned.add(id); localStorage.setItem('sparrowLearned',JSON.stringify([...learned])); renderSpecies(); renderProgress(); toast(learned.has(id)?'Pinned as strong. Retrieval practice will still test it.':'Removed manual strong pin.'); }
+
+function renderConfusions(){
+  const clusters=[['song','lincolns','swamp'],['chipping','field','tree'],['savannah','grasshopper'],['white-throated','white-crowned'],['song','fox'],['junco','house']];
+  document.getElementById('confusionGrid').innerHTML = confusionSets.map((c,i)=>`<article class="confusion-card"><div class="confusion-head"><h3>${c.title}</h3><p>${c.subtitle}</p></div><div class="confusion-body">${c.rows.map(r=>`<div class="contrast-row"><div class="contrast-side"><b>${r[0]}</b><span>${r[1]}</span></div><div class="versus">VS</div><div class="contrast-side"><b>${r[2]}</b><span>${r[3]}</span></div></div>`).join('')}<button data-cluster="${clusters[i].join(',')}" style="width:100%;border:0;border-radius:10px;background:var(--moss);color:white;padding:9px;font-weight:900;margin-top:10px">Drill this confusion set →</button></div></article>`).join('');
+  document.querySelectorAll('[data-cluster]').forEach(b=>b.addEventListener('click',()=>{quizCluster=b.dataset.cluster.split(',');setQuizMode('pair');document.getElementById('quiz').scrollIntoView({behavior:'smooth'});}));
+}
+
+function renderKey(){
+  const idx = keyAnswers.length;
+  document.getElementById('keyProgress').style.width = `${Math.min(100,(idx/keyQuestions.length)*100)}%`;
+  const area = document.getElementById('keyQuestionArea');
+  if (idx >= keyQuestions.length) area.innerHTML = `<h3 class="key-question">That is enough evidence for a ranked shortlist.</h3><p style="color:var(--muted)">Open the top candidates and compare the marks you were uncertain about.</p>`;
+  else {
+    const k = keyQuestions[idx];
+    area.innerHTML = `<h3 class="key-question">${k.q}</h3><div class="key-options">${k.options.map(o=>`<button class="key-option" data-keyanswer="${o[0]}">${o[1]}</button>`).join('')}<button class="key-option" data-keyanswer="skip">Not sure / skip this character</button></div>`;
+    area.querySelectorAll('[data-keyanswer]').forEach(b=>b.addEventListener('click',()=>{keyAnswers.push({key:k.key,value:b.dataset.keyanswer});renderKey();renderCandidates();}));
+  }
+  document.getElementById('keyBack').disabled = keyAnswers.length===0;
+}
+function scoreCandidate(s,answers=keyAnswers){
+  let score=20+(s.months[currentMonth]||0)*6;
+  const reasons=[];
+  for (const a of answers){
+    if(a.value==='skip') continue;
+    let match=false;
+    if(a.key==='breast') match=s.breast===a.value;
+    if(a.key==='habitat') match=s.habitats.includes(a.value);
+    if(a.key==='sizeClass') match=sizeMap[s.id]===a.value;
+    if(a.key==='faceMark') match=(faceMap[s.id]||[]).includes(a.value);
+    if(a.key==='tailClass') match=tailMap[s.id]===a.value;
+    score += match?13:-11;
+    reasons.push({match,label:`${a.key.replace('Class','')}: ${a.value}`});
+  }
+  if(s.months[currentMonth]) reasons.unshift({match:true,label:`${monthNames[currentMonth]} prior`});
+  else reasons.unshift({match:false,label:`unlikely in ${monthNames[currentMonth]}`});
+  return {score:Math.max(2,Math.min(99,Math.round(score))),reasons};
+}
+function renderCandidates(){
+  const ranked=[...species].map(s=>({s,...scoreCandidate(s)})).sort((a,b)=>b.score-a.score).slice(0,7);
+  document.getElementById('candidateList').innerHTML = ranked.map(({s,score,reasons})=>`<div class="candidate" data-open-candidate="${s.id}"><div class="photo-wrap" style="aspect-ratio:auto;height:58px"><div class="photo-fallback">${s.name}</div>${imgTag(s)}</div><div><h4>${s.name}</h4><p>${s.mnemonic}</p></div><div class="score" title="Teaching fit score, not probability">${score}</div><div class="candidate-reasons">${reasons.slice(0,4).map(r=>`<span class="reason ${r.match?'':'no'}">${r.match?'✓':'×'} ${r.label}</span>`).join('')}</div></div>`).join('');
+  document.querySelectorAll('[data-open-candidate]').forEach(x=>x.addEventListener('click',()=>openDetail(x.dataset.openCandidate)));
+}
+
+function randomItem(arr){return arr[Math.floor(Math.random()*arr.length)];}
+function weightedQuizBird(pool){
+  const now=Date.now();
+  const weighted=[];
+  pool.forEach(s=>{
+    const r=reviewFor(s.id);
+    const accuracy=r.attempts?r.correct/r.attempts:.5;
+    const weight=2+(r.due<=now?5:0)+(5-r.level)+Math.round((1-accuracy)*4)+(r.confidentMisses||0);
+    for(let i=0;i<weight;i++)weighted.push(s);
+  });
+  return randomItem(weighted.length?weighted:pool);
+}
+function recordReview(id,right,confidence){
+  const r={...reviewFor(id)};
+  r.attempts++;
+  if(right){
+    r.correct++;
+    r.streak++;
+    r.level=Math.min(5,r.level+1);
+    const days=reviewIntervals[r.level] ?? 60;
+    r.due=Date.now()+days*86400000;
+  }else{
+    r.streak=0;
+    r.level=Math.max(0,r.level-(confidence===3?2:1));
+    r.due=Date.now()+10*60000;
+    if(confidence===3)r.confidentMisses=(r.confidentMisses||0)+1;
+  }
+  reviewState[id]=r; saveReview();
+  return r;
+}
+function newQuiz(){
+  quizLocked=false;
+  document.getElementById('quizFeedback').className='quiz-feedback';
+  document.getElementById('quizFeedback').innerHTML='';
+  quizConfidence=2;
+  document.querySelectorAll('[data-confidence]').forEach(b=>b.classList.toggle('active',b.dataset.confidence==='2'));
+  const pairMap={song:['lincolns','swamp','fox'],lincolns:['song','swamp'],swamp:['lincolns','song'],savannah:['grasshopper','song'],grasshopper:['savannah'],chipping:['field','tree','junco'],field:['chipping','tree'],tree:['chipping','field'],fox:['song'], 'white-throated':['white-crowned'], 'white-crowned':['white-throated'],junco:['house','chipping'],house:['junco'],towhee:['fox']};
+  let eligible=quizMode==='sound'?species.filter(s=>audioLibrary[s.id]):[...species];
+  if(quizCluster) eligible=eligible.filter(s=>quizCluster.includes(s.id));
+  if(!eligible.length){quizCluster=null;eligible=quizMode==='sound'?species.filter(s=>audioLibrary[s.id]):[...species];}
+  const answer=weightedQuizBird(eligible);
+  let pool=eligible.filter(s=>s.id!==answer.id);
+  if(quizMode==='pair' && !quizCluster){
+    const IDs=pairMap[answer.id]||[];
+    pool=species.filter(s=>IDs.includes(s.id));
+    if(pool.length<1) pool=species.filter(s=>s.id!==answer.id);
+  }
+  const options=[answer];
+  while(options.length<4 && pool.length){ const x=randomItem(pool); if(!options.includes(x)) options.push(x); }
+  if(options.length<2){species.filter(s=>s.id!==answer.id).forEach(s=>{if(options.length<4&&!options.includes(s))options.push(s)});}
+  options.sort(()=>Math.random()-.5);
+  const quizPhoto=randomItem(photoLibrary[answer.id]);
+  quizCurrent={answer,options,photo:quizPhoto};
+  const media=document.getElementById('quizMedia');
+  if(quizMode==='sound'){
+    const shape=(audioLibrary[answer.id]||soundShapes[answer.id]).shape;
+    media.innerHTML=`<div class="sound-mystery"><div><div class="sound-icon">♪</div><div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.13em;color:var(--gold);font-weight:950">Recording hidden</div><h3 style="font-family:Georgia,serif;font-size:1.7rem;margin:8px 0">Identify the sound grammar</h3><div class="rhythm-code" style="justify-content:center;height:45px">${shape.map(h=>`<i style="height:${h*2}px;background:var(--gold)"></i>`).join('')}</div><button id="playMystery">▶ Play recording</button></div></div>`;
+    document.getElementById('playMystery').addEventListener('click',()=>playReal(answer.id,true));
+    document.getElementById('quizPrompt').textContent='Whose voice is this?';
+  } else if(quizMode==='clue'){
+    media.innerHTML=`<div style="height:100%;display:grid;place-items:center;padding:30px;color:white;text-align:center"><div><div style="font-size:.74rem;text-transform:uppercase;letter-spacing:.15em;font-weight:900;color:var(--gold)">Observed characters</div><div style="font-family:Georgia,serif;font-size:clamp(1.45rem,4vw,2.4rem);line-height:1.15;margin-top:12px">${answer.mnemonic}</div><div style="margin-top:15px;color:rgba(255,255,255,.7)">${answer.habitatText}</div></div></div>`;
+    document.getElementById('quizPrompt').textContent='Which species best fits this field description?';
+  } else {
+    media.innerHTML=`<div class="photo-fallback">${answer.name}<br><small>photo unavailable</small></div>${photoTag(quizPhoto,answer.name+' — mystery field view')}<div class="quiz-obscure-name">${quizMode==='pair'?'Confusion-pair drill':'View randomized · use structure before plumage details'}</div>`;
+    document.getElementById('quizPrompt').textContent=quizMode==='pair'?'Pick the exact species.':'What sparrow is this?';
+  }
+  document.getElementById('quizOptions').innerHTML=options.map(o=>`<button class="quiz-option" data-quiz="${o.id}">${o.name}</button>`).join('');
+  document.querySelectorAll('[data-quiz]').forEach(b=>b.addEventListener('click',()=>answerQuiz(b)));
+  document.getElementById('quizNext').style.display='none';
+}
+function answerQuiz(button){
+  if(quizLocked)return; quizLocked=true; scoreTotal++;
+  const right=button.dataset.quiz===quizCurrent.answer.id;
+  const chosen=species.find(s=>s.id===button.dataset.quiz);
+  if(right){scoreCorrect++;button.classList.add('correct');quizStats[quizCurrent.answer.id]=(quizStats[quizCurrent.answer.id]||0)+1;}
+  else {button.classList.add('wrong');document.querySelector(`[data-quiz="${quizCurrent.answer.id}"]`).classList.add('correct');quizStats[quizCurrent.answer.id]=Math.max(0,(quizStats[quizCurrent.answer.id]||0)-1);}
+  const review=recordReview(quizCurrent.answer.id,right,quizConfidence);
+  localStorage.setItem('sparrowQuizStats',JSON.stringify(quizStats));
+  document.getElementById('scoreCorrect').textContent=scoreCorrect; document.getElementById('scoreTotal').textContent=scoreTotal;
+  document.getElementById('scoreNote').textContent=right?quizCurrent.answer.mnemonic:`Answer: ${quizCurrent.answer.name}. ${quizCurrent.answer.mnemonic}`;
+  const confidenceRead=quizConfidence===3&&!right?'High-value confident miss: ':quizConfidence===1&&right?'Good low-confidence retrieval: ':'';
+  const soundCue=quizMode==='sound'?` ${audioLibrary[quizCurrent.answer.id].cue}`:'';
+  const photoCue=(quizMode==='photo'||quizMode==='pair')?` View: ${quizCurrent.photo.label}. ${quizCurrent.photo.note}`:'';
+  const feedback=document.getElementById('quizFeedback');
+  feedback.className=`quiz-feedback show ${right?'':'wrong'}`;
+  feedback.innerHTML=right
+    ? `<b>${confidenceRead}Correct — ${quizCurrent.answer.name}</b>${quizCurrent.answer.mnemonic}.${soundCue}${photoCue} Memory level is now ${review.level}/5.`
+    : `<b>${confidenceRead}${quizCurrent.answer.name}, not ${chosen.name}</b><strong>${quizCurrent.answer.name}:</strong> ${quizCurrent.answer.mnemonic}. <strong>${chosen.name}:</strong> ${chosen.mnemonic}.${soundCue}${photoCue}`;
+  const quizCaption=document.querySelector('.quiz-obscure-name');
+  if(quizCaption&&(quizMode==='photo'||quizMode==='pair'))quizCaption.textContent=quizCurrent.photo.label+' · '+quizCurrent.photo.author;
+  document.getElementById('quizNext').style.display='inline-block'; renderSpecies(); renderProgress();
+}
+
+function formatTime(seconds){
+  if(!Number.isFinite(seconds))return '0:00';
+  return `${Math.floor(seconds/60)}:${String(Math.floor(seconds%60)).padStart(2,'0')}`;
+}
+function drawSignature(shape,color='#efb83d'){
+  const canvas=document.getElementById('spectrumCanvas'); if(!canvas)return;
+  const ctx=canvas.getContext('2d'),w=canvas.width,h=canvas.height;
+  ctx.fillStyle='#07100c';ctx.fillRect(0,0,w,h);
+  ctx.strokeStyle='rgba(255,255,255,.055)';ctx.lineWidth=1;
+  for(let y=28;y<h;y+=28){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke();}
+  const gap=8,bw=(w-gap*(shape.length+1))/shape.length;
+  shape.forEach((v,i)=>{const bh=Math.max(8,v*7.5);const grad=ctx.createLinearGradient(0,h-bh,0,h);grad.addColorStop(0,color);grad.addColorStop(1,'rgba(45,115,84,.28)');ctx.fillStyle=grad;ctx.fillRect(gap+i*(bw+gap),h-bh-12,bw,bh);});
+}
+function drawLiveSpectrum(){
+  if(!audioAnalyser)return;
+  const canvas=document.getElementById('spectrumCanvas'),ctx=canvas.getContext('2d'),w=canvas.width,h=canvas.height;
+  const data=new Uint8Array(audioAnalyser.frequencyBinCount);audioAnalyser.getByteFrequencyData(data);
+  ctx.fillStyle='rgba(7,16,12,.35)';ctx.fillRect(0,0,w,h);
+  const bars=72,bw=w/bars;
+  for(let i=0;i<bars;i++){const v=data[Math.floor(i*data.length/bars)]/255;const bh=v*(h-14);ctx.fillStyle=`rgba(${239-Math.round(i*1.3)},${184+Math.round(i*.35)},${61+Math.round(i*.5)},.8)`;ctx.fillRect(i*bw,h-bh,bw-2,bh);}
+  if(activeAudio&&!activeAudio.paused)audioFrame=requestAnimationFrame(drawLiveSpectrum);
+}
+function stopAudio(){
+  if(activeAudio){activeAudio.pause();activeAudio=null;}
+  if(audioFrame)cancelAnimationFrame(audioFrame);
+  audioFrame=null;activeAudioId=null;
+  const toggle=document.getElementById('audioToggle');if(toggle)toggle.textContent='▶';
+}
+function playReal(id,blind=false){
+  const lib=audioLibrary[id]; if(!lib)return previewSynthetic(id);
+  stopAudio(); activeAudioId=id; activeAudioBlind=blind;
+  activeAudio=document.getElementById('realAudioElement');activeAudio.src=lib.file;activeAudio.load();
+  const s=species.find(x=>x.id===id);
+  document.getElementById('audioNow').textContent=blind?'Mystery recording':`${s.name} · ${lib.kind}`;
+  document.getElementById('audioMeta').innerHTML=blind?'Species hidden until you answer. Focus on rhythm → texture → contour.':`${lib.author} · ${lib.license} · <a href="${lib.source}" target="_blank" rel="noreferrer">source ↗</a>`;
+  document.getElementById('audioHint').innerHTML=`<b>Listen for:</b> ${lib.cue}`;
+  drawSignature(lib.shape);
+  audioAnalyser=null;
+  activeAudio.onloadedmetadata=()=>{document.getElementById('audioTime').textContent=`0:00 / ${formatTime(activeAudio.duration)}`;};
+  activeAudio.ontimeupdate=()=>{if(!activeAudio)return;document.getElementById('audioSeek').value=activeAudio.duration?(activeAudio.currentTime/activeAudio.duration)*1000:0;document.getElementById('audioTime').textContent=`${formatTime(activeAudio.currentTime)} / ${formatTime(activeAudio.duration)}`;};
+  activeAudio.onplay=()=>{document.getElementById('audioToggle').textContent='❚❚';};
+  activeAudio.onpause=()=>{document.getElementById('audioToggle').textContent='▶';};
+  activeAudio.onended=()=>{document.getElementById('audioToggle').textContent='▶';drawSignature(lib.shape);};
+  activeAudio.onerror=()=>{toast('That recording could not be decoded; using the rhythm sketch.');previewSynthetic(id);};
+  activeAudio.play().catch(()=>toast('Press play in the audio console to start the recording.'));
+}
+function previewSynthetic(id){
+  const s=species.find(x=>x.id===id),lib=audioLibrary[id]||soundShapes[id]; if(!s||!lib)return;
+  stopAudio();document.getElementById('audioNow').textContent=`${s.name} · rhythm sketch`;
+  document.getElementById('audioMeta').textContent='Generated timing/contour diagram—not a bird recording.';
+  document.getElementById('audioHint').innerHTML=`<b>Pattern:</b> ${lib.cue}`;
+  drawSignature(lib.shape,'#77b890');playPattern(s.audio);
+}
+function playBestSound(id){audioLibrary[id]?playReal(id):previewSynthetic(id);}
+function renderAudioGrid(){
+  document.getElementById('audioGrid').innerHTML=species.map(s=>{
+    const lib=audioLibrary[s.id]||soundShapes[s.id],real=audioLibrary[s.id];
+    return `<article class="audio-card"><div class="audio-top"><div><span class="real-badge">${real?'field recording':'rhythm only'}</span><h4>${s.name}</h4></div><span title="${real?real.kind:'synthetic sketch'}">${real?.kind==='call'?'call':'song'}</span></div><p>${lib.cue}</p><div class="rhythm-code">${lib.shape.map(h=>`<i style="height:${Math.max(4,h)}px"></i>`).join('')}</div><div class="audio-card-actions"><button data-real-audio="${s.id}" ${real?'':'disabled'}>▶ real</button><button class="ghost" data-sketch="${s.id}">◇ pattern</button></div></article>`;
+  }).join('');
+  document.querySelectorAll('[data-real-audio]').forEach(b=>b.addEventListener('click',()=>playReal(b.dataset.realAudio)));
+  document.querySelectorAll('[data-sketch]').forEach(b=>b.addEventListener('click',()=>previewSynthetic(b.dataset.sketch)));
+}
+
+function renderToday(){
+  const month=monthNames[currentMonth];
+  document.getElementById('heroDate').textContent=`${month} in the DC region`;
+  document.getElementById('nowMonth').textContent=`Working set · ${month}`;
+  const strong=species.filter(s=>s.months[currentMonth]===2),possible=species.filter(s=>s.months[currentMonth]===1),unlikely=species.filter(s=>!s.months[currentMonth]);
+  const ordered=[...strong,...possible].slice(0,9);
+  document.getElementById('nowChips').innerHTML=ordered.map(s=>`<div class="now-chip"><img src="${s.photo}" alt=""><button data-now-open="${s.id}">${s.name}</button><span title="${s.months[currentMonth]===2?'strong window':'regular or local'}">${s.months[currentMonth]===2?'●':'○'}</span></div>`).join('');
+  document.getElementById('nowLegend').textContent=`● strongest window (${strong.length}) · ○ regular, local, or lower likelihood (${possible.length}) · ${unlikely.length} core species need exceptional evidence this month.`;
+  document.querySelectorAll('[data-now-open]').forEach(b=>b.addEventListener('click',()=>openDetail(b.dataset.nowOpen)));
+  const trap=unlikely.find(s=>s.id==='white-throated')||unlikely[0],anchor=strong[0]||possible[0];
+  document.getElementById('signalCard').innerHTML=`<div class="signal-label">Seasonal type-check</div><h3>${anchor?anchor.name:'Keep the whole set'} is cheap.<br>${trap?trap.name:'A rarity'} is expensive.</h3><p>${trap?`${trap.name} is outside its normal DC window. Do not delete the possibility—raise the evidence threshold.`:'Migration keeps several candidates live; use structure and microhabitat.'}</p><button data-scroll="key">Build an evidence stack →</button>`;
+  document.querySelector('#signalCard [data-scroll]')?.addEventListener('click',e=>document.getElementById(e.currentTarget.dataset.scroll).scrollIntoView({behavior:'smooth'}));
+}
+
+function renderCourse(){
+  document.getElementById('courseRail').innerHTML=courseLessons.map((l,i)=>`<button data-lesson="${i}" class="${i===courseIndex?'active':''}">${i+1}. ${l.title}</button>`).join('');
+  const l=courseLessons[courseIndex];
+  document.getElementById('courseStage').innerHTML=`<div class="lesson-count">Pass ${courseIndex+1} of ${courseLessons.length}</div><h3>${l.title}</h3><p class="lesson-lede">${l.lede}</p><div class="lesson-demo">${l.cells.map(c=>`<div class="demo-cell"><div class="demo-key">${c[0]}</div><b>${c[1]}</b><span>${c[2]}</span></div>`).join('')}</div><div class="lesson-actions"><button id="lessonPrev" ${courseIndex===0?'disabled':''}>← Previous</button><button class="primary" id="lessonNext">${courseIndex===courseLessons.length-1?'Drill the model →':'Next pass →'}</button></div>`;
+  document.querySelectorAll('[data-lesson]').forEach(b=>b.addEventListener('click',()=>{courseIndex=Number(b.dataset.lesson);renderCourse();}));
+  document.getElementById('lessonPrev').addEventListener('click',()=>{courseIndex=Math.max(0,courseIndex-1);renderCourse();});
+  document.getElementById('lessonNext').addEventListener('click',()=>{if(courseIndex<courseLessons.length-1){courseIndex++;renderCourse();}else{quizCluster=null;setQuizMode('clue');document.getElementById('quiz').scrollIntoView({behavior:'smooth'});}});
+}
+
+function renderProgress(){
+  const rows=species.map(s=>({s,r:reviewFor(s.id)}));
+  const attempts=rows.reduce((n,x)=>n+x.r.attempts,0),correct=rows.reduce((n,x)=>n+x.r.correct,0);
+  const due=rows.filter(x=>x.r.due<=Date.now()&&x.r.level<5).length,strong=rows.filter(x=>isStrong(x.s.id)).length;
+  const weak=rows.sort((a,b)=>{const aa=a.r.attempts?a.r.correct/a.r.attempts:.5,ba=b.r.attempts?b.r.correct/b.r.attempts:.5;return (a.r.level+aa*2)-(b.r.level+ba*2)}).slice(0,4);
+  document.getElementById('progressShell').innerHTML=`<div class="metric"><label>Due now</label><strong>${due}</strong></div><div class="metric"><label>Retrieval accuracy</label><strong>${attempts?Math.round(correct/attempts*100):'—'}${attempts?'%':''}</strong></div><div class="metric"><label>Strong birds</label><strong>${strong}/${species.length}</strong></div><div class="metric"><label>Total attempts</label><strong>${attempts}</strong></div><div class="metric weak-list"><label>Highest-value review</label>${weak.map(({s,r})=>`<div class="weak-row"><span>${s.name}</span><div class="strength-track"><span style="width:${r.level*20}%"></span></div><button data-practice="${s.id}">drill</button></div>`).join('')}</div><div class="metric weak-list"><label>How to read this</label><p style="color:var(--muted);font-size:.82rem;margin:8px 0">Level rises with correct retrieval and falls faster after a confident miss. New and overdue birds receive more quiz weight automatically.</p><button class="reset-progress" id="resetProgress">Reset learning data</button></div>`;
+  document.querySelectorAll('[data-practice]').forEach(b=>b.addEventListener('click',()=>startSpeciesDrill(b.dataset.practice)));
+  document.getElementById('resetProgress').addEventListener('click',()=>{if(confirm('Reset quiz history and memory scheduling? Manual strong pins are kept.')){reviewState={};quizStats={};saveReview();localStorage.removeItem('sparrowQuizStats');renderProgress();renderSpecies();toast('Learning data reset.');}});
+}
+function startSpeciesDrill(id){
+  const map={song:['song','lincolns','swamp','fox'],lincolns:['lincolns','song','swamp'],swamp:['swamp','lincolns','song'],savannah:['savannah','grasshopper','song'],grasshopper:['grasshopper','savannah'],chipping:['chipping','field','tree','junco'],field:['field','chipping','tree'],tree:['tree','chipping','field'],fox:['fox','song'],'white-throated':['white-throated','white-crowned'],'white-crowned':['white-crowned','white-throated'],junco:['junco','house','chipping'],house:['house','junco'],towhee:['towhee','fox']};
+  quizCluster=map[id]||[id];setQuizMode('pair');document.getElementById('quiz').scrollIntoView({behavior:'smooth'});
+}
+function setQuizMode(mode){
+  quizMode=mode;document.querySelectorAll('[data-mode]').forEach(x=>x.classList.toggle('active',x.dataset.mode===mode));newQuiz();
+}
+
+function openFieldMode(){document.getElementById('fieldModal').classList.add('show');document.body.style.overflow='hidden';renderFieldMode();}
+function closeFieldMode(){document.getElementById('fieldModal').classList.remove('show');document.body.style.overflow='';}
+function renderFieldMode(){
+  const idx=fieldAnswers.length;
+  document.getElementById('fieldProgress').innerHTML=keyQuestions.map((_,i)=>`<i class="${i<idx?'on':''}"></i>`).join('');
+  const body=document.getElementById('fieldBody');
+  if(idx<keyQuestions.length){
+    const q=keyQuestions[idx];
+    const preview=[...species].map(s=>({s,...scoreCandidate(s,fieldAnswers)})).sort((a,b)=>b.score-a.score).slice(0,3);
+    body.innerHTML=`<div class="lesson-count" style="color:var(--gold)">Observation ${idx+1} · skip anything uncertain</div><h3 class="field-question">${q.q}</h3><div class="field-options">${q.options.map(o=>`<button data-field-answer="${o[0]}">${o[1]}</button>`).join('')}<button data-field-answer="skip">Not sure — do not invent data</button></div>${idx?`<div style="margin-top:20px;color:rgba(255,255,255,.55);font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;font-weight:900">Current shortlist</div><div class="field-results">${preview.map(x=>`<div class="field-result"><img src="${x.s.photo}" alt=""><div><h4>${x.s.name}</h4><p>${x.s.mnemonic}</p></div><strong>${x.score}</strong></div>`).join('')}</div>`:''}`;
+    body.querySelectorAll('[data-field-answer]').forEach(b=>b.addEventListener('click',()=>{fieldAnswers.push({key:q.key,value:b.dataset.fieldAnswer});renderFieldMode();}));
+  }else{
+    const ranked=[...species].map(s=>({s,...scoreCandidate(s,fieldAnswers)})).sort((a,b)=>b.score-a.score).slice(0,5);
+    body.innerHTML=`<div class="lesson-count" style="color:var(--gold)">Ranked hypotheses · scores are fit, not probability</div><h3 class="field-question">Test the top two.</h3><div class="field-results">${ranked.map(({s,score,reasons})=>`<div class="field-result"><img src="${s.photo}" alt=""><div><h4>${s.name} · ${score}</h4><p>${reasons.slice(0,3).map(r=>`${r.match?'✓':'×'} ${r.label}`).join(' · ')}</p></div><button data-field-open="${s.id}">open</button></div>`).join('')}</div><p style="color:rgba(255,255,255,.62);margin-top:15px">Next move: compare the first two candidates and seek one observation that has opposite predictions. Do not average ten weak impressions.</p>`;
+    body.querySelectorAll('[data-field-open]').forEach(b=>b.addEventListener('click',()=>{closeFieldMode();openDetail(b.dataset.fieldOpen);}));
+  }
+  document.getElementById('fieldBack').disabled=!fieldAnswers.length;
+}
+
+function playPattern(type){
+  const AudioCtx=window.AudioContext||window.webkitAudioContext; if(!AudioCtx)return toast('Audio is not supported in this browser.');
+  const ctx=new AudioCtx(); const t0=ctx.currentTime+.05;
+  const tone=(at,dur,f1,f2=f1,kind='sine',gain=.08)=>{const o=ctx.createOscillator(),g=ctx.createGain();o.type=kind;o.frequency.setValueAtTime(f1,t0+at);o.frequency.exponentialRampToValueAtTime(Math.max(80,f2),t0+at+dur);g.gain.setValueAtTime(.0001,t0+at);g.gain.exponentialRampToValueAtTime(gain,t0+at+.015);g.gain.exponentialRampToValueAtTime(.0001,t0+at+dur);o.connect(g).connect(ctx.destination);o.start(t0+at);o.stop(t0+at+dur+.02);};
+  const trill=(start,count,space,f=3200)=>{for(let i=0;i<count;i++)tone(start+i*space,.045,f*(.96+Math.random()*.08),f,'triangle',.055)};
+  if(type==='song'){tone(0,.13,2500,2300);tone(.22,.12,3100,2600);trill(.46,10,.06,2800);tone(1.15,.28,3300,1700,'sawtooth',.04);}
+  else if(type==='lincoln'){tone(0,.09,2900,3200);tone(.14,.09,3100,3500);trill(.34,6,.055,3300);trill(.75,8,.045,2400);tone(1.18,.18,2200,3400);}
+  else if(type==='swamp'){trill(0,15,.105,2500);}
+  else if(type==='savannah'){tone(0,.055,3500);tone(.13,.055,3300);tone(.25,.06,3500);trill(.38,16,.038,3900);}
+  else if(type==='grasshopper'){tone(0,.06,2600);tone(.18,.06,2900);trill(.36,24,.025,5200);}
+  else if(type==='chipping'){trill(0,24,.05,3200);}
+  else if(type==='field'){for(let i=0;i<12;i++)tone(i*(.16-i*.008),.07,2300+i*80,2600+i*85);}
+  else if(type==='tree'){tone(0,.12,3500,3100);tone(.22,.13,3200,2800);tone(.45,.15,3000,2300);trill(.75,7,.07,2800);}
+  else if(type==='fox'){tone(0,.22,1900,2700);tone(.32,.18,2600,2200);tone(.62,.24,2200,3100);tone(.95,.30,2800,1800);}
+  else if(type==='white-throated'){tone(0,.45,3100,2800);tone(.58,.35,2500,2400);trill(1.02,6,.16,2200);}
+  else if(type==='white-crowned'){tone(0,.42,3000,2600);trill(.55,5,.08,2800);tone(1.02,.22,2500,1800,'sawtooth',.04);trill(1.32,6,.07,2300);}
+  else if(type==='junco'){trill(0,18,.07,2800);}
+  else if(type==='towhee'){tone(0,.18,2300,3300);tone(.35,.17,2300,3500);trill(.65,13,.05,3200);}
+  else if(type==='house'){for(let i=0;i<7;i++)tone(i*.22,.09,2400,2100,'square',.035);}
+  toast('Synthetic rhythm sketch—not a bird recording.');
+  setTimeout(()=>ctx.close(),4000);
+}
+
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._timer);t._timer=setTimeout(()=>t.classList.remove('show'),2200);}
+
+// Events
+['searchInput','seasonFilter','habitatFilter','breastFilter','masteredOnly'].forEach(id=>document.getElementById(id).addEventListener(id==='searchInput'?'input':'change',renderSpecies));
+document.querySelectorAll('[data-scroll]').forEach(b=>b.addEventListener('click',()=>document.getElementById(b.dataset.scroll).scrollIntoView({behavior:'smooth'})));
+document.getElementById('panelOverlay').addEventListener('click',closeDetail);
+document.getElementById('compareClear').addEventListener('click',()=>{selected=[];renderSpecies();renderCompareDock();});
+document.getElementById('compareGo').addEventListener('click',showCompare);
+document.getElementById('compareClose').addEventListener('click',()=>{document.getElementById('compareModal').classList.remove('show');document.body.style.overflow='';});
+document.getElementById('compareModal').addEventListener('click',e=>{if(e.target.id==='compareModal'){e.currentTarget.classList.remove('show');document.body.style.overflow='';}});
+document.getElementById('keyBack').addEventListener('click',()=>{keyAnswers.pop();renderKey();renderCandidates();});
+document.getElementById('keyReset').addEventListener('click',()=>{keyAnswers=[];renderKey();renderCandidates();});
+document.getElementById('quizNext').addEventListener('click',newQuiz);
+document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>{quizCluster=null;setQuizMode(b.dataset.mode);}));
+document.querySelectorAll('[data-confidence]').forEach(b=>b.addEventListener('click',()=>{if(quizLocked)return;quizConfidence=Number(b.dataset.confidence);document.querySelectorAll('[data-confidence]').forEach(x=>x.classList.toggle('active',x===b));}));
+document.getElementById('audioToggle').addEventListener('click',()=>{if(!activeAudio)return toast('Choose a real recording first.');activeAudio.paused?activeAudio.play():activeAudio.pause();});
+document.getElementById('audioSeek').addEventListener('input',e=>{if(activeAudio&&activeAudio.duration)activeAudio.currentTime=activeAudio.duration*(Number(e.target.value)/1000);});
+document.getElementById('fieldLaunch').addEventListener('click',openFieldMode);
+document.getElementById('fieldClose').addEventListener('click',closeFieldMode);
+document.getElementById('fieldBack').addEventListener('click',()=>{fieldAnswers.pop();renderFieldMode();});
+document.getElementById('fieldReset').addEventListener('click',()=>{fieldAnswers=[];renderFieldMode();});
+document.addEventListener('keydown',e=>{
+  const typing=['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName);
+  if(e.key==='Escape'){closeDetail();closeFieldMode();document.getElementById('compareModal').classList.remove('show');document.body.style.overflow='';}
+  if(!typing&&e.key.toLowerCase()==='f'){e.preventDefault();openFieldMode();}
+  if(!typing&&['1','2','3','4'].includes(e.key)&&!quizLocked&&!document.getElementById('fieldModal').classList.contains('show'))document.querySelectorAll('.quiz-option')[Number(e.key)-1]?.click();
+  if(!typing&&e.key.toLowerCase()==='n'&&quizLocked)document.getElementById('quizNext').click();
+});
+
+renderToday();renderCourse();renderAudioGrid();renderAtlas();renderSpecies();renderCompareDock();renderConfusions();renderKey();renderCandidates();renderProgress();newQuiz();
+drawSignature(audioLibrary.song.shape);
+</script>
+</body>
+</html>
