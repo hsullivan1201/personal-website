@@ -960,6 +960,8 @@ let audioFrame = null;
 const currentMonth = new Date().getMonth();
 const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const reviewIntervals = [0,1,3,7,21,60];
+const MEDIA_VERSION = '20260714';
+const mediaUrl = file => `${file}?v=${MEDIA_VERSION}`;
 
 function reviewFor(id){
   return reviewState[id] || {level:0,attempts:0,correct:0,due:0,streak:0,confidentMisses:0};
@@ -968,7 +970,7 @@ function isStrong(id){return learned.has(id) || reviewFor(id).level>=4;}
 function saveReview(){localStorage.setItem('sparrowReviewState',JSON.stringify(reviewState));}
 
 function photoTag(photo,alt,className='') {
-  return '<img class="'+className+'" src="'+photo.file+'" alt="'+alt+'" loading="lazy" onerror="this.style.display=\'none\';this.parentElement.classList.add(\'image-failed\')">';
+  return '<img class="'+className+'" src="'+mediaUrl(photo.file)+'" alt="'+alt+'" loading="lazy" onerror="this.style.display=\'none\';this.parentElement.classList.add(\'image-failed\')">';
 }
 
 function imgTag(s, className='') {
@@ -1296,7 +1298,7 @@ function stopAudio(){
 function playReal(id,blind=false){
   const lib=audioLibrary[id]; if(!lib)return previewSynthetic(id);
   stopAudio(); activeAudioId=id; activeAudioBlind=blind;
-  activeAudio=document.getElementById('realAudioElement');activeAudio.src=lib.file;activeAudio.load();
+  activeAudio=document.getElementById('realAudioElement');activeAudio.src=mediaUrl(lib.file);activeAudio.load();
   const s=species.find(x=>x.id===id);
   document.getElementById('audioNow').textContent=blind?'Mystery recording':`${s.name} · ${lib.kind}`;
   document.getElementById('audioMeta').innerHTML=blind?'Species hidden until you answer. Focus on rhythm → texture → contour.':`${lib.author} · ${lib.license} · <a href="${lib.source}" target="_blank" rel="noreferrer">source ↗</a>`;
@@ -1334,7 +1336,7 @@ function renderToday(){
   document.getElementById('nowMonth').textContent=`Working set · ${month}`;
   const strong=species.filter(s=>s.months[currentMonth]===2),possible=species.filter(s=>s.months[currentMonth]===1),unlikely=species.filter(s=>!s.months[currentMonth]);
   const ordered=[...strong,...possible].slice(0,9);
-  document.getElementById('nowChips').innerHTML=ordered.map(s=>`<div class="now-chip"><img src="${s.photo}" alt=""><button data-now-open="${s.id}">${s.name}</button><span title="${s.months[currentMonth]===2?'strong window':'regular or local'}">${s.months[currentMonth]===2?'●':'○'}</span></div>`).join('');
+  document.getElementById('nowChips').innerHTML=ordered.map(s=>`<div class="now-chip"><img src="${mediaUrl(s.photo)}" alt=""><button data-now-open="${s.id}">${s.name}</button><span title="${s.months[currentMonth]===2?'strong window':'regular or local'}">${s.months[currentMonth]===2?'●':'○'}</span></div>`).join('');
   document.getElementById('nowLegend').textContent=`● strongest window (${strong.length}) · ○ regular, local, or lower likelihood (${possible.length}) · ${unlikely.length} core species need exceptional evidence this month.`;
   document.querySelectorAll('[data-now-open]').forEach(b=>b.addEventListener('click',()=>openDetail(b.dataset.nowOpen)));
   const trap=unlikely.find(s=>s.id==='white-throated')||unlikely[0],anchor=strong[0]||possible[0];
@@ -1377,11 +1379,11 @@ function renderFieldMode(){
   if(idx<keyQuestions.length){
     const q=keyQuestions[idx];
     const preview=[...species].map(s=>({s,...scoreCandidate(s,fieldAnswers)})).sort((a,b)=>b.score-a.score).slice(0,3);
-    body.innerHTML=`<div class="lesson-count" style="color:var(--gold)">Observation ${idx+1} · skip anything uncertain</div><h3 class="field-question">${q.q}</h3><div class="field-options">${q.options.map(o=>`<button data-field-answer="${o[0]}">${o[1]}</button>`).join('')}<button data-field-answer="skip">Not sure — do not invent data</button></div>${idx?`<div style="margin-top:20px;color:rgba(255,255,255,.55);font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;font-weight:900">Current shortlist</div><div class="field-results">${preview.map(x=>`<div class="field-result"><img src="${x.s.photo}" alt=""><div><h4>${x.s.name}</h4><p>${x.s.mnemonic}</p></div><strong>${x.score}</strong></div>`).join('')}</div>`:''}`;
+    body.innerHTML=`<div class="lesson-count" style="color:var(--gold)">Observation ${idx+1} · skip anything uncertain</div><h3 class="field-question">${q.q}</h3><div class="field-options">${q.options.map(o=>`<button data-field-answer="${o[0]}">${o[1]}</button>`).join('')}<button data-field-answer="skip">Not sure — do not invent data</button></div>${idx?`<div style="margin-top:20px;color:rgba(255,255,255,.55);font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;font-weight:900">Current shortlist</div><div class="field-results">${preview.map(x=>`<div class="field-result"><img src="${mediaUrl(x.s.photo)}" alt=""><div><h4>${x.s.name}</h4><p>${x.s.mnemonic}</p></div><strong>${x.score}</strong></div>`).join('')}</div>`:''}`;
     body.querySelectorAll('[data-field-answer]').forEach(b=>b.addEventListener('click',()=>{fieldAnswers.push({key:q.key,value:b.dataset.fieldAnswer});renderFieldMode();}));
   }else{
     const ranked=[...species].map(s=>({s,...scoreCandidate(s,fieldAnswers)})).sort((a,b)=>b.score-a.score).slice(0,5);
-    body.innerHTML=`<div class="lesson-count" style="color:var(--gold)">Ranked hypotheses · scores are fit, not probability</div><h3 class="field-question">Test the top two.</h3><div class="field-results">${ranked.map(({s,score,reasons})=>`<div class="field-result"><img src="${s.photo}" alt=""><div><h4>${s.name} · ${score}</h4><p>${reasons.slice(0,3).map(r=>`${r.match?'✓':'×'} ${r.label}`).join(' · ')}</p></div><button data-field-open="${s.id}">open</button></div>`).join('')}</div><p style="color:rgba(255,255,255,.62);margin-top:15px">Next move: compare the first two candidates and seek one observation that has opposite predictions. Do not average ten weak impressions.</p>`;
+    body.innerHTML=`<div class="lesson-count" style="color:var(--gold)">Ranked hypotheses · scores are fit, not probability</div><h3 class="field-question">Test the top two.</h3><div class="field-results">${ranked.map(({s,score,reasons})=>`<div class="field-result"><img src="${mediaUrl(s.photo)}" alt=""><div><h4>${s.name} · ${score}</h4><p>${reasons.slice(0,3).map(r=>`${r.match?'✓':'×'} ${r.label}`).join(' · ')}</p></div><button data-field-open="${s.id}">open</button></div>`).join('')}</div><p style="color:rgba(255,255,255,.62);margin-top:15px">Next move: compare the first two candidates and seek one observation that has opposite predictions. Do not average ten weak impressions.</p>`;
     body.querySelectorAll('[data-field-open]').forEach(b=>b.addEventListener('click',()=>{closeFieldMode();openDetail(b.dataset.fieldOpen);}));
   }
   document.getElementById('fieldBack').disabled=!fieldAnswers.length;
