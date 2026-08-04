@@ -4,7 +4,7 @@
 // ?worker=http://localhost:8787
 const WORKER_URL =
   new URLSearchParams(location.search).get("worker") ||
-  "https://ramble-worker.lostinthehaze.workers.dev";
+  "https://ramble-api.lostinthehaze.net";
 
 const MAX_SECONDS = 600; // 10 min cap, matches the worker
 

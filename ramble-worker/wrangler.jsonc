@@ -4,12 +4,20 @@
   "main": "src/index.js",
   "compatibility_date": "2026-08-01",
 
+  // First-party hostname for the API. The lostinthehaze.net zone lives in
+  // the Hsullivan1201 Cloudflare account; deploying from there creates the
+  // DNS record automatically. workers.dev is disabled — one URL, first-party.
+  "routes": [
+    { "pattern": "ramble-api.lostinthehaze.net", "custom_domain": true }
+  ],
+  "workers_dev": false,
+
   // KV holds: the single passkey credential, short-lived webauthn
   // challenges, and the daily session counter.
   // Create with: npx wrangler kv namespace create RAMBLE_KV
   // then paste the id below.
   "kv_namespaces": [
-    { "binding": "KV", "id": "73a91dc4b4be48fa952a6e532397a991" }
+    { "binding": "KV", "id": "0fa778c3138643a889b2a66eea67318d" }
   ],
 
   "vars": {

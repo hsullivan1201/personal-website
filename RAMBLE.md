@@ -37,9 +37,10 @@ From `ramble-worker/`:
    - In the OpenAI dashboard, check data controls and make sure retention /
      training opt-outs are on.
 
-4. `npx wrangler deploy` — note the `*.workers.dev` URL it prints.
-5. Put that URL into `static/ramble/app.js` (the `WORKER_URL` const at
-   the top), then push the site.
+4. `npx wrangler deploy` — the worker serves at
+   `ramble-api.lostinthehaze.net` (custom domain on the zone; the account
+   that owns the lostinthehaze.net DNS is Hsullivan1201@gmail.com's).
+   That URL is already wired into `static/ramble/app.js` (`WORKER_URL`).
 
 ## Enroll your passkey (once, on your phone)
 
@@ -80,8 +81,10 @@ also works). The page is installable and opens straight to the button.
 - Auth fallback: if passkeys ever misbehave, set `AUTH_MODE` to `token`,
   `npx wrangler secret put BEARER_TOKEN`, and redeploy. (The page's token
   mode would need a small addition — it currently only speaks passkey.)
-- The workers.dev URL in `app.js` is public by nature; that's fine, the
-  worker rejects anything without a valid passkey assertion.
+- The API hostname in `app.js` is public by nature; that's fine, the
+  worker rejects anything without a valid passkey assertion. It's a
+  first-party subdomain (not workers.dev) so tracking-protection lists
+  and content blockers leave it alone.
 - Free-plan Workers CPU limits should be fine (the worker mostly waits on
   APIs); if big uploads ever hit the 10 ms CPU wall, the $5 plan raises it.
 - Local dev: `cd ramble-worker && cp .dev.vars.example .dev.vars`, fill it
