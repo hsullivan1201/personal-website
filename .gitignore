@@ -1,5 +1,9 @@
 .DS_Store
 public/
+node_modules/
+.dev.vars
+.wrangler/
+.playwright-mcp/
 .vscode/
 *.swp
 obsidian_templates/

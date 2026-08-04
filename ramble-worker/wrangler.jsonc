@@ -1,0 +1,54 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "ramble-worker",
+  "main": "src/index.js",
+  "compatibility_date": "2026-08-01",
+
+  // KV holds: the single passkey credential, short-lived webauthn
+  // challenges, and the daily session counter.
+  // Create with: npx wrangler kv namespace create RAMBLE_KV
+  // then paste the id below.
+  "kv_namespaces": [
+    { "binding": "KV", "id": "73a91dc4b4be48fa952a6e532397a991" }
+  ],
+
+  "vars": {
+    // WebAuthn relying party. RP_ID is the domain the /ramble page lives on.
+    "RP_ID": "lostinthehaze.net",
+    "RP_NAME": "ramble",
+    // Origins allowed for CORS and expected in WebAuthn assertions.
+    // localhost entries are for testing with `zola serve`.
+    "ALLOWED_ORIGINS": "https://lostinthehaze.net,http://localhost:1111,http://127.0.0.1:1111",
+
+    // "passkey" (default) or "token" (bearer-token fallback, see README)
+    "AUTH_MODE": "passkey",
+
+    // STT stage. Model is swappable without touching code.
+    "STT_API_BASE": "https://api.openai.com/v1",
+    "STT_MODEL": "gpt-4o-transcribe",
+
+    // CLEAN stage. Candidate per spec: gpt-5.6-luna (cheap tier).
+    // Acceptance test against one tier up (terra) before settling.
+    "LLM_API_BASE": "https://api.openai.com/v1",
+    "CLEAN_MODEL": "gpt-5.6-luna",
+
+    // Where cleaned rambles get committed.
+    "GITHUB_API_BASE": "https://api.github.com",
+    "GITHUB_REPO": "hsullivan1201/ramble-inbox",
+    "GITHUB_BRANCH": "main",
+
+    // Filenames are stamped in this timezone.
+    "TIMEZONE": "America/New_York",
+
+    // Caps. Friendly errors when exceeded.
+    "MAX_SESSIONS_PER_DAY": "20",
+    "MAX_UPLOAD_BYTES": "26214400" // 25 MiB ≈ OpenAI's audio upload limit
+  }
+
+  // Secrets (set with `npx wrangler secret put <NAME>`, never in this file):
+  //   STT_API_KEY        - OpenAI key for transcription
+  //   LLM_API_KEY        - key for the CLEAN model (same OpenAI key is fine)
+  //   GITHUB_PAT         - fine-grained PAT, ramble-inbox only, contents r/w
+  //   REGISTRATION_KEY   - one-time setup phrase that gates passkey enrollment
+  //   BEARER_TOKEN       - only if AUTH_MODE=token (fallback plan)
+}
