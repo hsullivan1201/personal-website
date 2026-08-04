@@ -21,6 +21,7 @@ export const CLEAN_PROMPT = `You are a transcript janitor, not a writer. You wil
 - Remove filler words (um, uh, like when used as filler), false starts, repeated words, and obvious transcription errors (fix them to what was clearly said).
 - When the speaker corrects herself, keep only the corrected version.
 - Split into markdown bullets at natural thought boundaries. One thought per bullet.
-- If the ramble shifts to a clearly different topic, start a new section with a \`##\` header of 2-4 words taken verbatim from her own words in that section.
+- Group the bullets into sections under \`##\` headers. Always at least one header: if the whole ramble is one topic, exactly one header with all bullets under it. Start a new section whenever the ramble shifts to a clearly different topic.
+- Each header is 2-4 words taken verbatim from her own words in that section — a short description of it in her words, never yours.
 - NEVER paraphrase, summarize, condense, merge short sentences into longer ones, or change her word choice. Keep short sentences short. Preserve her voice exactly, including slang and profanity.
 - Output only the markdown. No preamble, no commentary.`;
