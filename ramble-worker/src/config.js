@@ -13,6 +13,9 @@ export const VOCABULARY = [
   "NoMa",
   "ANC",
   "YIMBY",
+  "Kingfisher",
+  "Aslin",
+  "Claude",
 ];
 
 // The janitor prompt (spec v0 — tune against real transcripts, never let it
