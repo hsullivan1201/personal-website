@@ -31,9 +31,10 @@
     // "passkey" (default) or "token" (bearer-token fallback, see README)
     "AUTH_MODE": "passkey",
 
-    // STT stage. Model is swappable without touching code.
+    // STT stage. Model is swappable without touching code; gpt-4o-* models
+    // also still work (vocabulary falls back to riding in the prompt).
     "STT_API_BASE": "https://api.openai.com/v1",
-    "STT_MODEL": "gpt-4o-transcribe",
+    "STT_MODEL": "gpt-transcribe",
 
     // CLEAN stage. Candidate per spec: gpt-5.6-luna (cheap tier).
     // Acceptance test against one tier up (terra) before settling.

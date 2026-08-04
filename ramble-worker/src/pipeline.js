@@ -16,12 +16,18 @@ export async function transcribe(env, audioBlob) {
   const form = new FormData();
   form.append("file", audioBlob, `ramble.${ext}`);
   form.append("model", env.STT_MODEL);
-  form.append("response_format", "text");
-  // Keyword hints: a standing vocabulary of proper nouns she actually uses.
-  form.append(
-    "prompt",
-    `Casual spoken notes. Vocabulary that may come up: ${VOCABULARY.join(", ")}.`
-  );
+  form.append("response_format", "json");
+  // keywords[] forbids <, >, and newlines
+  const vocab = VOCABULARY.map((w) => w.replace(/[<>\r\n]/g, " ").trim()).filter(Boolean);
+  if (env.STT_MODEL.startsWith("gpt-4o")) {
+    // older transcribe family: vocabulary rides in the prompt
+    form.append("prompt", `Casual spoken notes. Vocabulary that may come up: ${vocab.join(", ")}.`);
+  } else {
+    // gpt-transcribe (July 2026+): dedicated keyword and language hints
+    form.append("prompt", "Casual spoken notes.");
+    for (const w of vocab) form.append("keywords[]", w);
+    form.append("languages[]", "en");
+  }
 
   const res = await fetch(`${env.STT_API_BASE}/audio/transcriptions`, {
     method: "POST",
@@ -32,7 +38,8 @@ export async function transcribe(env, audioBlob) {
     const detail = await res.text().catch(() => "");
     throw new PipelineError("stt", res.status, detail);
   }
-  const text = (await res.text()).trim();
+  const data = await res.json().catch(() => ({}));
+  const text = (data.text || "").trim();
   if (!text) throw new PipelineError("stt", 200, "empty transcript");
   return text;
 }
