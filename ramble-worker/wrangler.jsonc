@@ -39,6 +39,8 @@
     // Acceptance test against one tier up (terra) before settling.
     "LLM_API_BASE": "https://api.openai.com/v1",
     "CLEAN_MODEL": "gpt-5.6-luna",
+    // Summary + action-items pass. Defaults to CLEAN_MODEL if empty.
+    "DISTILL_MODEL": "",
 
     // Where cleaned rambles get committed.
     "GITHUB_API_BASE": "https://api.github.com",

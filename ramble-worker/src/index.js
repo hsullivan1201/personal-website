@@ -4,7 +4,7 @@ import {
   authOptions,
   verifyAssertion,
 } from "./webauthn.js";
-import { transcribe, clean, commitRamble, PipelineError } from "./pipeline.js";
+import { transcribe, clean, distill, commitRamble, PipelineError } from "./pipeline.js";
 
 export default {
   async fetch(request, env) {
@@ -114,7 +114,8 @@ async function handleSession(request, env, origin, cors) {
   try {
     const transcript = await transcribe(env, audio);
     const cleaned = await clean(env, transcript);
-    const path = await commitRamble(env, cleaned);
+    const extras = await distill(env, cleaned); // null on failure — never blocks filing
+    const path = await commitRamble(env, cleaned, extras);
     return json({ ok: true, path }, 200, cors);
   } catch (err) {
     if (err instanceof PipelineError) {

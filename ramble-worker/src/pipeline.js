@@ -1,4 +1,4 @@
-import { VOCABULARY, CLEAN_PROMPT } from "./config.js";
+import { VOCABULARY, CLEAN_PROMPT, DISTILL_PROMPT } from "./config.js";
 
 const EXT_BY_MIME = {
   "audio/mp4": "mp4",
@@ -62,11 +62,49 @@ export async function clean(env, transcript) {
   return out;
 }
 
+// Extract-only second pass: one-sentence summary + action items. Best
+// effort by design — any failure returns null and the ramble files bare.
+export async function distill(env, cleaned) {
+  try {
+    const res = await fetch(`${env.LLM_API_BASE}/chat/completions`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${env.LLM_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: env.DISTILL_MODEL || env.CLEAN_MODEL,
+        response_format: { type: "json_object" },
+        messages: [
+          { role: "system", content: DISTILL_PROMPT },
+          { role: "user", content: cleaned },
+        ],
+      }),
+    });
+    if (!res.ok) throw new Error(`distill ${res.status}`);
+    const data = await res.json();
+    const parsed = JSON.parse(data.choices?.[0]?.message?.content ?? "");
+    const summary = typeof parsed.summary === "string" ? parsed.summary.trim() : "";
+    const actions = Array.isArray(parsed.actions)
+      ? parsed.actions.filter((a) => typeof a === "string" && a.trim()).map((a) => a.trim())
+      : [];
+    return summary || actions.length ? { summary, actions } : null;
+  } catch (err) {
+    console.error(`distill skipped: ${err.message}`);
+    return null;
+  }
+}
+
 // Commits rambles/YYYY-MM-DD-HHmm.md via the GitHub contents API.
 // On a same-minute collision, retries with a -2 / -3 suffix.
-export async function commitRamble(env, markdown) {
+export async function commitRamble(env, markdown, extras) {
   const stamp = localStamp(env.TIMEZONE);
-  const body = `# Ramble — ${stamp.human}\n\n${markdown}\n`;
+  let body = `# Ramble — ${stamp.human}\n\n`;
+  if (extras?.summary) body += `*${extras.summary}*\n\n`;
+  body += `${markdown}\n`;
+  if (extras?.actions?.length) {
+    body += `\n## Action items\n\n${extras.actions.map((a) => `- ${a}`).join("\n")}\n`;
+  }
   const content = btoa(String.fromCharCode(...new TextEncoder().encode(body)));
 
   for (let attempt = 1; attempt <= 3; attempt++) {
