@@ -2,6 +2,11 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<script>
+// webauthn and the API's CORS allowlist both require a secure context
+if (location.protocol === "http:" && !["localhost", "127.0.0.1"].includes(location.hostname))
+  location.replace(location.href.replace("http:", "https:"));
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>ramble</title>
 <link rel="manifest" href="manifest.webmanifest">
