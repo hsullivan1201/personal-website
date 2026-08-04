@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ramble diag 2</title>
+<meta name="robots" content="noindex, nofollow">
+<style>
+body { background:#1c1b1a; color:#e6e1dc; font-family: "courier new", monospace;
+       font-size: 0.85rem; padding: 1rem; line-height: 1.5; word-break: break-all; }
+.ok { color: #7fbf7f; } .bad { color: #e06c6c; }
+</style>
+</head>
+<body>
+<div id="out">running probes…</div>
+<script>
+const API = "https://ramble-api.lostinthehaze.net";
+const out = document.getElementById("out");
+const line = (label, ok, detail) => {
+  const d = document.createElement("div");
+  d.className = ok ? "ok" : "bad";
+  d.textContent = `${ok ? "✓" : "✗"} ${label}: ${detail}`;
+  out.appendChild(d);
+};
+const probe = async (label, fn) => {
+  try { line(label, true, await fn()); }
+  catch (e) { line(label, false, e.name + " " + e.message); }
+};
+
+(async () => {
+  out.textContent = "";
+  const info = document.createElement("div");
+  info.textContent = "UA: " + navigator.userAgent;
+  out.appendChild(info);
+
+  await probe("same-origin GET", async () => "status " + (await fetch("./manifest.webmanifest")).status);
+
+  await probe("API fetch GET", async () => {
+    const r = await fetch(API + "/health");
+    return "status " + r.status + " " + await r.text();
+  });
+
+  await probe("API fetch no-cors", async () => {
+    const r = await fetch(API + "/health", { mode: "no-cors" });
+    return "opaque ok (network path works, type=" + r.type + ")";
+  });
+
+  await probe("API XHR GET", () => new Promise((res, rej) => {
+    const x = new XMLHttpRequest();
+    x.open("GET", API + "/health");
+    x.onload = () => res("status " + x.status);
+    x.onerror = () => rej(new Error("XHR network error"));
+    x.timeout = 10000;
+    x.ontimeout = () => rej(new Error("XHR timeout"));
+    x.send();
+  }));
+
+  await probe("neutral cross-origin (github api)", async () => {
+    const r = await fetch("https://api.github.com/zen");
+    return "status " + r.status;
+  });
+
+  await probe("neutral cross-origin (wikipedia)", async () => {
+    const r = await fetch("https://en.wikipedia.org/api/rest_v1/page/summary/Sparrow");
+    return "status " + r.status;
+  });
+
+  line("webauthn", !!window.PublicKeyCredential, window.PublicKeyCredential ? "available" : "missing");
+
+  const done = document.createElement("div");
+  done.textContent = "— done. screenshot this (run in BOTH firefox and safari). —";
+  out.appendChild(done);
+})();
+</script>
+</body>
+</html>
