@@ -1,9 +1,12 @@
 // ramble — voice capture. talks only to the worker; no secrets live here.
 
 // Set after the worker is deployed. Override for local testing with
-// ?worker=http://localhost:8787
+// ?worker=http://localhost:8787 — honored only when the page itself is on
+// localhost, so a crafted link can't point the live page (audio + passkey
+// assertion) at someone else's server.
+const IS_LOCAL = ["localhost", "127.0.0.1"].includes(location.hostname);
 const WORKER_URL =
-  new URLSearchParams(location.search).get("worker") ||
+  (IS_LOCAL && new URLSearchParams(location.search).get("worker")) ||
   "https://ramble-api.lostinthehaze.net";
 
 const MAX_SECONDS = 600; // 10 min cap, matches the worker
