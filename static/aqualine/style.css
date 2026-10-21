@@ -1,0 +1,266 @@
+:root {
+  --aqua: #2fd6d0;
+  --bronze: #4b3a2e;
+  --ui: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+* { box-sizing: border-box; }
+html, body {
+  margin: 0;
+  height: 100%;
+  background: #000;
+  color: #e9e4d8;
+  font-family: var(--ui);
+  overflow: hidden;
+}
+.sr {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+#wrap {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+#stage {
+  position: relative;
+  width: 100vw;
+  aspect-ratio: 3 / 2;
+  background: #000;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+#view {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* hud */
+.home, .hud {
+  position: absolute;
+  top: 1.2%;
+  font: 600 clamp(10px, 1.15vw, 13px) var(--ui);
+  letter-spacing: 0.04em;
+  color: #f3efe6;
+  background: rgba(20, 16, 13, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  padding: 0.35em 0.8em;
+  border-radius: 2px;
+  text-decoration: none;
+  cursor: pointer;
+  z-index: 3;
+  backdrop-filter: blur(3px);
+}
+.home { left: 1%; }
+.hud { right: 1%; }
+.home:hover, .hud:hover, .home:focus-visible, .hud:focus-visible {
+  background: var(--aqua);
+  color: #062626;
+  outline: none;
+}
+
+/* the flash "access" button: orange, goes yellow on hover */
+#access {
+  position: absolute;
+  left: 50%;
+  top: 88.5%;
+  transform: translate(-50%, -50%) scale(0.9);
+  font: clamp(11px, 1.35vw, 16px) Georgia, "Times New Roman", serif;
+  color: #fff;
+  background: #a2410f;
+  border: 1px solid #5e2205;
+  padding: 0.12em 2.1em 0.18em;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.6s, transform 0.6s;
+  z-index: 3;
+}
+#access.on {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate(-50%, -50%) scale(1);
+}
+#access:hover, #access:focus-visible {
+  background: #ffff00;
+  color: #000;
+  outline: none;
+}
+
+#caption {
+  position: absolute;
+  left: 50%;
+  bottom: 2.2%;
+  transform: translateX(-50%);
+  font: 500 clamp(10px, 1.1vw, 13px) var(--ui);
+  letter-spacing: 0.05em;
+  color: #f3efe6;
+  background: rgba(10, 18, 20, 0.6);
+  padding: 0.3em 0.9em;
+  border-radius: 2px;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.25s;
+  pointer-events: none;
+  z-index: 2;
+}
+#caption.on { opacity: 1; }
+
+/* preloader */
+#loader {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(ellipse at 50% 60%, #06292b 0%, #000 70%);
+  z-index: 5;
+  transition: opacity 0.9s;
+}
+#loader.gone { opacity: 0; pointer-events: none; }
+.ld-inner { text-align: center; width: min(80%, 460px); }
+.ld-roundel {
+  width: clamp(36px, 6vw, 64px);
+  height: clamp(36px, 6vw, 64px);
+  margin: 0 auto 0.8em;
+  border-radius: 50%;
+  background: var(--bronze);
+  border: 3px solid var(--aqua);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: bold clamp(18px, 3.4vw, 36px) var(--ui);
+  color: #f3efe6;
+  box-shadow: 0 0 30px rgba(47, 214, 208, 0.35);
+}
+.ld-title {
+  margin: 0;
+  font: bold clamp(22px, 4.2vw, 48px) var(--ui);
+  letter-spacing: -0.01em;
+  color: #f3efe6;
+}
+.ld-sub {
+  margin: 0.2em 0 1.4em;
+  font-size: clamp(10px, 1.2vw, 14px);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--aqua);
+}
+.ld-track {
+  height: 4px;
+  background: rgba(255, 255, 255, 0.12);
+  overflow: hidden;
+}
+#load-bar {
+  height: 100%;
+  width: 0;
+  background: linear-gradient(90deg, #bf0d3e, #ed8b00, #ffd100, #00b140, #009cde, #919d9d, var(--aqua));
+  transition: width 0.2s;
+}
+.ld-msg {
+  margin: 0.8em 0 0;
+  font-size: clamp(10px, 1.1vw, 13px);
+  color: rgba(233, 228, 216, 0.6);
+  font-style: italic;
+}
+.ld-go {
+  display: flex;
+  gap: 0.8em;
+  justify-content: center;
+  margin-top: 1.4em;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s;
+}
+#loader.ready .ld-go { opacity: 1; pointer-events: auto; }
+#loader.ready .ld-msg { visibility: hidden; }
+.ld-go button {
+  font: clamp(12px, 1.4vw, 16px) Georgia, "Times New Roman", serif;
+  color: #fff;
+  background: #a2410f;
+  border: 1px solid #5e2205;
+  padding: 0.2em 1.6em 0.26em;
+  cursor: pointer;
+}
+.ld-go button + button {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.25);
+  color: rgba(255, 255, 255, 0.7);
+}
+.ld-go button:hover, .ld-go button:focus-visible {
+  background: #ffff00;
+  color: #000;
+  outline: none;
+}
+.ld-fine {
+  margin-top: 1.6em;
+  font-size: clamp(9px, 0.95vw, 11px);
+  color: rgba(233, 228, 216, 0.45);
+  letter-spacing: 0.06em;
+}
+
+/* the strip map, like the one over the train doors */
+#strip {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  width: min(100vw, 900px);
+  padding: 10px 16px 12px;
+  margin-top: 4px;
+}
+.strip-line {
+  position: absolute;
+  left: 40px;
+  right: 40px;
+  top: 17px;
+  height: 5px;
+  background: var(--aqua);
+  border-radius: 3px;
+  opacity: 0.8;
+}
+.stop {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  background: none;
+  border: none;
+  color: rgba(233, 228, 216, 0.4);
+  font: 600 clamp(9px, 1.05vw, 12px) var(--ui);
+  cursor: pointer;
+  padding: 0;
+}
+.stop .dot {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: #111;
+  border: 3px solid rgba(233, 228, 216, 0.35);
+}
+.stop.seen { color: rgba(233, 228, 216, 0.8); }
+.stop.seen .dot { border-color: #f3efe6; background: #222; }
+.stop.here { color: var(--aqua); }
+.stop.here .dot {
+  background: var(--aqua);
+  border-color: #fff;
+  box-shadow: 0 0 10px var(--aqua);
+}
+.stop:hover .nm, .stop:focus-visible .nm { text-decoration: underline; }
+.stop:focus-visible { outline: none; }
+
+.nojs { color: #ddd; text-align: center; padding: 2em; }
+.nojs a { color: var(--aqua); }
+
+@media (max-width: 600px) {
+  .stop .nm { font-size: 8px; max-width: 60px; text-align: center; }
+  html, body { overflow: auto; }
+}
