@@ -264,3 +264,14 @@ html, body {
   .stop .nm { font-size: 8px; max-width: 60px; text-align: center; }
   html, body { overflow: auto; }
 }
+
+/* 3d: fade-to-black between stations, and the classic link in the loader */
+#fade {
+  position: absolute;
+  inset: 0;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+.ld-fine a { color: var(--aqua); }

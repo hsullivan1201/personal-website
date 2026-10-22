@@ -5,16 +5,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#000000">
 <title>aqua line</title>
-<meta name="description" content="A flooded, slightly wrong DC Metro: fountains in the trackbed, waterfalls on the escalators, an arrival board that rises out of a reflecting pool.">
+<meta name="description" content="A flooded, slightly wrong DC Metro in 3D: fountains in the trackbed, waterfalls on the escalators, an arrival board that rises out of a reflecting pool.">
 <link rel="stylesheet" href="style.css">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⛲</text></svg>">
+<script type="importmap">{ "imports": { "three": "./vendor/three.module.min.js" } }</script>
 </head>
 <body>
 <h1 class="sr">aqua line — a flooded dc metro</h1>
 
 <div id="wrap">
   <div id="stage">
-    <canvas id="view" role="img" aria-label="An illustrated, flooded DC Metro station. Move the pointer around; things respond."></canvas>
+    <canvas id="view" role="img" aria-label="A 3D, flooded DC Metro station. Move the pointer around; things respond."></canvas>
+    <div id="fade"></div>
     <a class="home" href="/">&larr; lost in the haze</a>
     <button id="mute" class="hud" type="button" aria-pressed="true">sound: on</button>
     <button id="access" type="button" tabindex="-1">tap in</button>
@@ -31,7 +33,7 @@
           <button id="enter" type="button">enter</button>
           <button id="enter-quiet" type="button">enter without sound</button>
         </div>
-        <p class="ld-fine">best experienced with sound &middot; move the pointer around &middot; things respond</p>
+        <p class="ld-fine">best experienced with sound &middot; move the pointer around &middot; things respond<br>slow computer? <a href="classic/">ride the classic 2d line</a></p>
       </div>
     </div>
   </div>
@@ -49,11 +51,6 @@
 
 <script src="engine.js"></script>
 <script src="audio.js"></script>
-<script src="s1-foggy.js"></script>
-<script src="s2-waterfront.js"></script>
-<script src="s3-metrocenter.js"></script>
-<script src="s4-potomac.js"></script>
-<script src="s5-tidalbasin.js"></script>
-<script src="app.js"></script>
+<script type="module" src="main3d.js"></script>
 </body>
 </html>
