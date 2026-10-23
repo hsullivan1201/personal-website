@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta name="theme-color" content="#021a22">
+<title>the deep end</title>
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🫧</text></svg>">
+<script type="importmap">{ "imports": { "three": "./vendor/three.module.min.js" } }</script>
+</head>
+<body>
+<h1 class="sr">the deep end</h1>
+
+<div id="wrap">
+  <div id="stage">
+    <canvas id="view" role="img" aria-label="A flooded, dreamlike metro station in 3D. Move the pointer around; things respond."></canvas>
+    <div id="fade"></div>
+    <a class="home" href="/">&larr; surface</a>
+    <button id="mute" class="hud" type="button" aria-pressed="true">sound: on</button>
+    <button id="access" type="button" tabindex="-1"></button>
+    <div id="caption" aria-live="polite"></div>
+    <a id="np" href="credits.html" target="_blank" rel="noopener" title="music credits"><span class="np-eq"><i></i><i></i><i></i><i></i></span><span class="np-win"><span class="np-text"></span></span></a>
+
+    <div id="loader">
+      <div class="ld-bubbles" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="ld-inner">
+        <div class="ld-orb" aria-hidden="true"></div>
+        <p class="ld-title">the deep end</p>
+        <p class="ld-sub">no lifeguard on duty</p>
+        <div class="ld-track"><div id="load-bar"></div></div>
+        <p class="ld-msg">filling the pools&hellip;</p>
+        <div class="ld-go">
+          <button id="enter" type="button">enter</button>
+          <button id="enter-quiet" type="button">enter (muted)</button>
+        </div>
+        <p class="ld-fine">headphones recommended &middot; move the pointer around &middot; touch the water</p>
+      </div>
+    </div>
+  </div>
+  <nav id="strip" aria-label="stations"></nav>
+</div>
+
+<noscript><p class="nojs">the deep end needs javascript. <a href="/">back to the surface</a></p></noscript>
+
+<script src="engine.js"></script>
+<script src="audio.js"></script>
+<script type="module" src="main3d.js"></script>
+</body>
+</html>

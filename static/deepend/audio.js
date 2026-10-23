@@ -1,12 +1,12 @@
-/* aqua line — sound. all synthesized with webaudio, no samples.
-   ambience beds crossfade per station; sfx are one-shots; music + go-go run on a
-   lookahead step sequencer. */
+/* the deep end — sound. beds and sfx are synthesized with webaudio; the music is
+   streamed (tanner helland, cc by 4.0) through the same graph so it can go
+   underwater with everything else. */
 (function () {
   const AQ = (window.AQ = window.AQ || {});
   const A = (AQ.audio = {});
-  let ctx = null, master, revIn, revOut, comp;
+  let ctx = null, master, revIn, revOut, comp, masterLP;
   let muted = false;
-  try { muted = localStorage.getItem("aqualine-muted") === "1"; } catch (e) {}
+  try { muted = localStorage.getItem("deepend-muted") === "1"; } catch (e) {}
   let beds = {};
   let scene = "street";
   let noise = {};
@@ -30,7 +30,12 @@
     comp.ratio.value = 3.5;
     comp.attack.value = 0.01;
     comp.release.value = 0.25;
-    master.connect(comp);
+    masterLP = ctx.createBiquadFilter();
+    masterLP.type = "lowpass";
+    masterLP.frequency.value = 20000;
+    masterLP.Q.value = 0.8;
+    master.connect(masterLP);
+    masterLP.connect(comp);
     comp.connect(ctx.destination);
     const rev = ctx.createConvolver();
     rev.buffer = impulse(3.6, 2.4);
@@ -51,7 +56,7 @@
 
   A.setMuted = function (m) {
     muted = m;
-    try { localStorage.setItem("aqualine-muted", m ? "1" : "0"); } catch (e) {}
+    try { localStorage.setItem("deepend-muted", m ? "1" : "0"); } catch (e) {}
     if (ctx) master.gain.setTargetAtTime(m ? 0 : 0.85, ctx.currentTime, 0.08);
     if (m && window.speechSynthesis) speechSynthesis.cancel();
   };
@@ -683,156 +688,167 @@
     seq = null;
   };
 
-  // ---------- music voices ----------
-  function pad(t, notes, dur, vol = 0.03, cutoff = 1100) {
-    notes.forEach((m, i) => {
-      for (const det of [-6, 6]) {
-        const o = osc("sawtooth", mtof(m), t, dur + 1.6);
-        o.detune.value = det + (Math.random() - 0.5) * 4;
-        const f = filt("lowpass", cutoff, 0.6);
-        f.frequency.setValueAtTime(cutoff * 0.5, t);
-        f.frequency.linearRampToValueAtTime(cutoff, t + dur * 0.5);
-        const g = ctx.createGain();
-        g.gain.setValueAtTime(0.0001, t);
-        g.gain.linearRampToValueAtTime(vol, t + Math.min(1.2, dur * 0.4));
-        g.gain.setValueAtTime(vol, t + dur);
-        g.gain.exponentialRampToValueAtTime(0.0001, t + dur + 1.5);
-        o.connect(f); f.connect(g);
-        out(g, 0.6, (i / notes.length - 0.5) * 0.8);
-      }
-    });
+  // ---------- music: streamed songs, one per station, crossfaded ----------
+  const SONGS = {
+    destiny: { title: "Destiny", file: "music/destiny.mp3" },
+    deeper: { title: "Deeper", file: "music/deeper.mp3" },
+    syntheticity: { title: "Syntheticity", file: "music/syntheticity.mp3" },
+    nevermore: { title: "Nevermore", file: "music/nevermore.mp3" },
+    faith: { title: "Faith (love remix)", file: "music/faith-love-remix.mp3" },
+    islands: { title: "Lost Islands", file: "music/lost-islands.mp3" },
+  };
+  A.songs = SONGS;
+  let song = null; // { key, el, gain }
+  let musicBus = null, duck = null;
+  A.onSong = null;
+  A.nowSong = () => (song ? song.key : null);
+  function musicGraph() {
+    if (musicBus) return;
+    duck = ctx.createGain();
+    musicBus = ctx.createGain();
+    musicBus.gain.value = 0.55;
+    musicBus.connect(duck);
+    duck.connect(master);
+    const send = ctx.createGain();
+    send.gain.value = 0.12;
+    duck.connect(send);
+    send.connect(revIn);
   }
-  function fmBell(t, m, vol = 0.08, pan = 0, ratio = 3.5) {
-    const f = mtof(m);
-    const c = osc("sine", f, t, 2.6);
-    const mo = osc("sine", f * ratio, t, 2.6);
+  A.playSong = function (key, fade = 2.5) {
+    if (!ctx || !SONGS[key]) return;
+    if (song && song.key === key) return;
+    musicGraph();
+    const t = ctx.currentTime;
+    if (song) {
+      const old = song;
+      old.gain.gain.cancelScheduledValues(t);
+      old.gain.gain.setValueAtTime(old.gain.gain.value, t);
+      old.gain.gain.linearRampToValueAtTime(0, t + fade);
+      setTimeout(() => { old.el.pause(); old.el.src = ""; try { old.node.disconnect(); } catch (e) {} }, fade * 1000 + 200);
+    }
+    const el = new Audio(SONGS[key].file);
+    el.loop = true;
+    el.preload = "auto";
+    const node = ctx.createMediaElementSource(el);
+    const g = ctx.createGain();
+    g.gain.value = 0;
+    node.connect(g);
+    g.connect(musicBus);
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(1, t + fade);
+    el.play().catch(() => {});
+    song = { key, el, gain: g, node };
+    if (A.onSong) A.onSong(SONGS[key]);
+  };
+  A.stopSong = function (fade = 1.5) {
+    if (!song || !ctx) return;
+    const old = song;
+    song = null;
+    old.gain.gain.linearRampToValueAtTime(0, ctx.currentTime + fade);
+    setTimeout(() => { old.el.pause(); old.el.src = ""; }, fade * 1000 + 200);
+    if (A.onSong) A.onSong(null);
+  };
+  A.duckSong = function (on) {
+    if (!duck) return;
+    duck.gain.setTargetAtTime(on ? 0.12 : 1, ctx.currentTime, 0.3);
+  };
+  // everything goes muffled and slow when you're below the surface
+  A.underwater = function (on, time = 1.2) {
+    if (!ctx) return;
+    masterLP.frequency.cancelScheduledValues(ctx.currentTime);
+    masterLP.frequency.setTargetAtTime(on ? 620 : 20000, ctx.currentTime, time / 3);
+    revOut.gain.setTargetAtTime(on ? 1.1 : cur.rev, ctx.currentTime, time / 3);
+  };
+
+  // ---------- the mystical bits ----------
+  // jellyfish: soft glass bells on a d major pentatonic, drowned in reverb
+  const JELLY = [62, 64, 66, 69, 71, 74, 76, 78, 81, 83];
+  A.jelly = function (i, pan = 0) {
+    if (!A.live()) return;
+    const t = ctx.currentTime;
+    const f = mtof(JELLY[((i % JELLY.length) + JELLY.length) % JELLY.length]);
+    const c = osc("sine", f, t, 3);
+    const m = osc("sine", f * 2.01, t, 3);
     const mg = ctx.createGain();
-    mg.gain.setValueAtTime(f * 2.2, t);
-    mg.gain.exponentialRampToValueAtTime(f * 0.05, t + 1.2);
-    mo.connect(mg); mg.connect(c.frequency);
+    mg.gain.setValueAtTime(f * 1.2, t);
+    mg.gain.exponentialRampToValueAtTime(f * 0.02, t + 1.6);
+    m.connect(mg); mg.connect(c.frequency);
     const g = ctx.createGain();
-    env(g, t, 0.003, vol, 2.4);
+    env(g, t, 0.01, 0.07, 2.8);
     c.connect(g);
-    out(g, 0.7, pan);
-  }
-  function droplet(t, m, vol = 0.06, pan = 0) {
-    const f = mtof(m);
-    const o = osc("sine", f * 1.6, t, 0.5);
-    o.frequency.exponentialRampToValueAtTime(f, t + 0.035);
+    out(g, 0.9, pan, 0.5);
+    const sh = osc("sine", f * 4, t, 1);
+    const sg = ctx.createGain();
+    env(sg, t, 0.005, 0.015, 0.8);
+    sh.connect(sg);
+    out(sg, 1, -pan, 0.3);
+  };
+  // a glossy bubble popping
+  A.pop = function (pan = 0) {
+    if (!A.live()) return;
+    const t = ctx.currentTime;
+    const f = 500 + Math.random() * 500;
+    const o = osc("sine", f, t, 0.15);
+    o.frequency.exponentialRampToValueAtTime(f * 2.6, t + 0.07);
     const g = ctx.createGain();
-    env(g, t, 0.002, vol, 0.45);
+    env(g, t, 0.003, 0.12, 0.09);
     o.connect(g);
-    out(g, 0.8, pan);
-  }
-  function bass(t, m, dur, vol = 0.16) {
-    const o = osc("triangle", mtof(m), t, dur);
-    const s = osc("sine", mtof(m - 12), t, dur);
-    const f = filt("lowpass", 420);
+    out(g, 0.5, pan);
+  };
+  // a coin flipped into a fountain: ting, ting, plop
+  A.coin = function (pan = 0) {
+    if (!A.live()) return;
+    const t = ctx.currentTime;
+    [0, 0.09, 0.15].forEach((d, i) => {
+      [1, 2.76, 5.4].forEach((r, k) => {
+        const o = osc("sine", 2600 * r * (1 - i * 0.03), t + d, 0.5);
+        const g = ctx.createGain();
+        env(g, t + d, 0.001, (0.06 / (k + 1)) * (1 - i * 0.3), 0.35 / (k + 1));
+        o.connect(g);
+        out(g, 0.4, pan);
+      });
+    });
+    setTimeout(() => A.plop(pan, 0.6), 650);
+  };
+  // the dive: a big splash, then bubbles boiling past the ears
+  A.dive = function () {
+    if (!A.live()) return;
+    A.splash(0);
+    const t = ctx.currentTime;
+    for (let i = 0; i < 40; i++) {
+      const tt = t + 0.3 + Math.random() * 1.8;
+      const f = 300 + Math.random() * 900;
+      const o = osc("sine", f, tt, 0.12);
+      o.frequency.exponentialRampToValueAtTime(f * 1.8, tt + 0.06);
+      const g = ctx.createGain();
+      env(g, tt, 0.004, 0.05 + Math.random() * 0.05, 0.08);
+      o.connect(g);
+      out(g, 0.6, Math.random() * 1.6 - 0.8);
+    }
+    const s = src("brown", 0.6);
+    const f = filt("lowpass", 300);
     const g = ctx.createGain();
     g.gain.setValueAtTime(0.0001, t);
-    g.gain.exponentialRampToValueAtTime(vol, t + 0.03);
-    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-    o.connect(f); s.connect(f); f.connect(g);
-    out(g, 0.15);
-  }
-  function shaker(t, vol = 0.04) {
-    const s = ctx.createBufferSource();
-    s.buffer = noise.white;
-    const f = filt("highpass", 6000);
-    const g = ctx.createGain();
-    env(g, t, 0.004, vol, 0.05);
+    g.gain.exponentialRampToValueAtTime(0.6, t + 0.4);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 3);
     s.connect(f); f.connect(g);
-    out(g, 0.2, 0.3);
-    s.start(t, Math.random() * 3, 0.08);
-  }
-
-  const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
-  const TRACKS = [
-    {
-      title: "REFLECTING POOL",
-      sub: "aqua line music club",
-      bpm: 68,
-      chords: [[53, 57, 60, 64], [52, 55, 59, 62], [50, 53, 57, 60, 64], [48, 52, 55, 59]],
-      scale: [72, 74, 76, 79, 81, 84, 86, 88],
-      fn(step, t) {
-        const bar = Math.floor(step / 16), s = step % 16;
-        const ch = this.chords[Math.floor(bar / 2) % this.chords.length];
-        if (s === 0 && bar % 2 === 0) { pad(t, ch, (60 / this.bpm) * 8, 0.022); bass(t, ch[0] - 12, (60 / this.bpm) * 3.5); }
-        if (s % 2 === 0 && Math.random() < 0.32) fmBell(t, pick(this.scale), 0.05, Math.random() * 1.4 - 0.7);
-        if (s % 4 === 3 && Math.random() < 0.3) droplet(t, pick(this.scale) + 12, 0.04, Math.random() - 0.5);
-      },
-    },
-    {
-      title: "FOGGY BOTTOM",
-      sub: "aqua line music club",
-      bpm: 60,
-      chords: [[45, 52, 55, 59, 60], [41, 48, 52, 55, 59], [43, 50, 55, 59, 62], [40, 47, 50, 55, 59]],
-      scale: [69, 71, 72, 76, 79, 81, 83],
-      fn(step, t) {
-        const bar = Math.floor(step / 16), s = step % 16;
-        const ch = this.chords[bar % this.chords.length];
-        if (s === 0) { pad(t, ch, (60 / this.bpm) * 4, 0.02, 800); bass(t, ch[0], (60 / this.bpm) * 3); }
-        if (s % 3 === 0 && Math.random() < 0.28) droplet(t, pick(this.scale), 0.05, Math.random() * 1.4 - 0.7);
-      },
-    },
-    {
-      title: "DOORS CLOSING",
-      sub: "aqua line music club",
-      bpm: 96,
-      chords: [[52, 56, 59, 64], [49, 52, 56, 61], [45, 49, 52, 57], [47, 51, 54, 59]],
-      motif: [76, null, 72, null, null, null, 76, 72, null, null, 79, null, 76, null, 72, null],
-      fn(step, t) {
-        const bar = Math.floor(step / 16), s = step % 16;
-        const ch = this.chords[bar % this.chords.length];
-        if (s === 0) { pad(t, ch, (60 / this.bpm) * 4, 0.018, 1400); }
-        if (s % 4 === 0) bass(t, ch[0] - 12, 0.3, 0.14);
-        if (s % 2 === 1) shaker(t, 0.025);
-        const m = this.motif[s];
-        if (m && (bar % 4 !== 3 || s < 8)) fmBell(t, m + (bar % 2 ? -1 : 0), 0.05, s < 8 ? -0.3 : 0.3, 2);
-      },
-    },
-    {
-      title: "BLUE LINE TO THE SEA",
-      sub: "aqua line music club",
-      bpm: 84,
-      chords: [[50, 54, 57, 61, 64], [47, 50, 54, 57, 62], [43, 47, 50, 54, 57], [45, 49, 52, 54, 57]],
-      scale: [74, 76, 78, 81, 83, 86],
-      fn(step, t) {
-        const bar = Math.floor(step / 16), s = step % 16;
-        const ch = this.chords[bar % this.chords.length];
-        if (s === 0) pad(t, ch, (60 / this.bpm) * 4, 0.018, 1200);
-        if ([0, 6, 10].includes(s)) bass(t, ch[0] - 12, 0.4, 0.13);
-        if (s % 2 === 0) shaker(t, s % 4 ? 0.02 : 0.035);
-        if (s % 2 === 0) droplet(t, this.scale[(s / 2 + bar * 3) % this.scale.length], 0.035, Math.sin(step) * 0.6);
-      },
-    },
-    {
-      title: "TIDAL BASIN (3AM)",
-      sub: "aqua line music club",
-      bpm: 52,
-      chords: [[48, 55, 62, 64, 71], [53, 57, 64, 67, 72]],
-      scale: [67, 71, 72, 74, 79, 83, 84],
-      fn(step, t) {
-        const bar = Math.floor(step / 16), s = step % 16;
-        const ch = this.chords[bar % this.chords.length];
-        if (s === 0) { pad(t, ch, (60 / this.bpm) * 4, 0.022, 700); bass(t, ch[0] - 12, (60 / this.bpm) * 4, 0.12); }
-        if (Math.random() < 0.09) fmBell(t, pick(this.scale), 0.04, Math.random() * 1.6 - 0.8, 1.41);
-      },
-    },
-  ];
-  A.tracks = TRACKS;
-  A.music = { index: 0, playing: false };
-  A.playTrack = function (i) {
-    if (!ctx) return;
-    A.music.index = ((i % TRACKS.length) + TRACKS.length) % TRACKS.length;
-    A.music.playing = true;
-    A.gogo.playing = false;
-    const tr = TRACKS[A.music.index];
-    startSeq({ bpm: tr.bpm, swing: 0, fn: tr.fn.bind(tr) });
+    out(g, 0.6);
+    s.stop(t + 3.2);
   };
-  A.stopMusic = function () {
-    A.music.playing = false;
-    if (!A.gogo.playing) seq = null;
+  // a long, glassy swell for strange moments
+  A.swell = function (root = 50) {
+    if (!A.live()) return;
+    const t = ctx.currentTime;
+    [0, 7, 12, 16, 19].forEach((iv, i) => {
+      const o = osc(i % 2 ? "triangle" : "sine", mtof(root + iv), t, 5);
+      o.detune.value = (Math.random() - 0.5) * 12;
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.03, t + 1.8);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 5);
+      o.connect(g);
+      out(g, 1, (i - 2) * 0.3, 0.4);
+    });
   };
 
   // ---------- bucket go-go ----------
@@ -913,10 +929,11 @@
     if (A.gogo.playing) {
       A.gogo.playing = false;
       seq = null;
+      A.duckSong(false);
       return false;
     }
-    A.music.playing = false;
     A.gogo.playing = true;
+    A.duckSong(true);
     startSeq({
       bpm: 95,
       swing: 0.09,

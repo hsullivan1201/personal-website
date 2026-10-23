@@ -1,4 +1,4 @@
-/* station 4 — potomac ave, in 3d. the mezzanine at night; the lights come up in banks. */
+/* station 4 — potomac ave. dark first, and things glow in the dark. the clock runs backwards. */
 import * as L from "../lib3d.js";
 const { THREE } = L;
 const AQ = window.AQ;
@@ -7,6 +7,7 @@ const A = AQ.audio;
 const S = {
   name: "Potomac Ave",
   ambience: "dark",
+  song: "nevermore",
   holdInput: true,
   exposure: 1.0,
   bloom: { strength: 0.65, radius: 0.5, threshold: 0.9 },
@@ -21,7 +22,7 @@ const PORTALS = [
   { x: 5, name: "Tidal Basin", line: "aqua", id: "right" },
 ];
 let st = null;
-let groups = [[], [], []], fixtures = [[], [], []], hemi, clock, clockTex, portalProxies = [], fountainProxy, spout, veil, rightGlow, poolWater;
+let groups = [[], [], []], fixtures = [[], [], []], hemi, clock, clockTex, portalProxies = [], fountainProxy, spout, veil, rightGlow, poolWater, rug, jellies = [];
 const LIGHT_K = 5.5;
 
 function drawClock(x, w) {
@@ -42,7 +43,7 @@ function drawClock(x, w) {
   x.fillStyle = "#4b3a2e";
   x.font = `bold ${w * 0.07}px "Helvetica Neue", Helvetica, Arial, sans-serif`;
   x.textAlign = "center";
-  x.fillText("AQUA LINE", c, c + r * 0.42);
+  x.fillText("NO HURRY", c, c + r * 0.42);
   const now = new Date();
   const hr = now.getHours() % 12, mn = now.getMinutes(), sc = now.getSeconds();
   const hand = (ang, len, lw, col) => {
@@ -54,9 +55,10 @@ function drawClock(x, w) {
     x.lineTo(c + Math.sin(ang) * r * len, c - Math.cos(ang) * r * len);
     x.stroke();
   };
-  hand(((hr + mn / 60) / 12) * Math.PI * 2, 0.5, w * 0.03, "#1d1915");
-  hand(((mn + sc / 60) / 60) * Math.PI * 2, 0.76, w * 0.02, "#1d1915");
-  hand((sc / 60) * Math.PI * 2, 0.82, w * 0.008, L.LINES.red);
+  // it keeps perfect time, in the other direction
+  hand(-((hr + mn / 60) / 12) * Math.PI * 2, 0.5, w * 0.03, "#1d1915");
+  hand(-((mn + sc / 60) / 60) * Math.PI * 2, 0.76, w * 0.02, "#1d1915");
+  hand(-(sc / 60) * Math.PI * 2, 0.82, w * 0.008, L.LINES.red);
   x.fillStyle = "#1d1915";
   x.beginPath(); x.arc(c, c, w * 0.02, 0, Math.PI * 2); x.fill();
 }
@@ -164,16 +166,23 @@ S.build = function ({ envTex }) {
       x.fill();
     }
   });
-  const rug = new THREE.Mesh(new THREE.CircleGeometry(3.3, 64), new THREE.MeshStandardMaterial({ map: rugTex, transparent: true, roughness: 0.35, alphaTest: 0.1 }));
+  rug = new THREE.Mesh(new THREE.CircleGeometry(3.3, 64), new THREE.MeshStandardMaterial({ map: rugTex, emissive: 0xffffff, emissiveMap: rugTex, emissiveIntensity: 0, transparent: true, roughness: 0.35, alphaTest: 0.1 }));
   rug.rotation.x = -Math.PI / 2;
   rug.position.set(0, 0.004, FZ);
   rug.receiveShadow = true;
   scene.add(rug);
+  // jellyfish that live here in the dark
+  jellies = [];
+  [[-3.4, 3.4, -8.5, 0xc89bff], [3.0, 4.2, -9.5, 0x7ff6ff], [0.6, 5.2, -11.0, 0x7fffc4]].forEach(([x, y, z, c], i) => {
+    const j = new L.Jelly({ color: c, size: 0.38, len: 1.2 }).at(x, y, z);
+    scene.add(j.group);
+    jellies.push(j);
+  });
 
   // the tiered fountain
   const stone = new THREE.MeshStandardMaterial({ color: 0xb48256, roughness: 0.6, flatShading: true });
   scene.add(L.at(L.lathe([[0, 0.36], [1.0, 0.36], [1.0, 0.45], [1.17, 0.45], [1.17, 0], [0, 0]], 0, { material: stone, segments: 8 }), 0, 0, FZ));
-  poolWater = new THREE.Mesh(new THREE.CircleGeometry(1.0, 8), new THREE.MeshStandardMaterial({ color: 0x1d6066, roughness: 0.05, metalness: 0.5, emissive: 0x0e4c50, emissiveIntensity: 0.9 }));
+  poolWater = new THREE.Mesh(new THREE.CircleGeometry(1.0, 8), new THREE.MeshStandardMaterial({ color: 0x1d6066, roughness: 0.22, metalness: 0.35, emissive: 0x0e4c50, emissiveIntensity: 0.9 }));
   poolWater.rotation.x = -Math.PI / 2;
   poolWater.rotation.z = Math.PI / 8;
   poolWater.position.set(0, 0.39, FZ);
@@ -185,7 +194,7 @@ S.build = function ({ envTex }) {
   veil = new L.Spray({ at: new THREE.Vector3(0, 1.03, FZ), count: 900, rate: 380, speed: 0.6, ring: 0.57, life: 0.6, size: 0.03, floorY: 0.38, spread: 0.2 });
   scene.add(spout.points, veil.points);
   const pl = new THREE.PointLight(0x80e8ee, 1.2, 4, 1.6);
-  pl.position.set(0, 0.6, FZ);
+  pl.position.set(0, 1.5, FZ);
   scene.add(pl);
   fountainProxy = L.hitProxy(2.6, 1.6, 2.6, 0, 0.8, FZ);
   scene.add(fountainProxy);
@@ -232,14 +241,18 @@ function applyLights(flicker = 0) {
     groups[g].forEach((l, i) => (l.intensity = k * (i === groups[g].length - 1 && g === 1 ? LIGHT_K * 0.9 : LIGHT_K)));
     fixtures[g].forEach((m) => (m.emissiveIntensity = k * 3));
   }
-  hemi.intensity = 0.02 + 0.1 * (st.level[0] + st.level[1] + st.level[2]) / 3;
+  const lit = (st.level[0] + st.level[1] + st.level[2]) / 3;
+  hemi.intensity = 0.02 + 0.1 * lit;
+  // bioluminescence: the rug and the jellies are brightest when the lights are off
+  rug.material.emissiveIntensity = 0.9 * (1 - lit) + 0.05;
+  for (const j of jellies) j.bellMat.opacity = 0.25 + 0.4 * (1 - lit);
 }
 
 S.update = function (dt, t) {
   // lights up on arrival, in three banks, with a clunk each
   if (!st.out) {
     st.t += dt;
-    const marks = [0.6, 1.35, 2.1];
+    const marks = [2.2, 3.0, 3.8];
     while (st.stage < 3 && st.t > marks[st.stage]) {
       A.clunk(st.stage);
       st.level[[0, 2, 1][st.stage]] = 1;
@@ -260,6 +273,7 @@ S.update = function (dt, t) {
     applyLights();
   }
   spout.update(dt);
+  for (const j of jellies) j.update(dt, t);
   veil.update(dt);
   poolWater.material.emissiveIntensity = 0.8 + 0.15 * Math.sin(t * 3);
   rightGlow.intensity = 9 + 2 * Math.sin(t * 1.8) + (st.hoverR ? 6 : 0);
@@ -280,7 +294,8 @@ function timeWords() {
 }
 S.hotspots = function () {
   return [
-    { id: "clock", caption: "the station clock", objects: [clock], click: () => A.announce(`The time is ${timeWords()}. The next train is eventually.`) },
+    { id: "clock", caption: "the station clock (it's going the other way)", objects: [clock], click: () => A.announce(`The time is ${timeWords()}. The time was ${timeWords()}. The next train was yesterday.`) },
+    ...jellies.map((j, i) => ({ id: "jelly" + i, caption: "a jellyfish", objects: [j.group], click: () => { j.pulse(); A.jelly(i * 3 + 1, j.group.position.x / 5); } })),
     {
       id: "right",
       caption: "→ tidal basin",

@@ -1,4 +1,4 @@
-/* station 1 — foggy bottom, in 3d. the gate. */
+/* station 1 — foggy bottom at dusk. the gate. */
 import * as L from "../lib3d.js";
 const { THREE } = L;
 const AQ = window.AQ;
@@ -7,8 +7,9 @@ const A = AQ.audio;
 const S = {
   name: "Foggy Bottom",
   ambience: "street",
-  exposure: 1.0,
-  bloom: { strength: 0.55, radius: 0.45, threshold: 0.92 },
+  song: "destiny",
+  exposure: 0.95,
+  bloom: { strength: 0.75, radius: 0.55, threshold: 0.86 },
   pose: { pos: [0, 1.65, 0.6], look: [0, 2.05, -10], fov: 52 },
   arrive: { pos: [0, 2.1, 5.5], look: [0, 2.3, -10] },
   arriveDur: 2.6,
@@ -16,7 +17,7 @@ const S = {
 const GZ = -8.9; // grille plane
 const SLOPE = -0.52; // escalator shaft pitch (radians)
 let st = null;
-let grille, emblem, beams = [], pylons = [], pylonLights = [], sky, petals, waterTex, gateProxy, monument, trees = [];
+let grille, emblem, beams = [], pylons = [], pylonLights = [], sky, petals, waterTex, gateProxy, monument, trees = [], lamps = [], flies;
 
 function paintEmblem(x, s) {
   const c = s / 2, r = s * 0.44;
@@ -27,7 +28,7 @@ function paintEmblem(x, s) {
   x.beginPath(); x.arc(c, c, r * 0.68, 0, Math.PI * 2); x.stroke();
   x.fillStyle = "rgba(30,34,36,0.75)";
   x.beginPath(); x.arc(c, c, r * 0.97, 0, Math.PI * 2); x.arc(c, c, r * 0.71, 0, Math.PI * 2, true); x.fill();
-  const txt = "AQUA LINE • FOUNTAIN SERVICE • EST. NEVER • ";
+  const txt = "THE DEEP END • NO LIFEGUARD ON DUTY • SWIM AT OWN RISK • ";
   x.fillStyle = "#e9e4d8";
   x.font = `bold ${s * 0.075}px "Helvetica Neue", Helvetica, Arial, sans-serif`;
   x.textAlign = "center";
@@ -60,40 +61,72 @@ S.build = function ({ envTex }) {
   const scene = (S.scene = new THREE.Scene());
   scene.environment = envTex;
   scene.environmentIntensity = 0.35;
-  scene.fog = new THREE.Fog(0xb9cbe6, 70, 390);
+  scene.fog = new THREE.Fog(0x8a6a8c, 50, 360);
 
   // ---- sky dome with painted clouds ----
   const skyTex = L.canvasTex(2048, 1024, (x, w, h) => {
+    // dusk: indigo overhead, violet, then a band of burning orange at the horizon
     const g = x.createLinearGradient(0, 0, 0, h / 2);
-    g.addColorStop(0, "#0b2a8a");
-    g.addColorStop(0.55, "#2b5fc4");
-    g.addColorStop(0.85, "#6f98dc");
-    g.addColorStop(1, "#a9c2ea");
+    g.addColorStop(0, "#070a2a");
+    g.addColorStop(0.45, "#241a5a");
+    g.addColorStop(0.72, "#6a3a86");
+    g.addColorStop(0.9, "#d8668a");
+    g.addColorStop(1, "#ffb070");
     x.fillStyle = g;
     x.fillRect(0, 0, w, h);
-    x.fillStyle = "#c9d4e2";
+    x.fillStyle = "#6a4a6a";
     x.fillRect(0, h / 2, w, h / 2);
     const R = L.rng(1201);
-    for (let i = 0; i < 38; i++) {
-      const cx = R() * w, cy = h * 0.22 + Math.pow(R(), 0.8) * h * 0.24;
-      const s = 22 + R() * 60 * (cy / (h / 2));
-      for (const off of [-w, 0, w]) AQ.paintCloud(x, L.rng(i * 13 + 1), cx + off, cy, s);
+    // the first stars
+    for (let i = 0; i < 500; i++) {
+      const y = Math.pow(R(), 1.6) * h * 0.32;
+      x.fillStyle = `rgba(255,255,255,${(0.25 + R() * 0.75) * (1 - y / (h * 0.34))})`;
+      x.fillRect(R() * w, y, R() < 0.1 ? 2 : 1, R() < 0.1 ? 2 : 1);
+    }
+    // the sun going down, a soft bloom on the horizon (u = 0.14)
+    const sx = w * 0.14, sy = h * 0.49;
+    const sg = x.createRadialGradient(sx, sy, 0, sx, sy, h * 0.22);
+    sg.addColorStop(0, "rgba(255,240,200,1)");
+    sg.addColorStop(0.08, "rgba(255,190,120,0.9)");
+    sg.addColorStop(0.4, "rgba(255,120,110,0.3)");
+    sg.addColorStop(1, "rgba(255,120,110,0)");
+    x.fillStyle = sg;
+    x.fillRect(0, 0, w, h);
+    // clouds lit pink from below
+    x.globalCompositeOperation = "source-over";
+    for (let i = 0; i < 30; i++) {
+      const cx = R() * w, cy = h * 0.3 + Math.pow(R(), 0.8) * h * 0.17;
+      const s = 18 + R() * 50 * (cy / (h / 2));
+      const c = document.createElement("canvas");
+      c.width = c.height = Math.ceil(s * 5);
+      AQ.paintCloud(c.getContext("2d"), L.rng(i * 13 + 1), c.width / 2, c.height / 2, s);
+      const cx2 = c.getContext("2d");
+      cx2.globalCompositeOperation = "source-atop";
+      const tint = cx2.createLinearGradient(0, 0, 0, c.height);
+      tint.addColorStop(0, "rgba(90,70,150,0.75)");
+      tint.addColorStop(0.6, "rgba(255,140,150,0.65)");
+      tint.addColorStop(1, "rgba(255,190,120,0.7)");
+      cx2.fillStyle = tint;
+      cx2.fillRect(0, 0, c.width, c.height);
+      for (const off of [-w, 0, w]) x.drawImage(c, cx + off - c.width / 2, cy - c.height / 2);
     }
   });
-  sky = new THREE.Mesh(new THREE.SphereGeometry(420, 48, 24), new THREE.MeshBasicMaterial({ map: skyTex, side: THREE.BackSide, fog: false, color: 0xb8b8b8 }));
+  sky = new THREE.Mesh(new THREE.SphereGeometry(420, 48, 24), new THREE.MeshBasicMaterial({ map: skyTex, side: THREE.BackSide, fog: false, color: 0xd8d8d8 }));
   scene.add(sky);
 
   // ---- light ----
-  const sun = new THREE.DirectionalLight(0xfff0d8, 2.2);
-  sun.position.set(-26, 38, 14);
-  sun.target.position.set(0, 0, -7);
+  // a low sun ahead and to the left: long shadows run toward you
+  const sun = new THREE.DirectionalLight(0xffa868, 2.4);
+  sun.position.set(-34, 9, -40);
+  sun.target.position.set(0, 0, -4);
   sun.castShadow = true;
   sun.shadow.mapSize.set(2048, 2048);
-  Object.assign(sun.shadow.camera, { left: -16, right: 16, top: 16, bottom: -16, near: 10, far: 90 });
+  Object.assign(sun.shadow.camera, { left: -18, right: 18, top: 18, bottom: -18, near: 5, far: 110 });
   sun.shadow.bias = -0.0004;
   sun.shadow.normalBias = 0.02;
   scene.add(sun, sun.target);
-  scene.add(new THREE.HemisphereLight(0xbfd6ff, 0x8a7a66, 1.0));
+  scene.add(new THREE.HemisphereLight(0x8a7ad8, 0x4a3040, 0.75));
+  S.sunPos = new THREE.Vector3(-210, 30, -330);
 
   // ---- ground with a hole for the escalator ----
   const jointTex = L.canvasTex(256, 256, (x, w, h) => {
@@ -289,11 +322,20 @@ S.build = function ({ envTex }) {
     b.position.set(x, 0, z);
     scene.add(b);
   }
+  lamps = [];
   for (const s of [-1, 1]) {
     const l = L.globeLamp(3.6);
     l.position.set(s * 4.9, 0, -10.5);
+    l.children[2].material.emissiveIntensity = 2.4;
     scene.add(l);
+    const pl = new THREE.PointLight(0xffd9a0, 9, 14, 1.4);
+    pl.position.set(s * 4.9, 3.8, -10.3);
+    scene.add(pl);
+    lamps.push(new THREE.Vector3(s * 4.9, 3.9, -10.5));
   }
+  // fireflies over the boxwoods
+  flies = new L.Motes({ count: 70, color: 0xd8ff7a, size: 0.09, area: { x0: -9, x1: 9, y0: 0.4, y1: 2.6, z0: -12, z1: -4 } });
+  scene.add(flies.points);
   {
     const iron = new THREE.MeshStandardMaterial({ color: 0x151816, roughness: 0.5, metalness: 0.6 });
     const n = 700;
@@ -352,7 +394,6 @@ S.reset = function () {
   for (const p of pylons) for (const m of p.userData.stripes) m.emissiveIntensity = 0;
   for (const pl of pylonLights) pl.intensity = 0;
   for (const b of beams) b.geometry.setDrawRange(0, 0);
-  AQ.app.button(false);
 };
 function newPetal(anywhere) {
   return {
@@ -390,7 +431,7 @@ S.update = function (dt, t) {
     for (const b of beams) b.geometry.setDrawRange(0, Math.floor(b.geometry.index.count * AQ.ease.out(st.beam) / 6) * 6);
     if (st.beam >= 1 && !st.ready) {
       st.ready = true;
-      if (!st.opening) AQ.app.button(true, "tap in");
+      AQ.app.caption("the gate is listening");
     }
   }
   if (st.opening) {
@@ -398,6 +439,7 @@ S.update = function (dt, t) {
     grille.position.y = AQ.ease.inOut(st.open) * 2.5;
   }
   waterTex.offset.y += dt * (0.5 + st.open * 0.5);
+  flies.update(dt, t);
   // petals
   st.petals.forEach((pt, i) => {
     pt.ph += dt;
@@ -420,7 +462,6 @@ S.onButton = function () {
   if (st.opening || !st.ready) return;
   st.opening = true;
   AQ.app.busy = true;
-  AQ.app.button(false);
   A.tap();
   setTimeout(() => { A.grille(1.4); A.setScene("gateOpen"); }, 300);
   setTimeout(() => {
@@ -436,7 +477,7 @@ S.hotspots = function () {
   return [
     {
       id: "gate",
-      caption: st.ready ? "the entrance (it's ready)" : "the entrance",
+      caption: st.ready ? "go down" : "the entrance",
       objects: [gateProxy],
       enter: ignite,
       click: () => { ignite(); if (st.ready) S.onButton(); },
@@ -468,6 +509,6 @@ S.hotspots = function () {
     },
   ];
 };
-S.exit = () => AQ.app.button(false);
+S.flares = () => [{ pos: S.sunPos, strength: 0.9, size: 1.1 }, ...lamps.map((p) => ({ pos: p, strength: 0.35, size: 0.5 }))];
 
 export default S;

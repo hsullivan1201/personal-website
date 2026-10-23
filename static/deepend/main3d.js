@@ -1,4 +1,4 @@
-/* aqua line 3d — renderer, camera flights, hotspots, hud. */
+/* the deep end — renderer, camera flights, hotspots, hud. */
 import * as THREE from "three";
 import { EffectComposer } from "./vendor/jsm/postprocessing/EffectComposer.js";
 import { RenderPass } from "./vendor/jsm/postprocessing/RenderPass.js";
@@ -10,10 +10,12 @@ import waterfront from "./scenes/waterfront.js";
 import metrocenter from "./scenes/metrocenter.js";
 import potomac from "./scenes/potomac.js";
 import tidalbasin from "./scenes/tidalbasin.js";
+import below from "./scenes/below.js";
+import { U } from "./lib3d.js";
 
 const AQ = window.AQ;
 const A = AQ.audio;
-const SCENES = [foggy, waterfront, metrocenter, potomac, tidalbasin];
+const SCENES = [foggy, waterfront, metrocenter, potomac, tidalbasin, below];
 
 const stage = document.getElementById("stage");
 const canvas = document.getElementById("view");
@@ -23,6 +25,7 @@ const btn = document.getElementById("access");
 const muteBtn = document.getElementById("mute");
 const strip = document.getElementById("strip");
 const loader = document.getElementById("loader");
+const npEl = document.getElementById("np");
 const reduceMotion = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 // ---------- renderer ----------
@@ -30,7 +33,7 @@ let renderer;
 try {
   renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: "high-performance" });
 } catch (e) {
-  location.replace("classic/");
+  document.querySelector(".ld-msg").textContent = "this browser can't do 3D right now (WebGL is off or unavailable). the deep end needs it.";
   throw e;
 }
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -42,6 +45,12 @@ const composer = new EffectComposer(renderer);
 const renderPass = new RenderPass(new THREE.Scene(), camera);
 const bloom = new UnrealBloomPass(new THREE.Vector2(600, 400), 0.6, 0.5, 0.85);
 composer.addPass(renderPass);
+// lens flares live in a screen-space overlay drawn over the scene, before bloom
+const flareScene = new THREE.Scene();
+const flareCam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 10);
+const flarePass = new RenderPass(flareScene, flareCam);
+flarePass.clear = false;
+composer.addPass(flarePass);
 composer.addPass(bloom);
 composer.addPass(new OutputPass());
 const pmrem = new THREE.PMREMGenerator(renderer);
@@ -59,7 +68,7 @@ const app = (AQ.app = {
   pointer: new THREE.Vector2(),
 });
 try {
-  JSON.parse(localStorage.getItem("aqualine-visited") || "[]").forEach((i) => app.visited.add(i));
+  JSON.parse(localStorage.getItem("deepend-visited") || "[]").forEach((i) => app.visited.add(i));
 } catch (e) {}
 
 // ---------- sizing + adaptive resolution ----------
@@ -137,7 +146,8 @@ function buildStrip() {
   SCENES.forEach((s, i) => {
     const b = document.createElement("button");
     b.className = "stop";
-    b.innerHTML = `<span class="dot"></span><span class="nm">${s.name}</span>`;
+    b.innerHTML = `<span class="dot"></span><span class="nm">${s.secret && !app.visited.has(i) ? "???" : s.name}</span>`;
+    if (s.secret) b.classList.add("secret");
     b.setAttribute("aria-label", `go to ${s.name}`);
     b.addEventListener("click", () => {
       if (app.busy || i === app.cur) return;
@@ -154,6 +164,7 @@ function buildStrip() {
 }
 function updateStrip() {
   [...strip.querySelectorAll(".stop")].forEach((b, i) => {
+    if (SCENES[i].secret) b.querySelector(".nm").textContent = app.visited.has(i) ? SCENES[i].name : "???";
     b.classList.toggle("here", i === app.cur);
     b.classList.toggle("seen", app.visited.has(i));
   });
@@ -204,12 +215,13 @@ app.go = function (next) {
 let arrival = null;
 // test hook: jump to the end of an arrival (software-rendered screenshots run at ~1fps)
 app.settle = () => { if (arrival) arrival.t = arrival.dur; };
+app.scene = () => SCENES[app.cur] && SCENES[app.cur].scene;
 function enter(idx) {
   const prev = SCENES[app.cur];
   if (prev && prev.exit) prev.exit();
   app.cur = idx;
   app.visited.add(idx);
-  try { localStorage.setItem("aqualine-visited", JSON.stringify([...app.visited])); } catch (e) {}
+  try { localStorage.setItem("deepend-visited", JSON.stringify([...app.visited])); } catch (e) {}
   const s = SCENES[idx];
   if (s.reset) s.reset();
   renderPass.scene = s.scene;
@@ -225,7 +237,8 @@ function enter(idx) {
   arrival = { t: 0, dur: reduceMotion ? 0.01 : s.arriveDur || 1.8, fromP: vec(from.pos), fromL: vec(from.look), toP: vec(s.pose.pos), toL: vec(s.pose.look) };
   if (s.enter) s.enter();
   updateStrip();
-  document.title = `aqua line — ${s.name.toLowerCase()}`;
+  document.title = `the deep end — ${s.name.toLowerCase()}`;
+  if (s.song) A.playSong(s.song, 3);
 }
 
 // ---------- hotspots ----------
@@ -318,13 +331,97 @@ function frame() {
     }
   }
   if (s) {
+    U.time.value = app.t;
     s.update(dt, app.t);
     applyCamera(app.t);
+    updateFlares(s);
     composer.render();
   }
   adapt(dt);
   requestAnimationFrame(frame);
 }
+
+// ---------- lens flares (it is 2003 and we have just discovered them) ----------
+function flareTex(kind) {
+  const c = document.createElement("canvas");
+  c.width = c.height = 128;
+  const x = c.getContext("2d");
+  if (kind === "glow") {
+    const g = x.createRadialGradient(64, 64, 0, 64, 64, 64);
+    g.addColorStop(0, "rgba(255,255,255,1)");
+    g.addColorStop(0.2, "rgba(255,255,255,0.45)");
+    g.addColorStop(1, "rgba(255,255,255,0)");
+    x.fillStyle = g;
+    x.fillRect(0, 0, 128, 128);
+  } else if (kind === "ring") {
+    const g = x.createRadialGradient(64, 64, 40, 64, 64, 62);
+    g.addColorStop(0, "rgba(255,255,255,0)");
+    g.addColorStop(0.7, "rgba(255,255,255,0.5)");
+    g.addColorStop(1, "rgba(255,255,255,0)");
+    x.fillStyle = g;
+    x.fillRect(0, 0, 128, 128);
+  } else {
+    x.beginPath();
+    for (let k = 0; k < 6; k++) {
+      const a = (k / 6) * Math.PI * 2;
+      x.lineTo(64 + Math.cos(a) * 58, 64 + Math.sin(a) * 58);
+    }
+    x.closePath();
+    const g = x.createRadialGradient(64, 64, 0, 64, 64, 60);
+    g.addColorStop(0, "rgba(255,255,255,0.35)");
+    g.addColorStop(1, "rgba(255,255,255,0.12)");
+    x.fillStyle = g;
+    x.fill();
+  }
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+}
+const FLARE_PARTS = [
+  [0, 0.55, "glow", 0xffffff], [0.25, 0.08, "hex", 0x7fd8ff], [0.42, 0.05, "hex", 0xff9ae0], [0.6, 0.12, "ring", 0x9fffd8],
+  [0.78, 0.04, "hex", 0xfff29a], [1.15, 0.18, "hex", 0x7f9aff], [1.4, 0.07, "glow", 0xff7fbf], [1.7, 0.26, "ring", 0x7fffe8],
+];
+const flareSprites = [];
+const flareTexCache = {};
+for (let f = 0; f < 3; f++) {
+  const set = FLARE_PARTS.map(([k, size, kind, color]) => {
+    const tex = (flareTexCache[kind] = flareTexCache[kind] || flareTex(kind));
+    const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, color, transparent: true, blending: THREE.AdditiveBlending, depthTest: false, depthWrite: false, opacity: 0 }));
+    sp.userData = { k, size };
+    flareScene.add(sp);
+    return sp;
+  });
+  flareSprites.push(set);
+}
+const fv = new THREE.Vector3();
+function updateFlares(s) {
+  const list = (s.flares && s.flares()) || [];
+  const aspect = camera.aspect;
+  flareCam.left = -aspect; flareCam.right = aspect; flareCam.updateProjectionMatrix();
+  flareSprites.forEach((set, i) => {
+    const fl = list[i];
+    let vis = 0;
+    if (fl && fl.strength > 0) {
+      fv.copy(fl.pos).project(camera);
+      if (fv.z < 1 && Math.abs(fv.x) < 1.3 && Math.abs(fv.y) < 1.3) vis = fl.strength * AQ.clamp(1.3 - Math.max(Math.abs(fv.x), Math.abs(fv.y)), 0, 1);
+    }
+    set.forEach((sp) => {
+      sp.material.opacity = vis * (sp.userData.k === 0 ? 0.8 : 0.55);
+      if (!vis) return;
+      const lx = fv.x * aspect, ly = fv.y;
+      sp.position.set(lx - lx * 2 * sp.userData.k * 0.5, ly - ly * 2 * sp.userData.k * 0.5, -1);
+      const sz = sp.userData.size * (fl.size || 1);
+      sp.scale.set(sz, sz, 1);
+    });
+  });
+}
+
+// ---------- now playing (a winamp-ish ticker, and the credit the music deserves) ----------
+A.onSong = (song) => {
+  if (!npEl) return;
+  npEl.classList.toggle("on", !!song);
+  if (song) npEl.querySelector(".np-text").textContent = `\u266B  Tanner Helland \u2014 ${song.title}  \u00B7  CC BY 4.0  \u00B7  `;
+};
 
 // ---------- boot ----------
 function boot() {

@@ -1,4 +1,4 @@
-/* aqua line — engine: math, a tiny 3d projector, painters, water, led text.
+/* the deep end — 2d helpers: math, painters (clouds, ferns, blossoms), led text.
    everything is drawn in a fixed 1200x800 "stage" space and scaled by AQ.R. */
 (function () {
   const AQ = (window.AQ = window.AQ || {});

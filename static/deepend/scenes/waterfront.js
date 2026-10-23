@@ -1,4 +1,4 @@
-/* station 2 — waterfront, in 3d. the vault over a reflecting pool. */
+/* station 2 — waterfront. the vault over a pool whose reflection knows things. */
 import * as L from "../lib3d.js";
 const { THREE } = L;
 const AQ = window.AQ;
@@ -7,8 +7,9 @@ const A = AQ.audio;
 const S = {
   name: "Waterfront",
   ambience: "vault",
-  exposure: 1.0,
-  bloom: { strength: 0.55, radius: 0.5, threshold: 0.95 },
+  song: "deeper",
+  exposure: 0.95,
+  bloom: { strength: 0.7, radius: 0.55, threshold: 0.88 },
   pose: { pos: [0, 4.4, -0.6], look: [0, 0.6, -40], fov: 58 },
   arrive: { pos: [0, 6.2, 5], look: [0, 1.6, -40] },
   arriveDur: 2.2,
@@ -17,6 +18,7 @@ const WY = -1.2, PE = 5.0, VR = 10.5, VY = 0.8, ZEND = -164;
 const ROCK_Z = -13.5;
 let st = null;
 let water, rockMesh, rockProxy, jet, veil, foam, ducks = [], pigeons = [], edge, edgeCount = 0, tunnel, signs = [], pylonG;
+let jellies = [], kois = [], motes, ghostTrain, ghostMoon, ghostStars, coin, causticK = { value: 0.55 };
 
 S.build = function ({ envTex }) {
   const scene = (S.scene = new THREE.Scene());
@@ -25,7 +27,9 @@ S.build = function ({ envTex }) {
   scene.environmentIntensity = 0.25;
   scene.fog = new THREE.FogExp2(0x0a0d0e, 0.008);
 
-  scene.add(L.cofferVault({ axis: "z", c: [0, VY, 0], R: VR, depth: 0.55, margin: 0.13, along: [ZEND, -2], len: 2.0, n: 17, th: [-0.075, Math.PI + 0.075] }));
+  const vault = L.cofferVault({ axis: "z", c: [0, VY, 0], R: VR, depth: 0.55, margin: 0.13, along: [ZEND, -2], len: 2.0, n: 17, th: [-0.075, Math.PI + 0.075], color: 0xcdbfa8 });
+  L.caustics(vault.material, { color: 0x8ff0ff, uniform: causticK, scale: 0.75, y0: 0, y1: 14 });
+  scene.add(vault);
   // end wall + tunnel mouth glow
   const cap = new THREE.Mesh(new THREE.CircleGeometry(VR + 0.5, 40, 0, Math.PI), new THREE.MeshStandardMaterial({ color: 0x14191a, roughness: 1 }));
   cap.position.set(0, VY, ZEND + 0.5);
@@ -44,6 +48,7 @@ S.build = function ({ envTex }) {
   for (const s of [-1, 1]) {
     const w = VR - PE - 0.05;
     const f = L.hexFloor(w, -ZEND, { roughness: 0.45 });
+    L.caustics(f.material, { color: 0x8ff0ff, strength: 0.25, scale: 0.9, key: "floor" });
     f.position.set(s * (PE + w / 2), 0, ZEND / 2);
     scene.add(f);
     scene.add(L.box(0.62, 0.06, -ZEND, L.granite(), s * (PE + 0.3), 0.03, ZEND / 2));
@@ -55,7 +60,7 @@ S.build = function ({ envTex }) {
       scene.add(pl);
     }
   }
-  scene.add(new THREE.HemisphereLight(0xffe8cc, 0x302820, 0.12));
+  scene.add(new THREE.HemisphereLight(0xb8e8ff, 0x302820, 0.12));
 
   // edge lights (they flash for a train that never comes)
   const zs = [];
@@ -144,13 +149,118 @@ S.build = function ({ envTex }) {
     scene.add(p);
     pigeons.push(p);
   }
+
+  // jellyfish drifting through the vault: click one and it sings
+  jellies = [];
+  const jc = [0x7ff6ff, 0xc89bff, 0x7fffc4, 0xff9be0, 0x9fc4ff, 0x7ff6ff];
+  [[-3.5, 5.5, -16], [3.2, 6.6, -22], [-1.5, 7.4, -30], [4.0, 5.2, -36], [-4.2, 6.2, -44], [0.8, 4.8, -12]].forEach(([x, y, z], i) => {
+    const j = new L.Jelly({ color: jc[i], size: 0.42 + (i % 3) * 0.12, len: 1.3 + (i % 2) * 0.5 }).at(x, y, z);
+    scene.add(j.group);
+    jellies.push(j);
+  });
+  // koi, swimming laps through the air above the water
+  kois = [];
+  for (let i = 0; i < 4; i++) {
+    const pts = [];
+    for (let k = 0; k < 8; k++) {
+      const a = (k / 8) * Math.PI * 2;
+      pts.push(new THREE.Vector3(Math.cos(a) * (3.2 - i * 0.4), 1.4 + i * 0.5 + Math.sin(a * 2) * 0.4, -24 + Math.sin(a) * (9 + i)));
+    }
+    const kf = new L.Koi(pts, { speed: 0.018 + i * 0.004, color: [0xf06a28, 0xf2f0ea, 0xe8461e, 0xffb13a][i], size: 1.3 });
+    scene.add(kf.group);
+    kois.push(kf);
+  }
+  motes = new L.Motes({ count: 90, color: 0x8ffcff, size: 0.07, blink: false, rise: 0.25, drift: 0.8, area: { x0: -4.5, x1: 4.5, y0: WY + 0.5, y1: 4, z0: -40, z1: -6 } });
+  scene.add(motes.points);
+
+  // ---- things that exist only in the reflection ----
+  ghostMoon = new THREE.Group();
+  const moon = new THREE.Mesh(new THREE.SphereGeometry(1.6, 32, 16), new THREE.MeshBasicMaterial({ color: 0xfff6dc, toneMapped: false }));
+  ghostMoon.add(moon, L.glowSprite(0xfff0c8, 9, 0.5));
+  ghostMoon.position.set(-1.5, 8.4, -58);
+  scene.add(L.ghost(ghostMoon));
+  const sp = [];
+  for (let i = 0; i < 400; i++) {
+    const a = Math.random() * Math.PI, r = 9.6;
+    sp.push(Math.cos(a) * r, VY + Math.sin(a) * r, -6 - Math.random() * 110);
+  }
+  const sg = new THREE.BufferGeometry();
+  sg.setAttribute("position", new THREE.Float32BufferAttribute(sp, 3));
+  ghostStars = new THREE.Points(sg, new THREE.PointsMaterial({ color: 0xffffff, size: 0.09, transparent: true, opacity: 0.9, toneMapped: false }));
+  scene.add(L.ghost(ghostStars));
+  // a figure on the far platform, standing very still
+  const figure = new THREE.Group();
+  const coat = new THREE.MeshStandardMaterial({ color: 0x0a0c10, roughness: 1 });
+  const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.28, 1.2, 4, 10), coat);
+  body.position.y = 0.9;
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.2, 12, 8), coat);
+  head.position.y = 1.85;
+  const brim = new THREE.Mesh(new THREE.CylinderGeometry(0.34, 0.34, 0.03, 16), coat);
+  brim.position.y = 2.0;
+  figure.add(body, head, brim);
+  figure.position.set(6.6, 0, -31);
+  scene.add(L.ghost(figure));
+  // the train that never arrives, except down there
+  ghostTrain = new THREE.Group();
+  const carTex = L.canvasTex(1024, 128, (x, w, h) => {
+    x.fillStyle = "#6f777e";
+    x.fillRect(0, 0, w, h);
+    for (let i = 0; i < 14; i++) {
+      const gx = 20 + i * 72;
+      const g = x.createLinearGradient(0, 20, 0, 70);
+      g.addColorStop(0, "#fff6d8");
+      g.addColorStop(1, "#d8b878");
+      x.fillStyle = g;
+      x.fillRect(gx, 22, 52, 46);
+    }
+    x.fillStyle = L.LINES.aqua;
+    x.fillRect(0, 86, w, 8);
+  });
+  for (let c = 0; c < 4; c++) {
+    const car = new THREE.Mesh(new THREE.BoxGeometry(3.0, 3.2, 22), [
+      new THREE.MeshStandardMaterial({ map: carTex, emissive: 0xffffff, emissiveMap: carTex, emissiveIntensity: 0.9 }),
+      new THREE.MeshStandardMaterial({ map: carTex, emissive: 0xffffff, emissiveMap: carTex, emissiveIntensity: 0.9 }),
+      new THREE.MeshStandardMaterial({ color: 0x8a9096 }), new THREE.MeshStandardMaterial({ color: 0x8a9096 }),
+      new THREE.MeshStandardMaterial({ color: 0x8a9096, emissive: 0xfff2c8, emissiveIntensity: 0.8 }), new THREE.MeshStandardMaterial({ color: 0x8a9096 }),
+    ]);
+    car.position.set(0, WY + 1.7, -c * 23);
+    ghostTrain.add(car);
+  }
+  ghostTrain.position.z = 200;
+  ghostTrain.visible = false;
+  scene.add(L.ghost(ghostTrain));
+
+  // a coin for the fountain
+  coin = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.012, 20), new THREE.MeshStandardMaterial({ color: 0xd8b04a, metalness: 1, roughness: 0.25, emissive: 0x3a2a00 }));
+  coin.visible = false;
+  scene.add(coin);
 };
 
 S.reset = function () {
-  st = { ghost: 0, nextGhost: 14 + Math.random() * 10, nextBirds: 2 + Math.random() * 3, burst: 0 };
+  st = { ghost: 0, nextGhost: 14 + Math.random() * 10, nextBirds: 2 + Math.random() * 3, burst: 0, coins: 0, coinT: -1 };
 };
 
 const col = new THREE.Color();
+function summonGhost() {
+  st.nextGhost = 30 + Math.random() * 20;
+  st.ghost = 6;
+  A.train(true, 6, 0.35);
+}
+const WISHES = [
+  "the water accepts your wish",
+  "somewhere below, a train changes its mind",
+  "the moon in the water gets a little brighter",
+  "you hear applause from the other side",
+  "a wish, received. processing time: 6\u20138 business years",
+  "the fish noticed",
+];
+function wish() {
+  st.coins++;
+  A.swell(48 + (st.coins % 4) * 2);
+  AQ.app.caption(WISHES[(st.coins - 1) % WISHES.length]);
+  for (const j of jellies) j.pulse();
+  if (st.coins % 2 === 1) setTimeout(summonGhost, 1200);
+}
 S.update = function (dt, t) {
   water.userData.tick(t);
   jet.boost = veil.boost = st.burst;
@@ -162,11 +272,32 @@ S.update = function (dt, t) {
   // ghost train
   st.nextGhost -= dt;
   if (st.nextGhost <= 0) {
-    st.nextGhost = 28 + Math.random() * 20;
-    st.ghost = 5;
-    A.train(true, 5, 0.35);
+    summonGhost();
   }
   st.ghost = Math.max(0, st.ghost - dt);
+  // the reflected train runs the length of the pool while the lights flash
+  if (st.ghost > 0) {
+    ghostTrain.visible = true;
+    ghostTrain.position.z = -150 + (1 - st.ghost / 6) * 230;
+  } else ghostTrain.visible = false;
+  for (const j of jellies) j.update(dt, t);
+  for (const k of kois) k.update(dt, t);
+  motes.update(dt, t);
+  causticK.value = 0.36 + 0.08 * Math.sin(t * 0.7);
+  ghostMoon.children[1].material.opacity = 0.4 + 0.1 * Math.sin(t * 0.5) + st.coins * 0.05;
+  // a coin in flight
+  if (st.coinT >= 0) {
+    st.coinT += dt;
+    const k = Math.min(1, st.coinT / 1.1);
+    coin.position.set(AQ.lerp(0.4, 0.15, k), AQ.lerp(3.6, WY + 0.05, k) + Math.sin(k * Math.PI) * 2.2, AQ.lerp(-2, ROCK_Z + 1.4, k));
+    coin.rotation.x += dt * 18;
+    if (k >= 1) {
+      st.coinT = -1;
+      coin.visible = false;
+      water.userData.ripple(0.15, ROCK_Z + 1.4, 1.2);
+      wish();
+    }
+  }
   for (let i = 0; i < edgeCount; i++) {
     const z = edge.userData[i];
     let k = 0.9;
@@ -213,6 +344,7 @@ S.update = function (dt, t) {
   tunnel.children[1].material.opacity = 0.45 + 0.12 * Math.sin(t * 1.3);
 };
 
+S.flares = () => [{ pos: new THREE.Vector3(0, 0.8, ZEND + 1), strength: 0.45, size: 0.8 }];
 S.hotspots = function () {
   return [
     {
@@ -239,9 +371,27 @@ S.hotspots = function () {
     })),
     {
       id: "fountain",
-      caption: "the fountain",
+      caption: "a wishing fountain (toss a coin)",
       objects: [rockProxy],
-      click: () => { st.burst = 1.4; A.splash(0); water.userData.ripple(0, ROCK_Z, 1.4); },
+      click: () => {
+        if (st.coinT >= 0) return;
+        st.coinT = 0;
+        coin.visible = true;
+        A.coin(0);
+        st.burst = 0.8;
+      },
+    },
+    ...jellies.map((j, i) => ({
+      id: "jelly" + i,
+      caption: "a jellyfish (it hums)",
+      objects: [j.group],
+      click: () => { j.pulse(); A.jelly(i * 2 + (Math.random() < 0.5 ? 0 : 1), j.group.position.x / 6); },
+    })),
+    {
+      id: "koi",
+      caption: "koi (they don't know they're out of the water)",
+      objects: kois.map((k) => k.group),
+      click: () => { A.plop(0, 0.5); for (const k of kois) k.speed *= 1.6; setTimeout(() => kois.forEach((k) => (k.speed /= 1.6)), 2000); },
     },
     {
       id: "sign",
@@ -257,7 +407,7 @@ S.hotspots = function () {
     },
     {
       id: "water",
-      caption: "the reflecting pool",
+      caption: "the reflecting pool (look closer)",
       cursor: "crosshair",
       objects: [water],
       click: (hit) => {

@@ -1,4 +1,4 @@
-/* station 5 — tidal basin, in 3d. end of the line; the board rises out of the pool. */
+/* station 5 — tidal basin. end of the line, and the pool goes further down than it should. */
 import * as L from "../lib3d.js";
 const { THREE } = L;
 const AQ = window.AQ;
@@ -7,8 +7,9 @@ const A = AQ.audio;
 const S = {
   name: "Tidal Basin",
   ambience: "platform",
-  exposure: 1.0,
-  bloom: { strength: 0.6, radius: 0.5, threshold: 0.9 },
+  song: "faith",
+  exposure: 0.95,
+  bloom: { strength: 0.7, radius: 0.55, threshold: 0.88 },
   pose: { pos: [0, 1.65, 1.4], look: [0, 1.15, -5], fov: 58 },
   arrive: { pos: [0, 2.3, 4.2], look: [0, 1.4, -5] },
   arriveDur: 2.0,
@@ -16,18 +17,9 @@ const S = {
 const TZ = -5.05; // train side face
 const DOOR_X = [-9.4, -6.25, -3.1, 0, 3.1, 6.25, 9.4];
 const MAIN_DOORS = [2, 3, 4];
-const PANEL_Y = { down: -1.45, up: 0.55 };
-const CW = 1200, CH = 576; // board canvas
-const DESTS = [
-  { dest: "ABOUT", min: "2", url: "/pages/about/" },
-  { dest: "NOW", min: "BRD", url: "/pages/now/" },
-  { dest: "HORLOGE", min: "4", url: "/horloge/" },
-  { dest: "SPARROWS", min: "7", url: "/sparrows/" },
-  { dest: "HOME", min: "11", url: "/" },
-];
 let st = null;
-let water, train, leaves = [], frames = [], lamps = [], panel, board, boardTex, doorProxies = [], speakers = [], floaters, coneMat;
-let rows = [], buttons = [];
+let water, train, leaves = [], frames = [], lamps = [], doorProxies = [], speakers = [], floaters, coneMat;
+let lanterns, bubbles, motes, glowRing;
 
 // ---------- the car side, painted ----------
 function paintCar(x, w, h, glowOnly) {
@@ -92,88 +84,12 @@ function paintCar(x, w, h, glowOnly) {
   x.fillStyle = "#0b0b0b";
   AQ.roundRect(x, sx, sy, 2.0 * ppm, ppm * 0.22, 5);
   x.fill();
-  AQ.ledText(x, "AQ  TIDAL BASIN", sx + 12, sy + 9, ppm * 0.022, "rgba(255,157,46,1)", !glowOnly);
+  AQ.ledText(x, "~~  NOT IN SERVICE", sx + 12, sy + 9, ppm * 0.022, "rgba(255,157,46,1)", !glowOnly);
   if (!glowOnly) {
     x.fillStyle = "#30353a";
     x.font = `bold ${ppm * 0.12}px "Helvetica Neue", Helvetica, Arial, sans-serif`;
     x.fillText("7777", cx - 1.2 * ppm, Y(0.75));
   }
-}
-
-// ---------- the board ----------
-const LED = "rgba(255,157,46,1)", LED_AQ = "rgba(80,240,230,1)";
-function drawBoard() {
-  const x = boardTex.userData.canvas.getContext("2d");
-  const t = AQ.app.t;
-  const placeholder = st.panelT < 0.8;
-  x.clearRect(0, 0, CW, CH);
-  x.fillStyle = "rgba(255,255,255,0.92)";
-  x.font = '300 52px "Helvetica Neue", Helvetica, Arial, sans-serif';
-  x.textBaseline = "alphabetic";
-  ["aqua", "line", "club"].forEach((wd, i) => x.fillText(wd, 46, 96 + i * 48));
-  const bx = 250, bw = CW - 300;
-  x.fillStyle = "rgba(255,255,255,0.35)";
-  x.fillRect(bx, 44, bw, 4);
-  x.fillStyle = "rgba(255,255,255,0.95)";
-  x.fillRect(bx, 42, bw * (A.music.playing ? (t * 0.02) % 1 : 0.6), 8);
-  // board
-  const ly = 70, lh = 300;
-  x.fillStyle = "rgba(6,6,6,0.92)";
-  AQ.roundRect(x, bx, ly, bw, lh, 10);
-  x.fill();
-  const dot = 4.6, rowH = 48, cols = Math.floor((bw - 24) / (dot * 6));
-  const line = (s, r, c, col) => AQ.ledText(x, s, bx + 14 + c * dot * 6, ly + 14 + r * rowH, dot, col);
-  line("LN CAR DEST", 0, 0, "rgba(255,120,40,1)");
-  line("MIN", 0, cols - 3, "rgba(255,120,40,1)");
-  rows = [];
-  DESTS.forEach((d, i) => {
-    const r = i + 1;
-    rows.push([bx, ly + 8 + r * rowH, bx + bw, ly + 8 + (r + 1) * rowH]);
-    if (st.hoverRow === i) {
-      x.fillStyle = "rgba(255,157,46,0.14)";
-      x.fillRect(bx + 6, ly + 8 + r * rowH, bw - 12, rowH - 4);
-    }
-    if (st.boarding && st.boarding.row === i && Math.floor(t * 6) % 2) return;
-    if (placeholder) { line("txtDest", r, 7, LED); return; }
-    line("AQ", r, 0, LED_AQ);
-    line(i % 2 ? "6" : "8", r, 3, LED);
-    line(d.dest, r, 7, LED);
-    let mn = d.min;
-    if (mn === "BRD" && Math.floor(t * 2) % 2) mn = "";
-    line(mn, r, cols - mn.length, LED);
-  });
-  // player
-  const tr = A.tracks[A.music.index];
-  x.fillStyle = "#fff";
-  x.font = 'bold 30px "Helvetica Neue", Helvetica, Arial, sans-serif';
-  x.fillText(placeholder ? "txtTitle" : tr.title, bx, 430);
-  x.font = '24px "Helvetica Neue", Helvetica, Arial, sans-serif';
-  x.fillStyle = "rgba(255,255,255,0.75)";
-  x.fillText(placeholder ? "txtTitle" : tr.sub, bx, 464);
-  buttons = [];
-  ["prev", A.music.playing ? "pause" : "play", "stop", "next"].forEach((ic, i) => {
-    const cx = 70 + i * 48, cy = 440, r = 20;
-    buttons.push({ ic, cx, cy, r });
-    x.fillStyle = "rgba(10,20,22,0.75)";
-    x.beginPath(); x.arc(cx, cy, r, 0, Math.PI * 2); x.fill();
-    x.strokeStyle = "rgba(255,255,255,0.7)";
-    x.lineWidth = 2;
-    x.stroke();
-    x.fillStyle = "#fff";
-    x.beginPath();
-    if (ic === "play") { x.moveTo(cx - 6, cy - 10); x.lineTo(cx + 10, cy); x.lineTo(cx - 6, cy + 10); }
-    else if (ic === "pause") { x.rect(cx - 8, cy - 9, 6, 18); x.rect(cx + 2, cy - 9, 6, 18); }
-    else if (ic === "stop") x.rect(cx - 8, cy - 8, 16, 16);
-    else if (ic === "prev") { x.moveTo(cx + 8, cy - 9); x.lineTo(cx - 2, cy); x.lineTo(cx + 8, cy + 9); x.moveTo(cx - 2, cy - 9); x.lineTo(cx - 12, cy); x.lineTo(cx - 2, cy + 9); }
-    else { x.moveTo(cx - 8, cy - 9); x.lineTo(cx + 2, cy); x.lineTo(cx - 8, cy + 9); x.moveTo(cx + 2, cy - 9); x.lineTo(cx + 12, cy); x.lineTo(cx + 2, cy + 9); }
-    x.fill();
-  });
-  for (let i = 0; i < 18; i++) {
-    const hgt = A.music.playing ? 8 + Math.abs(Math.sin(t * (3 + i * 0.7) + i)) * 40 : 6;
-    x.fillStyle = `rgba(80,240,230,${0.35 + i / 40})`;
-    x.fillRect(CW - 60 - (18 - i) * 18, 470 - hgt, 12, hgt);
-  }
-  boardTex.needsUpdate = true;
 }
 
 S.build = function ({ envTex }) {
@@ -184,7 +100,9 @@ S.build = function ({ envTex }) {
   scene.fog = new THREE.FogExp2(0x0b0a09, 0.02);
 
   // the vault over everything, and the far wall the train hides
-  scene.add(L.cofferVault({ axis: "x", c: [0, 0.8, -3.2], R: 6.4, depth: 0.42, margin: 0.13, along: [-30, 30], len: 2, n: 10, th: [0, Math.PI], color: 0xdac6a6 }));
+  const vault = L.cofferVault({ axis: "x", c: [0, 0.8, -3.2], R: 6.4, depth: 0.42, margin: 0.13, along: [-30, 30], len: 2, n: 10, th: [0, Math.PI], color: 0xd2c0a4 });
+  L.caustics(vault.material, { color: 0x9ff6ff, strength: 0.7, scale: 1.1, y0: 1, y1: 8 });
+  scene.add(vault);
   scene.add(L.box(60, 0.9, 0.4, L.concrete(0xcbbda5), 0, 0.4, -9.6));
   const endSign = L.signPlane("Tidal Basin", 4.2, 0.8, { stripe: L.LINES.aqua, emissive: 0.2 });
   endSign.position.set(0, 1.9, -9.45);
@@ -364,36 +282,34 @@ S.build = function ({ envTex }) {
   }
   scene.add(new THREE.HemisphereLight(0xffe8cc, 0x1e1812, 0.12));
 
-  // ---- the board: frosted glass + an led face ----
-  panel = new THREE.Group();
-  const glass = new THREE.Mesh(new THREE.BoxGeometry(2.55, 1.28, 0.05), new THREE.MeshPhysicalMaterial({ color: 0xe8fbfa, transmission: 1, roughness: 0.34, thickness: 0.08, ior: 1.35, metalness: 0, clearcoat: 0.6, clearcoatRoughness: 0.2 }));
-  boardTex = L.canvasTex(CW, CH, () => {});
-  board = new THREE.Mesh(new THREE.PlaneGeometry(2.4, 1.152), new THREE.MeshStandardMaterial({ map: boardTex, emissive: 0xffffff, emissiveMap: boardTex, emissiveIntensity: 1.05, transparent: true, roughness: 0.4 }));
-  board.position.z = 0.03;
-  panel.add(glass, board);
-  panel.position.set(0, PANEL_Y.down, -2.5);
-  scene.add(panel);
+  // a faint ring of light deep under the surface, where the pool keeps going
+  glowRing = new THREE.Mesh(new THREE.RingGeometry(0.6, 1.4, 48), new THREE.MeshBasicMaterial({ color: 0x7ffff0, transparent: true, opacity: 0.0, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false }));
+  glowRing.rotation.x = -Math.PI / 2;
+  glowRing.position.set(0, 0.01, -1.6);
+  scene.add(glowRing);
+  bubbles = new L.Bubbles({ count: 18, area: { x0: -2.6, x1: 2.6, z0: -3.8, z1: 0.8, y0: 0.0, y1: 4.5 }, size: [0.05, 0.16], speed: [0.2, 0.45] });
+  scene.add(bubbles.mesh);
+  motes = new L.Motes({ count: 60, color: 0x9ffcff, size: 0.06, blink: false, rise: 0.2, drift: 0.6, area: { x0: -3, x1: 3, y0: 0.2, y1: 3.5, z0: -4, z1: 1 } });
+  scene.add(motes.points);
+  // paper lanterns, floating above the pool. you can only see them in the water.
+  lanterns = new THREE.Group();
+  [[-1.8, 2.4, -2.6], [0.4, 3.1, -3.4], [1.9, 2.2, -1.8], [-0.6, 3.6, -1.2], [2.6, 3.4, -3.8], [-2.6, 3.0, -0.4]].forEach(([x, y, z], i) => {
+    const l = L.lantern([0xffb35a, 0xff7fae, 0xffd27a][i % 3]);
+    l.position.set(x, y, z);
+    l.userData.base = y;
+    lanterns.add(l);
+  });
+  scene.add(L.ghost(lanterns));
 };
 
 S.reset = function () {
-  st = { panel: 0, target: 0, panelT: 0, doors: 0, doorTarget: 0, leaving: false, v: 0, hoverDoor: false, hoverRow: -1, boarding: null, drawT: 0 };
+  st = { doors: 0, doorTarget: 0, leaving: false, v: 0, hoverDoor: false, boarding: null, hoverWater: 0, diving: false };
   train.position.x = 0;
-  panel.position.y = PANEL_Y.down;
-  drawBoard();
 };
-S.exit = () => A.stopMusic();
 
 const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler(), one = new THREE.Vector3(1, 1, 1);
 S.update = function (dt, t) {
   water.userData.tick(t);
-  // panel rises with a little overshoot, like it means it
-  if (st.target !== st.panel) st.panel = AQ.clamp(st.panel + Math.sign(st.target - st.panel) * dt / 1.4, 0, 1);
-  st.panelT = st.panel >= 1 ? st.panelT + dt : 0;
-  const k = st.target > 0 ? AQ.ease.back(st.panel) : AQ.ease.inOut(st.panel);
-  panel.position.y = PANEL_Y.down + (PANEL_Y.up - PANEL_Y.down) * k;
-  panel.rotation.y = Math.sin(t * 0.6) * 0.02;
-  st.drawT -= dt;
-  if (st.panel > 0 && st.drawT <= 0) { st.drawT = 0.1; drawBoard(); }
   // doors + train
   if (st.doorTarget !== st.doors) st.doors = AQ.clamp(st.doors + Math.sign(st.doorTarget - st.doors) * dt / 0.7, 0, 1);
   const slide = AQ.ease.inOut(st.doors) * 0.74;
@@ -417,92 +333,69 @@ S.update = function (dt, t) {
   });
   floaters.instanceMatrix.needsUpdate = true;
   coneMat.opacity = 0.11 + 0.02 * Math.sin(t * 0.9);
+  lanterns.children.forEach((l, i) => {
+    l.position.y = l.userData.base + Math.sin(t * 0.6 + i) * 0.15;
+    l.rotation.y += dt * 0.3;
+  });
+  bubbles.update(dt, t);
+  motes.update(dt, t);
+  // the ring below the surface breathes, and leans toward you when you hover the water
+  st.hoverWater += ((app().hover && app().hover.id === "water" ? 1 : 0) - st.hoverWater) * Math.min(1, dt * 3);
+  glowRing.material.opacity = 0.12 + 0.08 * Math.sin(t * 1.2) + st.hoverWater * 0.25;
+  glowRing.scale.setScalar(1 + 0.1 * Math.sin(t * 0.8) + st.hoverWater * 0.3);
 };
+const app = () => AQ.app;
 
 // ---------- interaction ----------
-function raise() {
-  st.target = 1;
-  A.shimmer(true);
-  if (!A.music.playing) A.playTrack(A.music.index);
-}
-function sink() {
-  st.target = 0;
-  A.shimmer(false);
-}
-function depart(url, row) {
+function rideBack() {
   if (st.boarding) return;
-  st.boarding = { row };
+  st.boarding = true;
   AQ.app.busy = true;
   AQ.app.caption("");
-  A.stopMusic();
-  if (row != null) A.ui();
-  setTimeout(() => sink(), 500);
-  setTimeout(() => { st.doorTarget = 1; A.doors(); }, 800);
-  setTimeout(() => A.announce("Step back. Doors closing."), 1600);
-  setTimeout(() => { st.doorTarget = 0; A.doors(); }, 3400);
-  setTimeout(() => { st.leaving = true; A.train(false, 5); }, 4300);
-  setTimeout(() => {
-    AQ.app.fly(0, [{ pos: [0.6, 1.7, 1.2], look: [-6, 1.6, -5] }], { dur: 1.6, fadeFrom: 0.2, whoosh: false });
-    if (url) setTimeout(() => (window.location.href = url), 1500);
-  }, 6000);
+  setTimeout(() => { st.doorTarget = 1; A.doors(); }, 300);
+  setTimeout(() => A.announce("Step back. Doors closing."), 1100);
+  setTimeout(() => { st.doorTarget = 0; A.doors(); }, 2900);
+  setTimeout(() => { st.leaving = true; A.train(false, 5); }, 3800);
+  setTimeout(() => AQ.app.fly(0, [{ pos: [0.6, 1.7, 1.2], look: [-6, 1.6, -5] }], { dur: 1.6, fadeFrom: 0.2, whoosh: false }), 5500);
 }
-const boardPx = (hit) => [hit.uv.x * CW, (1 - hit.uv.y) * CH];
+function dive(hit) {
+  if (st.diving) return;
+  st.diving = true;
+  const x = hit ? hit.point.x * 0.4 : 0;
+  water.userData.ripple(x, -1.6, 2);
+  A.dive();
+  setTimeout(() => A.underwater(true, 1.5), 900);
+  AQ.app.fly(5, [
+    { pos: [x * 0.5, 1.9, 0.4], look: [x, -0.4, -2.2] },
+    { pos: [x, 0.6, -1.0], look: [x, -2.5, -2.4] },
+    { pos: [x, -0.8, -1.6], look: [x, -4, -2.8] },
+  ], { dur: 1.9, fadeFrom: 0.5, ease: "in", whoosh: false });
+}
+S.flares = () => [{ pos: new THREE.Vector3(0, 5.5, -3.0), strength: 0.45, size: 0.7 }];
 S.hotspots = function () {
-  const up = st.panel > 0.95;
-  const hs = [];
-  if (up) {
-    hs.push({
-      id: "board",
-      caption: "",
-      cursor: "default",
-      objects: [panel],
-      move: boardHover,
-      leave: () => (st.hoverRow = -1),
-      click: (hit) => {
-        if (st.panelT < 0.8 || !hit || hit.object !== board) return;
-        const [x, y] = boardPx(hit);
-        const r = rows.findIndex((b) => x > b[0] && x < b[2] && y > b[1] && y < b[3]);
-        if (r >= 0) return depart(DESTS[r].url, r);
-        const bt = buttons.find((b) => Math.hypot(x - b.cx, y - b.cy) < b.r + 6);
-        if (!bt) return;
-        A.ui();
-        if (bt.ic === "play") A.playTrack(A.music.index);
-        else if (bt.ic === "pause" || bt.ic === "stop") A.stopMusic();
-        else A.playTrack(A.music.index + (bt.ic === "next" ? 1 : -1));
-      },
-    });
-  }
-  hs.push(
+  return [
     {
       id: "doors",
       caption: "ride back to foggy bottom",
       objects: doorProxies,
       enter: () => (st.hoverDoor = true),
       leave: () => (st.hoverDoor = false),
-      click: () => depart(null, null),
+      click: rideBack,
     },
     {
       id: "water",
-      caption: st.target > 0.5 ? "let it sink" : "the water",
+      caption: "the deep end",
       objects: [water],
-      click: (hit) => {
-        water.userData.ripple(hit.point.x, hit.point.z, 1.3);
-        A.plop(hit.point.x / 3, 1);
-        if (st.target > 0.5) sink();
-        else setTimeout(raise, 250);
-      },
+      click: (hit) => dive(hit),
     },
-    { id: "speaker", caption: "the pa", objects: speakers, click: () => A.announce("Tidal Basin. End of the line. All water must leave the train.") }
-  );
-  return hs;
+    {
+      id: "bubbles",
+      caption: "a bubble",
+      objects: [bubbles.mesh],
+      click: (hit) => { if (hit && hit.instanceId != null) { bubbles.pop(hit.instanceId); A.pop(hit.point.x / 3); } },
+    },
+    { id: "speaker", caption: "the pa", objects: speakers, click: () => A.announce("Tidal Basin. End of the line. The pool is closed. The pool is always open.") },
+  ];
 };
-// per-row hover on the board
-function boardHover(hit) {
-  if (!hit || hit.object !== board) { st.hoverRow = -1; return; }
-  const [x, y] = boardPx(hit);
-  st.hoverRow = rows.findIndex((b) => x > b[0] && x < b[2] && y > b[1] && y < b[3]);
-  AQ.app.caption(st.hoverRow >= 0 && st.panelT > 0.8 ? `board for ${DESTS[st.hoverRow].dest.toLowerCase()}` : "");
-  AQ.app.canvasCursor(st.hoverRow >= 0 ? "pointer" : "default");
-}
 
 export default S;

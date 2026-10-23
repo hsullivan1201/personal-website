@@ -1,4 +1,4 @@
-/* station 3 — metro center, in 3d. two vaults cross; the escalators are waterfalls. */
+/* station 3 — metro center. two vaults cross; the water here falls up. */
 import * as L from "../lib3d.js";
 const { THREE } = L;
 const AQ = window.AQ;
@@ -7,8 +7,9 @@ const A = AQ.audio;
 const S = {
   name: "Metro Center",
   ambience: "crossing",
-  exposure: 1.0,
-  bloom: { strength: 0.5, radius: 0.5, threshold: 0.96 },
+  song: "syntheticity",
+  exposure: 0.98,
+  bloom: { strength: 0.6, radius: 0.55, threshold: 0.9 },
   pose: { pos: [0, 1.7, 0.5], look: [0, 3.4, -18], fov: 62 },
   arrive: { pos: [0, 2.6, 7], look: [0, 3.8, -18] },
   arriveDur: 2.0,
@@ -16,7 +17,7 @@ const S = {
 const YC = 1.4, R = 10, ZC = -18;
 const ESC = { xIn: 6.4, xOut: 8.6, z0: -8, z1: -15.2, top: 5.6, steps: 24 };
 let st = null;
-let jet, veil, sheets = [], escProxies = [], kit, buckets = [], lid, rainbow, fountainProxy, waterTex, basinWater;
+let jet, veil, sheets = [], escProxies = [], kit, buckets = [], lid, rainbow, fountainProxy, waterTex, basinWater, orb, orbU = { value: 0 }, bubbles;
 
 S.build = function ({ envTex }) {
   const scene = (S.scene = new THREE.Scene());
@@ -26,8 +27,13 @@ S.build = function ({ envTex }) {
   scene.fog = new THREE.FogExp2(0x0b0b0b, 0.009);
 
   const th = [-0.14, Math.PI + 0.14];
-  scene.add(L.cofferVault({ axis: "z", c: [0, YC, 0], R, depth: 0.5, margin: 0.13, along: [-150, 4], len: 2, n: 16, th, skip: (p) => (p.z - ZC) ** 2 + (p.y - YC) ** 2 < (R - 1.4) ** 2 }));
-  scene.add(L.cofferVault({ axis: "x", c: [0, YC, ZC], R, depth: 0.5, margin: 0.13, along: [-60, 60], len: 2, n: 16, th, skip: (p) => p.x ** 2 + (p.y - YC) ** 2 < (R - 1.4) ** 2 }));
+  for (const v of [
+    L.cofferVault({ axis: "z", c: [0, YC, 0], R, depth: 0.5, margin: 0.13, along: [-150, 4], len: 2, n: 16, th, skip: (p) => (p.z - ZC) ** 2 + (p.y - YC) ** 2 < (R - 1.4) ** 2 }),
+    L.cofferVault({ axis: "x", c: [0, YC, ZC], R, depth: 0.5, margin: 0.13, along: [-60, 60], len: 2, n: 16, th, skip: (p) => p.x ** 2 + (p.y - YC) ** 2 < (R - 1.4) ** 2 }),
+  ]) {
+    L.caustics(v.material, { color: 0x9ff8ff, strength: 0.32, scale: 0.6, y0: 2, y1: 14 });
+    scene.add(v);
+  }
 
   // the rainbow: every line color traced along the groin where the vaults meet
   rainbow = new THREE.Group();
@@ -142,17 +148,37 @@ S.build = function ({ envTex }) {
   // the fountain under the crossing
   const stone = new THREE.MeshStandardMaterial({ color: 0xd2c8b8, roughness: 0.55 });
   scene.add(L.at(L.lathe([[0, 0.36], [2.4, 0.36], [2.4, 0.48], [2.72, 0.48], [2.72, 0.0], [0, 0]], 0, { material: stone, segments: 64 }), 0, 0, ZC));
-  basinWater = new THREE.Mesh(new THREE.CircleGeometry(2.4, 64), new THREE.MeshStandardMaterial({ color: 0x1d6c70, roughness: 0.04, metalness: 0.6, emissive: 0x0b3b40, emissiveIntensity: 0.6 }));
+  basinWater = new THREE.Mesh(new THREE.CircleGeometry(2.4, 64), new THREE.MeshStandardMaterial({ color: 0x1d6c70, roughness: 0.22, metalness: 0.4, emissive: 0x0b3b40, emissiveIntensity: 0.6 }));
   basinWater.rotation.x = -Math.PI / 2;
   basinWater.position.set(0, 0.4, ZC);
   scene.add(basinWater);
-  scene.add(L.at(L.lathe([[0.16, 0.4], [0.12, 0.7], [0.1, 0.95], [0.74, 1.0], [0.78, 1.06], [0.68, 1.05], [0.1, 1.0]], 0, { material: stone }), 0, 0, ZC));
+  // the water here falls up, into a ball of itself that hangs over the basin
+  const orbMat = new THREE.MeshPhysicalMaterial({ color: 0xb8f4f4, transparent: true, opacity: 0.55, roughness: 0.03, metalness: 0, iridescence: 0.6, iridescenceIOR: 1.33, clearcoat: 1, envMapIntensity: 2.4, emissive: 0x1a8a90, emissiveIntensity: 0.35, depthWrite: false });
+  orbMat.onBeforeCompile = (sh) => {
+    sh.uniforms.oTime = L.U.time;
+    sh.uniforms.oKick = orbU;
+    sh.vertexShader = sh.vertexShader
+      .replace("#include <common>", "#include <common>\nuniform float oTime; uniform float oKick;")
+      .replace("#include <begin_vertex>", `#include <begin_vertex>
+        float w = sin(position.x * 3.1 + oTime * 1.7) * sin(position.y * 2.7 + oTime * 1.3) * sin(position.z * 2.9 - oTime * 1.1);
+        transformed += normal * w * (0.09 + oKick * 0.25);`);
+  };
+  orb = new THREE.Mesh(new THREE.SphereGeometry(1.0, 64, 32), orbMat);
+  const core = new THREE.Mesh(new THREE.SphereGeometry(0.45, 24, 16), new THREE.MeshBasicMaterial({ color: 0x9ffcff, transparent: true, opacity: 0.35, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false }));
+  orb.add(core);
+  orb.position.set(0, 3.7, ZC);
+  scene.add(orb);
+  const orbGlow = new THREE.PointLight(0x7ff6ff, 5, 12, 1.5);
+  orbGlow.position.set(0, 3.7, ZC);
+  scene.add(orbGlow);
   const pool = new THREE.PointLight(0x7ff0ea, 4, 8, 1.5);
-  pool.position.set(0, 0.6, ZC);
+  pool.position.set(0, 1.4, ZC); // well above the water: a light grazing a mirror-smooth surface blows out
   scene.add(pool);
-  jet = new L.Spray({ at: new THREE.Vector3(0, 1.1, ZC), count: 1400, rate: 520, speed: 6.4, spread: 0.12, life: 1.5, size: 0.06, floorY: 0.4, radius: 0.04 });
-  veil = new L.Spray({ at: new THREE.Vector3(0, 1.04, ZC), count: 1400, rate: 650, speed: 1.2, ring: 0.76, life: 0.8, size: 0.045, floorY: 0.4, spread: 0.3 });
+  jet = new L.Spray({ at: new THREE.Vector3(0, 0.42, ZC), count: 1600, rate: 420, speed: 0.4, spread: 0.05, gravity: -5.5, life: 2.2, size: 0.05, floorY: 0.3, ceilY: 3.2, radius: 0.35 });
+  veil = new L.Spray({ at: new THREE.Vector3(0, 0.42, ZC), count: 1200, rate: 260, speed: 0.25, ring: 1.5, gravity: -3.2, life: 2.6, size: 0.04, floorY: 0.3, ceilY: 3.0, spread: 0.02 });
   scene.add(jet.points, veil.points);
+  bubbles = new L.Bubbles({ count: 36, area: { x0: -6, x1: 6, z0: ZC - 6, z1: ZC + 7, y0: 0.4, y1: 10 }, size: [0.08, 0.28], speed: [0.3, 0.7] });
+  scene.add(bubbles.mesh);
   fountainProxy = L.hitProxy(5.6, 3.4, 5.6, 0, 1.7, ZC);
   scene.add(fountainProxy);
 
@@ -235,7 +261,11 @@ S.update = function (dt, t) {
   jet.boost = st.burst;
   jet.update(dt);
   veil.update(dt);
-  waterTex.offset.y += dt * 1.1;
+  orbU.value = st.burst;
+  orb.position.y = 3.7 + Math.sin(t * 0.8) * 0.12;
+  orb.rotation.y += dt * 0.2;
+  bubbles.update(dt, t);
+  waterTex.offset.y -= dt * 1.1; // up the escalator
   for (const s of sheets) if (s.spray) s.spray.update(dt);
   basinWater.material.emissiveIntensity = 0.55 + 0.1 * Math.sin(t * 3);
   for (let i = 0; i < 5; i++) st.hits[i] = Math.max(0, st.hits[i] - dt * 7);
@@ -254,6 +284,7 @@ const climb = (s) => [
   { pos: [s * 7.5, 6.6, -14.4], look: [s * 9, 7.2, -21] },
   { pos: [s * 8.5, 7.4, -17.5], look: [s * 18, 7.4, -21] },
 ];
+S.flares = () => [{ pos: orb.position, strength: 0.35, size: 0.6 }];
 S.hotspots = function () {
   return [
     {
@@ -265,9 +296,15 @@ S.hotspots = function () {
         AQ.app.caption(on ? "stop the go-go" : "bucket drums");
       },
     },
-    { id: "escL", caption: "up the escalator (it's a waterfall now)", objects: [escProxies[0]], click: () => AQ.app.fly(3, climb(-1), { dur: 3.6, fadeFrom: 0.65 }) },
-    { id: "escR", caption: "up the escalator (it's a waterfall now)", objects: [escProxies[1]], click: () => AQ.app.fly(3, climb(1), { dur: 3.6, fadeFrom: 0.65 }) },
-    { id: "fountain", caption: "the fountain", objects: [fountainProxy], click: () => { st.burst = 1.4; A.splash(0); } },
+    { id: "escL", caption: "up the escalator (the water is going up too)", objects: [escProxies[0]], click: () => AQ.app.fly(3, climb(-1), { dur: 3.6, fadeFrom: 0.65 }) },
+    { id: "escR", caption: "up the escalator (the water is going up too)", objects: [escProxies[1]], click: () => AQ.app.fly(3, climb(1), { dur: 3.6, fadeFrom: 0.65 }) },
+    { id: "orb", caption: "the water, holding itself up", objects: [orb, fountainProxy], click: () => { st.burst = 1.6; A.swell(46); A.splash(0); } },
+    {
+      id: "bubbles",
+      caption: "a bubble",
+      objects: [bubbles.mesh],
+      click: (hit) => { if (hit && hit.instanceId != null) { bubbles.pop(hit.instanceId); A.pop((hit.point.x || 0) / 6); } },
+    },
     { id: "crossing", caption: "the crossing", objects: [rainbow], click: () => A.announce("Metro Center. Transfer to all lines. Including the ones that don't exist yet.") },
   ];
 };

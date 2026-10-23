@@ -1,4 +1,4 @@
-/* aqua line 3d — shared builders: textures, the waffle vault, water, particles, low-poly props. */
+/* the deep end — shared builders: textures, the waffle vault, water, caustics, creatures, props. */
 import * as THREE from "three";
 import { Reflector } from "./vendor/jsm/objects/Reflector.js";
 import { mergeGeometries } from "./vendor/jsm/utils/BufferGeometryUtils.js";
@@ -213,6 +213,64 @@ export function cofferVault(o) {
   return mesh;
 }
 
+// ---------- shared time + the ghost layer ----------
+export const U = { time: { value: 0 } };
+// things on this layer exist only in reflections
+export const GHOST = 1;
+export function ghost(obj) {
+  obj.traverse((o) => o.layers.set(GHOST));
+  return obj;
+}
+
+// ---------- caustics: light off moving water, painted onto any standard material ----------
+// the pattern is animated cellular-noise edges, projected from below in world space
+export function caustics(mat, o = {}) {
+  const col = new THREE.Color(o.color || 0x9ff4ff);
+  mat.onBeforeCompile = (sh) => {
+    sh.uniforms.cTime = U.time;
+    sh.uniforms.cColor = { value: col };
+    sh.uniforms.cStrength = o.uniform || { value: o.strength ?? 0.6 };
+    sh.uniforms.cScale = { value: o.scale ?? 1.0 };
+    sh.uniforms.cBand = { value: new THREE.Vector2(o.y0 ?? -50, o.y1 ?? 50) };
+    sh.vertexShader = sh.vertexShader
+      .replace("#include <common>", "#include <common>\nvarying vec3 vCW;")
+      .replace("#include <project_vertex>", "#include <project_vertex>\nvCW = (modelMatrix * vec4(transformed, 1.0)).xyz;");
+    sh.fragmentShader = sh.fragmentShader
+      .replace("#include <common>", `#include <common>
+        varying vec3 vCW;
+        uniform float cTime; uniform vec3 cColor; uniform float cStrength; uniform float cScale; uniform vec2 cBand;
+        vec2 cHash(vec2 p) { p = vec2(dot(p, vec2(127.1, 311.7)), dot(p, vec2(269.5, 183.3))); return fract(sin(p) * 43758.5453); }
+        // bright web where two animated cell boundaries meet, two layers, gently warped
+        float causticEdge(vec2 p, float t) {
+          vec2 i = floor(p), f = fract(p);
+          float d1 = 8.0, d2 = 8.0;
+          for (int y = -1; y <= 1; y++) for (int x = -1; x <= 1; x++) {
+            vec2 g = vec2(float(x), float(y));
+            vec2 o = 0.5 + 0.42 * sin(t + 6.2831 * cHash(i + g));
+            float d = length(g + o - f);
+            if (d < d1) { d2 = d1; d1 = d; } else if (d < d2) { d2 = d; }
+          }
+          return 1.0 - smoothstep(0.0, 0.16, d2 - d1);
+        }
+        float causticAt(vec2 uv, float t) {
+          uv += 0.18 * vec2(sin(uv.y * 1.9 + t * 0.7), cos(uv.x * 1.7 - t * 0.6));
+          float a = causticEdge(uv, t * 0.9);
+          float b = causticEdge(uv * 1.63 + 4.7, t * 1.15);
+          return clamp(pow(a * 0.75 + b * 0.5, 1.6), 0.0, 1.0);
+        }`)
+      .replace("#include <emissivemap_fragment>", `#include <emissivemap_fragment>
+        {
+          vec2 cuv = (vCW.xz + vec2(vCW.y * 0.31, vCW.y * 0.23)) * cScale;
+          float cc = causticAt(cuv, cTime);
+          float band = smoothstep(cBand.x - 1.5, cBand.x + 1.5, vCW.y) * (1.0 - smoothstep(cBand.y - 1.5, cBand.y + 1.5, vCW.y));
+          totalEmissiveRadiance += cColor * cc * cStrength * band * (0.35 + diffuseColor.rgb);
+        }`);
+  };
+  mat.customProgramCacheKey = () => "caustic" + (o.key || "");
+  mat.needsUpdate = true;
+  return mat;
+}
+
 // ---------- water ----------
 const WaterShader = {
   name: "AquaWater",
@@ -291,6 +349,7 @@ export function water(w, d, o = {}) {
     multisample: 2,
   });
   mesh.rotation.x = -Math.PI / 2;
+  mesh.camera.layers.enable(GHOST);
   const u = mesh.material.uniforms;
   if (o.deep) u.deep.value = new THREE.Color(o.deep);
   if (o.reflectivity != null) u.reflectivity.value = o.reflectivity;
@@ -382,7 +441,7 @@ export class Spray {
       this.p[i * 3] += this.v[i * 3] * dt;
       this.p[i * 3 + 1] += this.v[i * 3 + 1] * dt;
       this.p[i * 3 + 2] += this.v[i * 3 + 2] * dt;
-      if (this.p[i * 3 + 1] < o.floorY) { this.age[i] = 1e9; this.alpha[i] = 0; continue; }
+      if (this.p[i * 3 + 1] < o.floorY || (o.ceilY != null && this.p[i * 3 + 1] > o.ceilY)) { this.age[i] = 1e9; this.alpha[i] = 0; continue; }
       this.alpha[i] = o.opacity * (1 - this.age[i] / o.life);
     }
     this.points.geometry.attributes.position.needsUpdate = true;
@@ -653,3 +712,226 @@ export function glowTube(curve, radius, colors, intensity = 3) {
   return new THREE.Mesh(g, new THREE.MeshBasicMaterial({ vertexColors: true, toneMapped: false }));
 }
 export { mergeGeometries };
+
+
+// ---------- creatures ----------
+// a glowing jellyfish: a soft bell that breathes, tentacles that trail and sway
+export class Jelly {
+  constructor(o = {}) {
+    this.o = Object.assign({ color: 0x7ff6ff, size: 0.5, tentacles: 9, len: 1.4 }, o);
+    const { color, size } = this.o;
+    this.group = new THREE.Group();
+    const bellG = new THREE.SphereGeometry(size, 24, 12, 0, Math.PI * 2, 0, Math.PI * 0.55);
+    this.bellMat = new THREE.MeshStandardMaterial({ color, emissive: color, emissiveIntensity: 1.1, transparent: true, opacity: 0.5, roughness: 0.2, side: THREE.DoubleSide, depthWrite: false });
+    this.bell = new THREE.Mesh(bellG, this.bellMat);
+    const core = new THREE.Mesh(new THREE.SphereGeometry(size * 0.35, 12, 8), new THREE.MeshBasicMaterial({ color: new THREE.Color(color).multiplyScalar(1.6), transparent: true, opacity: 0.8, toneMapped: false, depthWrite: false, blending: THREE.AdditiveBlending }));
+    core.position.y = size * 0.25;
+    this.bell.add(core);
+    this.group.add(this.bell);
+    const n = this.o.tentacles, seg = 14;
+    this.seg = seg;
+    this.tPos = new Float32Array(n * seg * 2 * 3);
+    const tg = new THREE.BufferGeometry();
+    tg.setAttribute("position", new THREE.BufferAttribute(this.tPos, 3));
+    this.tent = new THREE.LineSegments(tg, new THREE.LineBasicMaterial({ color, transparent: true, opacity: 0.55, blending: THREE.AdditiveBlending, depthWrite: false }));
+    this.tent.frustumCulled = false;
+    this.group.add(this.tent);
+    this.ph = Math.random() * 6;
+    this.kick = 0;
+    this.home = new THREE.Vector3();
+    this.drift = new THREE.Vector3((Math.random() - 0.5) * 0.3, 0, (Math.random() - 0.5) * 0.3);
+  }
+  at(x, y, z) { this.home.set(x, y, z); this.group.position.set(x, y, z); return this; }
+  pulse() { this.kick = 1; }
+  update(dt, t) {
+    this.kick = Math.max(0, this.kick - dt * 1.2);
+    const beat = Math.max(0, Math.sin(t * 1.6 + this.ph)) ** 3 + this.kick;
+    this.bell.scale.set(1 - beat * 0.16, 1 + beat * 0.12, 1 - beat * 0.16);
+    this.bellMat.emissiveIntensity = 1.0 + beat * 1.6;
+    const g = this.group.position;
+    g.x = this.home.x + Math.sin(t * 0.21 + this.ph) * 1.2;
+    g.z = this.home.z + Math.cos(t * 0.17 + this.ph * 1.3) * 1.2;
+    g.y = this.home.y + Math.sin(t * 0.5 + this.ph) * 0.35 + this.kick * 0.6;
+    this.group.rotation.z = Math.sin(t * 0.4 + this.ph) * 0.12;
+    const { size, len, tentacles: n } = this.o;
+    let k = 0;
+    for (let i = 0; i < n; i++) {
+      const a = (i / n) * Math.PI * 2;
+      const r0 = size * 0.7;
+      let px = Math.cos(a) * r0, py = -size * 0.05, pz = Math.sin(a) * r0;
+      for (let j = 0; j < this.seg; j++) {
+        const u = (j + 1) / this.seg;
+        const nx = Math.cos(a) * r0 * (1 - u * 0.5) + Math.sin(t * 2 + j * 0.5 + i) * 0.08 * u;
+        const ny = -u * len * (1 - beat * 0.15);
+        const nz = Math.sin(a) * r0 * (1 - u * 0.5) + Math.cos(t * 1.7 + j * 0.45 + i) * 0.08 * u;
+        this.tPos.set([px, py, pz, nx, ny, nz], k);
+        k += 6;
+        px = nx; py = ny; pz = nz;
+      }
+    }
+    this.tent.geometry.attributes.position.needsUpdate = true;
+  }
+}
+
+// a low-poly koi that swims a loop through the air
+export class Koi {
+  constructor(points, o = {}) {
+    this.curve = new THREE.CatmullRomCurve3(points, true, "centripetal");
+    this.speed = o.speed || 0.03;
+    this.u = Math.random();
+    this.group = new THREE.Group();
+    const base = new THREE.MeshStandardMaterial({ color: o.color || 0xf06a28, roughness: 0.35, flatShading: true, emissive: o.color || 0xf06a28, emissiveIntensity: 0.15 });
+    const white = new THREE.MeshStandardMaterial({ color: 0xf6f1e8, roughness: 0.35, flatShading: true });
+    const s = o.size || 1;
+    const body = new THREE.Mesh(new THREE.SphereGeometry(0.22 * s, 8, 6), base);
+    body.scale.set(2.4, 0.8, 0.9);
+    const patch = new THREE.Mesh(new THREE.SphereGeometry(0.16 * s, 7, 5), white);
+    patch.scale.set(1.8, 0.6, 0.95);
+    patch.position.set(0.12 * s, 0.07 * s, 0);
+    this.tail = new THREE.Group();
+    const finG = new THREE.BufferGeometry();
+    finG.setAttribute("position", new THREE.Float32BufferAttribute([0, 0, 0, -0.42 * s, 0.22 * s, 0, -0.42 * s, -0.22 * s, 0], 3));
+    finG.computeVertexNormals();
+    const fin = new THREE.Mesh(finG, new THREE.MeshStandardMaterial({ color: o.color || 0xf06a28, side: THREE.DoubleSide, transparent: true, opacity: 0.85, flatShading: true }));
+    this.tail.add(fin);
+    this.tail.position.x = -0.48 * s;
+    const dorsal = fin.clone();
+    dorsal.scale.set(0.5, 0.5, 1);
+    dorsal.rotation.z = -Math.PI / 2 - 0.4;
+    dorsal.position.set(0.1 * s, 0.16 * s, 0);
+    this.group.add(body, patch, this.tail, dorsal);
+    this.ph = Math.random() * 6;
+    this.tmp = new THREE.Vector3();
+  }
+  update(dt, t) {
+    this.u = (this.u + dt * this.speed) % 1;
+    const p = this.curve.getPointAt(this.u);
+    this.curve.getPointAt((this.u + 0.004) % 1, this.tmp);
+    this.group.position.copy(p);
+    this.group.lookAt(this.tmp);
+    this.group.rotateY(-Math.PI / 2);
+    this.tail.rotation.y = Math.sin(t * 7 + this.ph) * 0.5;
+  }
+}
+
+// iridescent frutiger-aero bubbles drifting up; click to pop
+export class Bubbles {
+  constructor(o) {
+    this.o = Object.assign({ count: 40, size: [0.06, 0.22], speed: [0.25, 0.6] }, o);
+    const mat = new THREE.MeshPhysicalMaterial({ color: 0xffffff, transparent: true, opacity: 0.32, roughness: 0.02, metalness: 0.1, iridescence: 1, iridescenceIOR: 1.35, iridescenceThicknessRange: [200, 600], clearcoat: 1, envMapIntensity: 2.2, depthWrite: false });
+    this.mesh = new THREE.InstancedMesh(new THREE.SphereGeometry(1, 20, 14), mat, this.o.count);
+    this.mesh.frustumCulled = false;
+    this.b = [];
+    for (let i = 0; i < this.o.count; i++) this.b.push(this.spawn({}, true));
+    this.m4 = new THREE.Matrix4();
+    this.q = new THREE.Quaternion();
+  }
+  spawn(b, anywhere) {
+    const { area, size, speed } = this.o;
+    b.x = area.x0 + Math.random() * (area.x1 - area.x0);
+    b.z = area.z0 + Math.random() * (area.z1 - area.z0);
+    b.y = anywhere ? area.y0 + Math.random() * (area.y1 - area.y0) : area.y0;
+    b.r = size[0] + Math.random() * (size[1] - size[0]);
+    b.v = speed[0] + Math.random() * (speed[1] - speed[0]);
+    b.ph = Math.random() * 6;
+    b.pop = 0;
+    return b;
+  }
+  pop(i) { if (this.b[i]) this.b[i].pop = 0.0001; }
+  update(dt, t) {
+    const { area } = this.o;
+    this.b.forEach((b, i) => {
+      if (b.pop > 0) {
+        b.pop += dt;
+        if (b.pop > 0.18) this.spawn(b, false);
+      } else {
+        b.y += b.v * dt;
+        if (b.y > area.y1) this.spawn(b, false);
+      }
+      const wob = Math.sin(t * 3 + b.ph) * 0.08;
+      const s = b.pop > 0 ? b.r * (1 + b.pop * 8) : b.r;
+      this.m4.compose(new THREE.Vector3(b.x + Math.sin(t * 0.8 + b.ph) * 0.15, b.y, b.z + Math.cos(t * 0.7 + b.ph) * 0.15), this.q, new THREE.Vector3(s * (1 + wob), s * (1 - wob), s * (1 + wob)));
+      this.mesh.setMatrixAt(i, b.pop > 0.12 ? this.m4.makeScale(0, 0, 0) : this.m4);
+    });
+    this.mesh.instanceMatrix.needsUpdate = true;
+  }
+}
+
+// a manta: a flat diamond that flies through the murk
+export function manta(color = 0x2a4a5a) {
+  const grp = new THREE.Group();
+  const shape = new THREE.Shape();
+  shape.moveTo(1.2, 0); shape.quadraticCurveTo(0.2, 0.3, -0.2, 1.6); shape.quadraticCurveTo(-0.4, 0.4, -0.9, 0.12);
+  shape.lineTo(-0.9, -0.12); shape.quadraticCurveTo(-0.4, -0.4, -0.2, -1.6); shape.quadraticCurveTo(0.2, -0.3, 1.2, 0);
+  const g = new THREE.ShapeGeometry(shape, 12);
+  g.rotateX(-Math.PI / 2);
+  const pos = g.attributes.position;
+  const base = Float32Array.from(pos.array);
+  const mat = new THREE.MeshStandardMaterial({ color, roughness: 0.6, side: THREE.DoubleSide, flatShading: true, emissive: 0x0a2a3a, emissiveIntensity: 0.4 });
+  const body = new THREE.Mesh(g, mat);
+  const tailG = new THREE.CylinderGeometry(0.01, 0.04, 1.8, 5);
+  tailG.rotateZ(Math.PI / 2);
+  const tail = new THREE.Mesh(tailG, mat);
+  tail.position.x = -1.7;
+  const spots = new THREE.Mesh(new THREE.CircleGeometry(0.08, 8), new THREE.MeshBasicMaterial({ color: 0x9ffcff, toneMapped: false }));
+  spots.rotation.x = -Math.PI / 2;
+  spots.position.set(0.3, 0.02, 0.4);
+  const spots2 = spots.clone();
+  spots2.position.z = -0.4;
+  grp.add(body, tail, spots, spots2);
+  grp.userData.flap = (t) => {
+    for (let i = 0; i < pos.count; i++) {
+      const z = base[i * 3 + 2];
+      pos.setY(i, base[i * 3 + 1] + Math.sin(t * 1.4 - Math.abs(z) * 0.8) * 0.35 * Math.abs(z));
+    }
+    pos.needsUpdate = true;
+    g.computeVertexNormals();
+  };
+  return grp;
+}
+
+// fireflies / glowing motes: additive points that wander and blink
+export class Motes {
+  constructor(o) {
+    this.o = Object.assign({ count: 80, color: 0xd8ff7a, size: 0.12, blink: true }, o);
+    const N = this.o.count;
+    this.p = new Float32Array(N * 3);
+    this.a = new Float32Array(N);
+    this.seed = [];
+    const { area } = this.o;
+    for (let i = 0; i < N; i++) {
+      this.seed.push([area.x0 + Math.random() * (area.x1 - area.x0), area.y0 + Math.random() * (area.y1 - area.y0), area.z0 + Math.random() * (area.z1 - area.z0), Math.random() * 6]);
+    }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute("position", new THREE.BufferAttribute(this.p, 3));
+    g.setAttribute("alpha", new THREE.BufferAttribute(this.a, 1));
+    this.points = new THREE.Points(g, new THREE.ShaderMaterial({
+      uniforms: { map: { value: dotTex }, color: { value: new THREE.Color(this.o.color) }, size: { value: this.o.size }, scale: { value: 600 } },
+      vertexShader: `attribute float alpha; varying float vA; uniform float size; uniform float scale;
+        void main(){ vA = alpha; vec4 mv = modelViewMatrix * vec4(position,1.0); gl_PointSize = size * scale / -mv.z; gl_Position = projectionMatrix * mv; }`,
+      fragmentShader: `uniform sampler2D map; uniform vec3 color; varying float vA;
+        void main(){ vec4 t = texture2D(map, gl_PointCoord); gl_FragColor = vec4(color * 1.6, t.a * vA); }`,
+      transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false,
+    }));
+    this.points.frustumCulled = false;
+  }
+  update(dt, t) {
+    const drift = this.o.drift ?? 0.6;
+    this.seed.forEach(([x, y, z, ph], i) => {
+      this.p[i * 3] = x + Math.sin(t * 0.3 + ph) * drift;
+      this.p[i * 3 + 1] = y + Math.sin(t * 0.47 + ph * 2) * drift * 0.5 + (this.o.rise ? ((t * this.o.rise + ph) % 4) - 2 : 0);
+      this.p[i * 3 + 2] = z + Math.cos(t * 0.27 + ph) * drift;
+      this.a[i] = this.o.blink ? Math.max(0, Math.sin(t * 1.3 + ph * 3)) ** 2 : 0.6 + 0.4 * Math.sin(t + ph);
+    });
+    this.points.geometry.attributes.position.needsUpdate = true;
+    this.points.geometry.attributes.alpha.needsUpdate = true;
+  }
+}
+
+// a paper lantern glow (used in reflections that shouldn't exist)
+export function lantern(color = 0xffb35a) {
+  const g = new THREE.Group();
+  const body = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.2, 0.36, 10), new THREE.MeshStandardMaterial({ color, emissive: color, emissiveIntensity: 2.2, roughness: 0.6 }));
+  g.add(body, glowSprite(color, 1.3, 0.55));
+  return g;
+}
