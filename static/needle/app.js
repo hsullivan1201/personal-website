@@ -527,7 +527,8 @@ function updateMoodEar() {
 
 async function loadHistory() {
   try {
-    const h = await fetch(`${API}/api/history`).then((r) => r.json());
+    // the minute in the URL lets a CDN share one copy and stops browsers reusing an old one
+    const h = await fetch(`${API}/api/history?m=${Math.floor(Date.now() / 60000)}`).then((r) => r.json());
     history = h.map((p) => ({ t: p.t, p_rep: p.p_rep }));
   } catch {}
 }
@@ -537,11 +538,36 @@ async function boot() {
   connect();
 }
 
+// Refused a stream (a 503 at the cap) or the stream is down: read the same JSON
+// by polling until a stream opens again. The 15-second bucket in the URL lets a
+// CDN serve one copy to everyone and stops browsers reusing an old one.
+let poller = null;
+async function pollState() {
+  try {
+    const r = await fetch(`${API}/api/state?b=${Math.floor(Date.now() / 15000)}`);
+    if (!r.ok) return;
+    const next = await r.json();
+    if (!next) return;
+    lastMsg = Date.now();
+    if (next.fetched_at !== state?.fetched_at) onState(next);
+  } catch {}
+}
+function startPolling() {
+  if (poller) return;
+  pollState();
+  poller = setInterval(pollState, 30000 + Math.random() * 15000);
+}
+function stopPolling() {
+  clearInterval(poller);
+  poller = null;
+}
+
 let lastMsg = 0, retry = 0, outage = false;
 function connect() {
   const es = new EventSource(`${API}/api/stream`);
   es.onopen = () => {
     retry = 0;
+    stopPolling();
     if (outage) { outage = false; loadHistory(); } // fill the chart's gap
   };
   es.onmessage = (ev) => {
@@ -554,6 +580,7 @@ function connect() {
     // (a 502 mid-redeploy, a 503 from the cap) closes the stream for good.
     if (es.readyState === EventSource.CLOSED) {
       outage = true;
+      startPolling();
       retry = Math.min(retry + 1, 6);
       setTimeout(connect, 2 ** retry * 1000 + Math.random() * 5000);
     }
