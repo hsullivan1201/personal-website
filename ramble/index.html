@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<script>
+// webauthn and the API's CORS allowlist both require a secure context
+if (location.protocol === "http:" && !["localhost", "127.0.0.1"].includes(location.hostname))
+  location.replace(location.href.replace("http:", "https:"));
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>ramble</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#fffcf5" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1c1b1a" media="(prefers-color-scheme: dark)">
+<meta name="robots" content="noindex, nofollow">
+<style>
+:root {
+    --bg: #fffcf5;
+    --text: #2c2c2c;
+    --accent: #b93b3b;
+    --dim: rgba(44, 44, 44, 0.5);
+    --mono: "courier new", monospace;
+    --body: "charter", "bitstream charter", "georgia", serif;
+}
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg: #1c1b1a;
+        --text: #e6e1dc;
+        --accent: #e06c6c;
+        --dim: rgba(230, 225, 220, 0.5);
+    }
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--body);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    padding: 1rem;
+    text-align: center;
+    -webkit-user-select: none;
+    user-select: none;
+}
+h1 {
+    font-weight: normal;
+    font-size: 1.4rem;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    margin: 0;
+}
+#record {
+    width: 11rem;
+    height: 11rem;
+    border-radius: 50%;
+    border: 3px solid var(--accent);
+    background: transparent;
+    color: var(--accent);
+    font-family: var(--body);
+    font-size: 1.3rem;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, transform 0.1s;
+    -webkit-tap-highlight-color: transparent;
+}
+#record:active { transform: scale(0.97); }
+#record.recording {
+    background: var(--accent);
+    color: var(--bg);
+    animation: breathe 2.4s ease-in-out infinite;
+}
+#record:disabled { opacity: 0.4; cursor: default; animation: none; }
+@keyframes breathe {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(185, 59, 59, 0.35); }
+    50% { box-shadow: 0 0 0 18px rgba(185, 59, 59, 0); }
+}
+#timer {
+    font-family: var(--mono);
+    font-size: 1.6rem;
+    min-height: 2rem;
+    color: var(--dim);
+}
+#timer.on { color: var(--text); }
+#status {
+    min-height: 1.6rem;
+    font-size: 1.05rem;
+    max-width: 22rem;
+    line-height: 1.4;
+}
+#status.error { color: var(--accent); }
+#hint {
+    font-size: 0.85rem;
+    color: var(--dim);
+    max-width: 20rem;
+    line-height: 1.4;
+}
+button.small, a.small {
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    color: var(--dim);
+    background: none;
+    border: 1px solid var(--dim);
+    padding: 0.4rem 0.8rem;
+    cursor: pointer;
+    text-decoration: none;
+}
+#retry-row { display: none; gap: 0.8rem; }
+#retry-row.show { display: flex; }
+#setup {
+    position: fixed;
+    bottom: max(0.8rem, env(safe-area-inset-bottom));
+    font-size: 0.75rem;
+}
+#setup a { color: var(--dim); }
+</style>
+</head>
+<body>
+<h1>ramble</h1>
+<button id="record" aria-label="record">record</button>
+<div id="timer">0:00</div>
+<div id="status"></div>
+<div id="retry-row">
+    <button class="small" id="retry">try sending again</button>
+    <a class="small" id="save" download>save audio</a>
+</div>
+<div id="hint">keep the screen on while recording — ios kills the mic on lock</div>
+<div id="setup"><a href="#" id="enroll">set up this device</a></div>
+<script src="app.js"></script>
+</body>
+</html>

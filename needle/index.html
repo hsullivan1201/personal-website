@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- where the API lives; empty = the server this page came from -->
+<meta name="needle-api" content="https://needle-production-07ab.up.railway.app">
+<title>The Needle</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,100..900;1,62..125,100..900&family=Instrument+Serif:ital@0;1&family=UnifrakturMaguntia&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="stage">
+  <header class="masthead">
+    <div class="ears">
+      <div class="ear">
+        <div class="ear-k" id="editionK">Late edition</div>
+        <div class="ear-v" id="clock">--</div>
+        <div class="ear-s"><span id="lamp" class="lamp"></span><span id="source">connecting</span></div>
+      </div>
+      <h1 class="nameplate">The Needle</h1>
+      <div class="ear r">
+        <div class="ear-k">Mood</div>
+        <div class="ear-v" id="moodEar">Anxious.</div>
+        <div class="ear-s" id="teamTag">Rooting for nobody yet</div>
+      </div>
+    </div>
+    <div class="dateline">
+      <span>Tuesday, November 3, 2026</span>
+      <span class="hide-sm">Election night · 35 Senate seats · one duck-related ballot measure</span>
+      <button id="settingsBtn" class="text-btn">Wobble controls</button>
+    </div>
+  </header>
+
+  <div id="simBanner" class="sim-bar" hidden>Practice edition: simulated returns on tonight's real map. These are not real votes.</div>
+
+  <main class="page front">
+    <article class="lead">
+      <div class="kicker">Senate control</div>
+      <h2 class="hed" id="hed">Warming Up the Needle</h2>
+      <p class="dek" id="dek">&nbsp;</p>
+      <div class="main-dial">
+        <div class="side-label l">Dem.<small>+ Ind.</small></div>
+        <div id="mainNeedle"></div>
+        <div class="side-label r">Rep.</div>
+      </div>
+      <div class="needle-says">
+        <span class="lbl">Needle reads</span>
+        <b class="d" id="readL">--</b>
+        <b class="r" id="readR">--</b>
+        <span class="lbl dim">every number on this page wobbles except the box to the right</span>
+      </div>
+    </article>
+
+    <aside class="rail">
+      <section class="box truth">
+        <h3>What the model actually says</h3>
+        <dl>
+          <dt>Republicans keep control</dt><dd class="r big" id="tControl">--</dd>
+          <dt>Democrats + independents</dt><dd class="d big" id="tDem">--</dd>
+          <dt>Expected GOP seats</dt><dd id="tSeats">--</dd>
+          <dt>80% range</dt><dd id="tSeatRange">--</dd>
+          <dt>Independents decide it</dt><dd id="tKing">--</dd>
+          <dt id="tSwingLabel">National swing vs. ratings</dt><dd id="tSwing">--</dd>
+          <dt>Races called</dt><dd id="tCalled">--</dd>
+          <dt>Seats not up this year</dt><dd id="tHold">--</dd>
+        </dl>
+      </section>
+
+      <section class="box chamber">
+        <h3>The chamber</h3>
+        <p class="fine">Republicans need 50 (the vice president breaks ties). Democrats need 51.</p>
+        <div class="seat-bar" id="seatBar"></div>
+        <div class="seat-mid"><span>50</span></div>
+        <h4>How many seats Republicans end up with</h4>
+        <div class="seat-hist" id="seatHist"></div>
+      </section>
+    </aside>
+  </main>
+
+  <section class="page second">
+    <article class="fever">
+      <div class="kicker">The night so far</div>
+      <h3 class="sub-hed">Chance Republicans keep the Senate <span class="dim" id="stripRange"></span></h3>
+      <canvas id="strip"></canvas>
+    </article>
+
+    <article class="box dc" id="foiePanel" hidden>
+      <div class="kicker">Also on the ballot in D.C.</div>
+      <h3 class="sub-hed">Initiative 86 Would Ban Foie Gras</h3>
+      <p class="fine">Prohibits force-feeding birds and selling what comes of it. Takes effect July 2027 if it passes.</p>
+      <div class="dc-dial">
+        <div class="side-label l sm">Yes</div>
+        <div id="foieNeedle"></div>
+        <div class="side-label r sm">No</div>
+      </div>
+      <div class="dc-odds"><b class="y" id="foieYes">--</b><span>chance it passes</span><b class="n" id="foieNo">--</b></div>
+      <p class="fine" id="foieStatus"></p>
+      <p class="aside" id="duckMood"></p>
+    </article>
+  </section>
+
+  <section class="page races-wrap">
+    <div class="section-head">
+      <h2>All 35 races</h2>
+      <div class="races-ctl">
+        <label>Sort <select id="sortSel">
+          <option value="close">closest first</option>
+          <option value="polls">poll closing</option>
+          <option value="az">A to Z</option>
+        </select></label>
+        <label><input type="checkbox" id="hideSafeQuick"> hide safe seats</label>
+      </div>
+    </div>
+    <div id="races" class="races"></div>
+    <p class="colophon">
+      Vote counts are the AP's, read from the public JSON behind the NYT's results pages every 30 seconds, with county files fetched when a state's totals move.
+      The model compares each county's count with its 2024 presidential result, shares a national error across every race, and allows for the first ballots counted leaning one way.
+      Before votes arrive, odds come from a pre-election forecast, or from race ratings where there isn't one. Click any race for details. An asterisk marks the incumbent.
+    </p>
+  </section>
+</div>
+
+<!-- outside #stage: the mood filters on #stage would unpin anything fixed inside it -->
+<footer class="wire"><span class="wire-k">Wire</span><div class="wire-window"><div class="wire-track" id="tickerTrack"></div></div></footer>
+
+<div id="mood" class="mood-overlay" aria-live="polite">
+  <div class="front-page">
+    <div class="fp-top"><span class="fp-name">The Needle</span><span class="fp-kicker" id="moodKicker"></span></div>
+    <div class="fp-head" id="moodHead"><span class="c"></span><span class="m"></span><span class="k"></span></div>
+    <div class="fp-deck" id="moodDeck"></div>
+    <div class="fp-stamp" id="moodStamp" aria-hidden="true"></div>
+  </div>
+</div>
+<div id="toasts" class="toasts"></div>
+
+<aside id="settings" class="drawer" aria-label="Wobble controls">
+  <div class="drawer-head">
+    <h2>Wobble controls</h2>
+    <button id="settingsClose" class="text-btn" aria-label="Close">Close</button>
+  </div>
+
+  <div class="ctl">
+    <div class="ctl-label">Presets</div>
+    <div class="btn-row wrap">
+      <button data-preset="house">Default</button>
+      <button data-preset="sedated">Sedated</button>
+      <button data-preset="classic">NYT 2016</button>
+      <button data-preset="wobbly">Extra wobbly</button>
+      <button data-preset="doomer">Doomer</button>
+      <button data-preset="schizo">Unhinged</button>
+    </div>
+  </div>
+
+  <div class="ctl">
+    <div class="ctl-label">Wobble <span class="ctl-out" id="setAmountOut"></span></div>
+    <input type="range" id="setAmount" min="0" max="11" step="0.5">
+    <div class="scale"><span>0</span><span>1, the original</span><span>11</span></div>
+  </div>
+
+  <div class="ctl">
+    <div class="ctl-label">Lean <span class="ctl-out" id="setLeanOut"></span></div>
+    <input type="range" id="setLean" min="-1" max="1" step="0.05">
+    <div class="scale lean"><span>toward Dems</span><span>none</span><span>toward GOP</span></div>
+  </div>
+
+  <div class="ctl">
+    <div class="ctl-label">Motion</div>
+    <div class="btn-row">
+      <button data-style="jitter">Jitter</button>
+      <button data-style="pendulum">Back and forth</button>
+      <button data-style="seismic">Seismic</button>
+    </div>
+  </div>
+
+  <div class="ctl">
+    <div class="ctl-label">Speed <span class="ctl-out" id="setSpeedOut"></span></div>
+    <input type="range" id="setSpeed" min="0.25" max="3" step="0.05">
+  </div>
+
+  <div class="ctl">
+    <div class="ctl-label">Bounce <span class="ctl-out" id="setBounceOut"></span></div>
+    <input type="range" id="setBounce" min="0" max="1" step="0.01">
+  </div>
+
+  <div class="ctl">
+    <div class="ctl-label">Mood swings <span class="ctl-note">so over, then so back; one every 3 min at most</span></div>
+    <div class="btn-row">
+      <button data-moods="off">Off</button>
+      <button data-moods="sometimes">Sometimes</button>
+      <button data-moods="often">Often</button>
+      <button data-moods="unhinged">Constantly</button>
+    </div>
+  </div>
+
+  <div class="ctl">
+    <div class="ctl-label">Drama <span class="ctl-out" id="setIntensityOut"></span></div>
+    <input type="range" id="setIntensity" min="0" max="1" step="0.01">
+  </div>
+
+  <div class="ctl">
+    <div class="ctl-label">Rooting for</div>
+    <div class="btn-row">
+      <button data-team="D">Democrats</button>
+      <button data-team="R">Republicans</button>
+      <button data-team="chaos">Chaos</button>
+    </div>
+  </div>
+
+  <div class="ctl toggles">
+    <label><input type="checkbox" id="set_misregister"> plates slip when the needle moves fast</label>
+    <label><input type="checkbox" id="set_shake"> shake the page</label>
+    <label><input type="checkbox" id="set_sound"> sound</label>
+    <label><input type="checkbox" id="set_truth"> show what the model actually says</label>
+    <label><input type="checkbox" id="set_hideSafe"> hide safe seats</label>
+  </div>
+
+  <div class="ctl btn-row">
+    <button id="moodTest">Stop the presses</button>
+    <button id="touchGrass">Touch grass</button>
+  </div>
+  <p class="fine">The wobble and the mood swings are theater, and they move every number on the page together: one national wobble swings every race, and control follows the races. "What the model actually says" is the one box that doesn't wobble. It only moves when votes do. Set Wobble to 0 to see the model's numbers everywhere.</p>
+</aside>
+
+<div id="onboard" class="modal">
+  <div class="modal-card">
+    <div class="kicker">Before we start</div>
+    <h2>Who Are You Rooting For?</h2>
+    <p>This only decides which way "it's so over" points. The odds don't care.</p>
+    <div class="btn-row big">
+      <button data-pick="D" class="pick d">Democrats</button>
+      <button data-pick="R" class="pick r">Republicans</button>
+      <button data-pick="chaos" class="pick c">Nobody, I'm here for the chaos</button>
+    </div>
+    <p class="fine">You can change it in Wobble controls.</p>
+  </div>
+</div>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>
