@@ -24,7 +24,10 @@ const SUB = {
   back: ['Hopium levels: critical (good).', 'Doomers in shambles.', 'The vibes are immaculate.', 'Never in doubt.', 'Uncork something.', "Say it with me: we're so back."],
 };
 
-const RATES = { off: 0, sometimes: 75, often: 30, unhinged: 10 }; // mean seconds between episodes
+// Never more than one cycle every 3 minutes, whatever triggers it.
+const COOLDOWN_MS = 180000;
+// Mean seconds between random cycles, on top of the cooldown ("constantly" is the cooldown itself).
+const RATES = { off: 0, sometimes: 600, often: 240, unhinged: 180 };
 
 const pick = (a) => a[Math.floor(Math.random() * a.length)];
 
@@ -35,7 +38,8 @@ export class Mood {
     this.steps = [];
     this.stepEnds = 0;
     this.dir = 1;
-    this.nextRandom = performance.now() + 15000;
+    this.lastStart = -Infinity;
+    this.nextRandom = performance.now() + 45000;
     this.listeners = [];
   }
 
@@ -49,6 +53,7 @@ export class Mood {
   }
 
   episode(steps, settings, reason) {
+    this.lastStart = performance.now(); // every cycle counts toward the cooldown, even a test one
     this.dir = this.teamDir(settings.team);
     this.lonerSign = undefined;
     this.steps = steps.map((s) => ({ ...s, reason }));
@@ -59,6 +64,7 @@ export class Mood {
   react(kind, reason, settings) {
     if (settings.moods === 'off') return;
     if (this.kind !== 'calm') return;
+    if (performance.now() - this.lastStart < COOLDOWN_MS) return;
     this.episode([{ kind, ms: 2600, word: kind === 'over' ? pick(OVER) : pick(BACK) }], settings, reason);
   }
 
@@ -94,7 +100,7 @@ export class Mood {
     if (this.kind !== 'calm' && now >= this.stepEnds) this.advance(now, settings);
     const mean = RATES[settings.moods] || 0;
     if (!mean || !settings.team) { this.nextRandom = now + 8000; return; }
-    if (this.kind === 'calm' && now >= this.nextRandom) {
+    if (this.kind === 'calm' && now >= this.nextRandom && now - this.lastStart >= COOLDOWN_MS) {
       const r = Math.random();
       if (r < 0.72) {
         this.episode([{ kind: 'over', ms: 3200, word: pick(OVER) }, { kind: 'back', ms: 2900, word: pick(BACK) }], settings);
@@ -114,7 +120,8 @@ export class Mood {
           { kind: 'back', ms: 2800, word: "OK WE'RE ACTUALLY SO BACK" },
         ], settings);
       }
-      this.nextRandom = now + (-Math.log(1 - Math.random()) * mean + 4) * 1000;
+      const wait = settings.moods === 'unhinged' ? COOLDOWN_MS : -Math.log(1 - Math.random()) * mean * 1000;
+      this.nextRandom = now + Math.max(COOLDOWN_MS, wait);
     }
   }
 
