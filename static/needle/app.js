@@ -19,10 +19,15 @@ const PRESETS = {
   schizo: { amount: 11, speed: 2.2, style: 'seismic', bounce: 0.93, moods: 'unhinged', intensity: 1, shake: true, misregister: true },
 };
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-const DEFAULTS = { ...(reduced ? PRESETS.classic : PRESETS.house), lean: 0, team: 'D', sound: true, truth: true, sort: 'close', hideSafe: false };
+const DEFAULTS = { ...(reduced ? PRESETS.classic : PRESETS.house), lean: 0, team: null, sound: true, truth: true, sort: 'close', hideSafe: false };
 
 function loadSettings() {
-  try { return { ...DEFAULTS, ...JSON.parse(localStorage.getItem('needle-settings') || '{}') }; } catch { return { ...DEFAULTS }; }
+  try {
+    const saved = JSON.parse(localStorage.getItem('needle-settings') || '{}');
+    // only a team someone actually picked counts; older saves stored a default
+    if (!saved.teamPicked) delete saved.team;
+    return { ...DEFAULTS, ...saved };
+  } catch { return { ...DEFAULTS }; }
 }
 const S = loadSettings();
 function save() {
@@ -667,6 +672,7 @@ function bindSettings() {
   for (const group of ['style', 'moods', 'team']) {
     $$(`[data-${group}]`).forEach((b) => b.addEventListener('click', () => {
       S[group] = b.dataset[group];
+      if (group === 'team') S.teamPicked = true;
       save(); syncSettings();
       if (group === 'team') { lastP = state?.control.p_rep ?? null; updateMoodEar(); }
     }));
@@ -694,7 +700,7 @@ function bindSettings() {
   $('#moodTest').addEventListener('click', () => mood.episode([{ kind: 'over', ms: 3000, word: "IT'S SO OVER" }, { kind: 'back', ms: 2800, word: "WE'RE SO BACK" }], S, 'you pressed the button'));
 
   $$('[data-pick]').forEach((b) => b.addEventListener('click', () => {
-    S.team = b.dataset.pick; save(); syncSettings();
+    S.team = b.dataset.pick; S.teamPicked = true; save(); syncSettings();
     $('#onboard').classList.remove('open');
     lastP = state?.control.p_rep ?? null;
     updateMoodEar();
